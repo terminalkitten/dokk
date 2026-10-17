@@ -1,0 +1,6 @@
+title = "dokk example"
+description = "Fixture site for dokk acceptance checks"
+site_url = "https://example.com/repo/"
+
+[theme]
+style = "vega"

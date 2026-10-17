@@ -9,6 +9,9 @@ wheels/
 # Virtual environments
 .venv
 
+# dokk
+.dokk/
+
 # Local notes, not published
 CLAUDE.md
 PLAN.md
