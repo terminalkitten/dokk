@@ -1,18 +1,18 @@
 import shutil
+import sys
 from pathlib import Path
 
 from jinja2 import Environment
-from markdown_it import MarkdownIt
 
+from dokk.assets import ASSETS_DIR, copy_page_assets, copy_public, copy_static
 from dokk.config import Config, load_config
 from dokk.content import Page, scan
-from dokk.markdown import make_md, render_markdown
+from dokk.markdown import Renderer, pygments_css
 from dokk.menu import breadcrumbs, build_menu, ordered_pages, prev_next
 from dokk.render import canonical, make_env, render_template
 from dokk.routes import assign_routes, output_path
 from dokk.tree import Node, build_tree
 
-STATIC = Path(__file__).parent / "static"
 NOT_FOUND = Path("404.md")
 
 
@@ -32,18 +32,25 @@ def build(root: Path, drafts: bool = False) -> Config:
     order = ordered_pages(tree)
     index_pages = {p.rel.parent: p for p in pages if p.rel.stem == "index"}
     env = make_env(cfg)
-    md = make_md()
+    renderer = Renderer({p.rel.as_posix(): p.url for p in pages}, cfg.content_dir, cfg.base_path)
 
     out = cfg.out_dir
     if out.exists():
         shutil.rmtree(out)
-    shutil.copytree(STATIC, out / "_dokk")
-    public = cfg.root / "public"
-    if public.is_dir():
-        shutil.copytree(public, out, dirs_exist_ok=True)
+    copy_static(out)
+    copy_page_assets(cfg.content_dir, out)
+    copy_public(cfg.root, out)
+    _write(
+        out / ASSETS_DIR / "pygments.css",
+        pygments_css(cfg.theme["code_light"], cfg.theme["code_dark"]),
+    )
 
     for page in pages:
-        page.html = render_markdown(md, page.body)
+        rendered = renderer.render(page.body, page.rel)
+        page.html, page.toc = rendered.html, rendered.toc
+        page.description = page.description or rendered.description
+        for href in rendered.broken:
+            print(f"warning: {page.rel}: broken link {href!r}", file=sys.stderr)
         prev, next_ = prev_next(order, page)
         html = render_template(
             env,
@@ -57,12 +64,12 @@ def build(root: Path, drafts: bool = False) -> Config:
         )
         _write(out / output_path(page.route), html)
 
-    _write(out / "404.html", _render_404(env, tree, not_found, md))
+    _write(out / "404.html", _render_404(env, tree, not_found, renderer))
     _write(out / ".nojekyll", "")
     return cfg
 
 
-def _render_404(env: Environment, tree: Node, page: Page | None, md: MarkdownIt) -> str:
-    body = render_markdown(md, page.body) if page else ""
+def _render_404(env: Environment, tree: Node, page: Page | None, renderer: Renderer) -> str:
+    body = renderer.render(page.body, page.rel).html if page else ""
     title = page.title if page else "Page not found"
     return render_template(env, "404.html.jinja", title=title, body=body, menu=build_menu(tree, ""))

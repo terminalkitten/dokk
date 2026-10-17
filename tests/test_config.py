@@ -44,6 +44,7 @@ def test_dev_forces_empty_base_path(make_site) -> None:
         ('title = "T"\nout_dir = "."\n', "out_dir"),
         ('title = "T"\ntheme = "x"\n', "[theme] must be a table"),
         ("title = \n", "dokk.toml"),
+        ('title = "T"\n[theme]\ncode_dark = "nope"\n', "unknown Pygments style 'nope'"),
     ],
 )
 def test_errors(make_site, toml: str, message: str) -> None:

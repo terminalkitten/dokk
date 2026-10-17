@@ -7,4 +7,10 @@ sidebar:
     variant: secondary
 ---
 
+## Requirements
+
+Python 3.11 or newer.
+
+## Install
+
 Run `pip install dokk`.

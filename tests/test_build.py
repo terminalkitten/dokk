@@ -2,6 +2,7 @@ import hashlib
 import re
 import shutil
 from pathlib import Path
+from urllib.parse import unquote
 
 import pytest
 
@@ -33,13 +34,15 @@ def test_example_output_files(example: Path) -> None:
         "getting-started/index.html",
         "getting-started/install/index.html",
         "guides/advanced/deep/nested/index.html",
+        "guides/img/diagram.png",
+        "guides/markdown/index.html",
         "guides/secret/index.html",  # hidden from the menu, still built
         "guides/writing/index.html",
         "index.html",
         "reference/café-ünïcode/index.html",
         "reference/index.html",
     ]
-    for asset in ("dokk.css", "dokk.js", "vendor/basecoat/basecoat.cdn.min.css"):
+    for asset in ("dokk.css", "dokk.js", "pygments.css", "vendor/basecoat/basecoat.cdn.min.css"):
         assert f"_dokk/{asset}" in files
 
 
@@ -85,6 +88,28 @@ def test_base_path_prefixes_every_internal_url(example: Path) -> None:
     assert urls, "no internal URLs found"
     assert {u for u in urls if not u.startswith("/repo/")} == set()
     assert "/repo/_dokk/dokk.css" in urls
+
+
+@pytest.mark.parametrize("site_url", ["https://example.com/", "https://example.com/repo/"])
+def test_every_internal_url_resolves(example: Path, site_url: str) -> None:
+    toml = example / "dokk.toml"
+    toml.write_text(toml.read_text().replace("https://example.com/", site_url))
+    cfg = build(example)
+    out = cfg.out_dir
+    missing = set()
+    for page in out.rglob("*.html"):
+        for url in re.findall(r'(?:href|src)="(/[^"#]*)', page.read_text()):
+            assert url.startswith(cfg.base_path + "/"), (page, url)
+            target = out / unquote(url[len(cfg.base_path) + 1 :])
+            if not (target.is_file() or (target / "index.html").is_file()):
+                missing.add(url)
+    assert missing == set()
+
+
+def test_heading_ids_do_not_clash_with_layout(example: Path) -> None:
+    html = (build(example).out_dir / "guides/markdown/index.html").read_text()
+    ids = re.findall(r'\sid="([^"]+)"', html)
+    assert len(ids) == len(set(ids))
 
 
 def test_build_is_deterministic(example: Path, tmp_path: Path) -> None:

@@ -15,12 +15,13 @@
     } catch (e) {} })();
   </script>
   <link rel="stylesheet" href="{{ asset('vendor/basecoat/basecoat.cdn.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('pygments.css') }}">
   <link rel="stylesheet" href="{{ asset('dokk.css') }}">
   <script src="{{ asset('vendor/basecoat/all.min.js') }}" defer></script>
   <script src="{{ asset('dokk.js') }}" defer></script>
 </head>
 <body>
-  {{ sidebar(id='sidebar', label='Documentation', header=sidebar_header, menu=menu) }}
+  {{ sidebar(id='dk-sidebar', label='Documentation', header=sidebar_header, menu=menu) }}
   <div class="dk-shell">{# must be the element right after .sidebar #}
     {% include 'partials/header.html.jinja' %}
     <div class="dk-content">

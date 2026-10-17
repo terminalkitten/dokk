@@ -4,6 +4,9 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from pygments.styles import get_style_by_name
+from pygments.util import ClassNotFound
+
 from dokk import DokkError
 
 CONFIG_FILE = "dokk.toml"
@@ -85,6 +88,15 @@ def load_config(root: Path, dev: bool = False) -> Config:
     if out_dir == root or out_dir in root.parents or content_dir.resolve().is_relative_to(out_dir):
         raise ConfigError(f"{CONFIG_FILE}: 'out_dir' must not contain the site or its content")
 
+    theme = {"code_light": "default", "code_dark": "github-dark", **_table(data, "theme")}
+    for key in ("code_light", "code_dark"):
+        try:
+            get_style_by_name(theme[key])
+        except ClassNotFound:
+            raise ConfigError(
+                f"{CONFIG_FILE}: unknown Pygments style {theme[key]!r} for theme.{key}"
+            ) from None
+
     return Config(
         root=root,
         title=title,
@@ -94,7 +106,7 @@ def load_config(root: Path, dev: bool = False) -> Config:
         out_dir=out_dir,
         lang=_str(data, "lang", "en"),
         base_path="" if dev else base_path_from(site_url),
-        theme=_table(data, "theme"),
+        theme=theme,
         links=_table(data, "links"),
         search=_table(data, "search"),
     )

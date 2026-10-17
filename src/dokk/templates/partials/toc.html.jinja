@@ -1,8 +1,8 @@
-<nav aria-label="On this page">
+<nav class="dk-toc-nav" aria-label="On this page">
   <h2>On this page</h2>
   <ul>
-    {% for level, id, text in page.toc %}
-    <li data-level="{{ level }}"><a href="#{{ id }}">{{ text }}</a></li>
+    {% for item in page.toc %}
+    <li data-level="{{ item.level }}"><a href="#{{ item.id }}">{{ item.text }}</a></li>
     {% endfor %}
   </ul>
 </nav>

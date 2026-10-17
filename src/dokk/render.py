@@ -4,11 +4,11 @@ from typing import Any
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 from markupsafe import Markup
 
+from dokk.assets import ASSETS_DIR
 from dokk.config import Config
 from dokk.routes import url_for
 
 BUILTIN_TEMPLATES = Path(__file__).parent / "templates"
-ASSET_PREFIX = "/_dokk/"  # where package static files land in the output
 
 
 def make_env(cfg: Config) -> Environment:
@@ -27,7 +27,7 @@ def make_env(cfg: Config) -> Environment:
         return url_for(cfg.base_path, route)
 
     def asset(path: str) -> str:
-        return url(ASSET_PREFIX + path)
+        return url(f"/{ASSETS_DIR}/{path}")
 
     env.globals.update(
         url=url,
