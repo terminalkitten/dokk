@@ -1,0 +1,10 @@
+{% if prev or next %}
+<nav class="dk-pager" aria-label="Pages" data-pagefind-ignore>
+  {% if prev %}
+  <a class="dk-pager-prev" href="{{ prev.url }}" rel="prev"><span>Previous</span>{{ prev.title }}</a>
+  {% endif %}
+  {% if next %}
+  <a class="dk-pager-next" href="{{ next.url }}" rel="next"><span>Next</span>{{ next.title }}</a>
+  {% endif %}
+</nav>
+{% endif %}

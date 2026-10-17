@@ -1,0 +1,18 @@
+{% if crumbs | length > 1 %}
+<nav class="breadcrumb dk-breadcrumbs" aria-label="Breadcrumb" data-pagefind-ignore>
+  <ol>
+    {% for crumb in crumbs %}
+    {% if not loop.first %}
+    <li aria-hidden="true"><svg data-rtl-flip xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></li>
+    {% endif %}
+    {% if loop.last %}
+    <li><span aria-current="page">{{ crumb.label }}</span></li>
+    {% elif crumb.url %}
+    <li><a href="{{ crumb.url }}">{{ crumb.label }}</a></li>
+    {% else %}
+    <li><span>{{ crumb.label }}</span></li>
+    {% endif %}
+    {% endfor %}
+  </ol>
+</nav>
+{% endif %}

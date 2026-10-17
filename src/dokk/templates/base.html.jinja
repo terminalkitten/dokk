@@ -1,0 +1,34 @@
+{% from 'basecoat/sidebar.html.jinja' import sidebar %}
+<!doctype html>
+<html lang="{{ site.lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site.title }}{% endblock %}</title>
+  {% block meta %}{% endblock %}
+  <script>
+    /* Apply theme before first paint. Key and class match Basecoat 1.0. */
+    (function () { try {
+      var m = localStorage.getItem('themeMode');
+      var dark = m ? m === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', dark);
+    } catch (e) {} })();
+  </script>
+  <link rel="stylesheet" href="{{ asset('vendor/basecoat/basecoat.cdn.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('dokk.css') }}">
+  <script src="{{ asset('vendor/basecoat/all.min.js') }}" defer></script>
+  <script src="{{ asset('dokk.js') }}" defer></script>
+</head>
+<body>
+  {{ sidebar(id='sidebar', label='Documentation', header=sidebar_header, menu=menu) }}
+  <div class="dk-shell">{# must be the element right after .sidebar #}
+    {% include 'partials/header.html.jinja' %}
+    <div class="dk-content">
+      <main class="dk-main" data-pagefind-body>
+        {% block main %}{% endblock %}
+      </main>
+      {% block aside %}{% endblock %}
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<nav aria-label="On this page">
+  <h2>On this page</h2>
+  <ul>
+    {% for level, id, text in page.toc %}
+    <li data-level="{{ level }}"><a href="#{{ id }}">{{ text }}</a></li>
+    {% endfor %}
+  </ul>
+</nav>

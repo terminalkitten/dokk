@@ -1,6 +1,9 @@
 title = "dokk example"
 description = "Fixture site for dokk acceptance checks"
-site_url = "https://example.com/repo/"
+site_url = "https://example.com/"
 
 [theme]
 style = "vega"
+
+[links]
+github = "https://github.com/example/dokk"

@@ -1,0 +1,11 @@
+{% extends 'base.html.jinja' %}
+{% block title %}{{ title }} · {{ site.title }}{% endblock %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block main %}
+  <article class="dk-prose">
+    <h1>{{ title }}</h1>
+    {% if body %}{{ body | safe }}{% else %}
+    <p>This page does not exist. <a href="{{ url('/') }}">Go to the home page</a>.</p>
+    {% endif %}
+  </article>
+{% endblock %}
