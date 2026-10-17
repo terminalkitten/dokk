@@ -11,10 +11,9 @@ from dokk.routes import url_for
 BUILTIN_TEMPLATES = Path(__file__).parent / "templates"
 
 
-def make_env(cfg: Config) -> Environment:
-    user_templates = cfg.root / "templates"
-    search_path = [p for p in (user_templates, BUILTIN_TEMPLATES) if p.is_dir()]
-    env = Environment(
+def base_env(user_templates: Path | None = None) -> Environment:
+    search_path = [p for p in (user_templates, BUILTIN_TEMPLATES) if p and p.is_dir()]
+    return Environment(
         loader=FileSystemLoader(search_path),  # user overrides win
         autoescape=select_autoescape(["html", "jinja"]),
         undefined=StrictUndefined,
@@ -22,6 +21,10 @@ def make_env(cfg: Config) -> Environment:
         lstrip_blocks=True,
         keep_trailing_newline=True,
     )
+
+
+def make_env(cfg: Config) -> Environment:
+    env = base_env(cfg.root / "templates")
 
     def url(route: str) -> str:
         return url_for(cfg.base_path, route)

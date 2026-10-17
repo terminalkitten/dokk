@@ -28,6 +28,7 @@ class Page:
     html: str = ""
     toc: list[Any] = field(default_factory=list)  # filled in Phase 2
     draft: bool = False
+    line_offset: int = 0  # lines before `body` in the source file
 
     @property
     def sidebar(self) -> dict[str, Any]:
@@ -60,7 +61,8 @@ def split_front_matter(text: str, src: Path) -> tuple[dict[str, Any], str]:
 
 def load_page(src: Path, content_dir: Path) -> Page:
     rel = src.relative_to(content_dir)
-    meta, body = split_front_matter(src.read_text(encoding="utf-8"), src)
+    text = src.read_text(encoding="utf-8")
+    meta, body = split_front_matter(text, src)
     title = meta.get("title")
     if title is None:
         # Title from a leading H1, which is then removed so it is not rendered twice.
@@ -78,6 +80,7 @@ def load_page(src: Path, content_dir: Path) -> Page:
         title=str(title),
         description=str(meta.get("description", "")),
         draft=meta.get("draft") is True,
+        line_offset=text[: len(text) - len(body)].count("\n"),  # body is a suffix of text
     )
 
 

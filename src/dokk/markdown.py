@@ -6,8 +6,10 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import quote, unquote, urlsplit
 
+from jinja2 import Environment
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
+from markupsafe import Markup
 from mdit_py_plugins.anchors import anchors_plugin
 from mdit_py_plugins.attrs import attrs_plugin
 from mdit_py_plugins.deflist import deflist_plugin
@@ -17,6 +19,8 @@ from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import TextLexer, get_lexer_by_name
 from pygments.util import ClassNotFound
+
+from dokk.directives import CALLOUTS, Directive, DirectiveError, directive_plugin, fold
 
 DESCRIPTION_LENGTH = 160
 _FORMATTER = HtmlFormatter(nowrap=True)
@@ -65,6 +69,7 @@ def make_md() -> MarkdownIt:
         .use(tasklists_plugin)
         .use(deflist_plugin)
         .use(attrs_plugin)
+        .use(directive_plugin)
     )
     md.add_render_rule("table_open", _table_open)
     md.add_render_rule("table_close", _table_close)
@@ -101,15 +106,23 @@ class Renderer:
 
     `page_urls` maps a source path (relative to content_dir, POSIX) to its page URL.
     `content_dir` is used to check that linked assets exist.
+    `env` renders directive components from `components/<name>.html.jinja`.
     """
 
-    def __init__(self, page_urls: dict[str, str], content_dir: Path, base_path: str) -> None:
+    def __init__(
+        self,
+        page_urls: dict[str, str],
+        content_dir: Path,
+        base_path: str,
+        env: Environment,
+    ) -> None:
         self.md = make_md()
         self.page_urls = page_urls
         self.content_dir = content_dir
         self.base_path = base_path
+        self.env = env
 
-    def render(self, body: str, rel: Path) -> Rendered:
+    def render(self, body: str, rel: Path, line_offset: int = 0) -> Rendered:
         env: dict[str, Any] = {}
         tokens = self.md.parse(body, env)
         result = Rendered(html="")
@@ -122,7 +135,31 @@ class Renderer:
                 result.description = _truncate(_plain_text(tokens[i + 1]))
             if tok.type == "inline":
                 self._rewrite(tok.children or [], source_dir, result.broken)
-        result.html = self.md.renderer.render(tokens, self.md.options, env)
+        tabs = iter(range(1, 10**6))  # explicit, per-page tab ids keep builds deterministic
+
+        def render_inner(inner: list[Token]) -> str:
+            return self.md.renderer.render(inner, self.md.options, env)
+
+        def render_directive(d: Directive, body: str, children: list[tuple[Directive, str]]) -> str:
+            href = d.attrs.get("href")
+            if href:
+                resolved = self._resolve(href, source_dir, is_link=True)
+                if resolved is None:
+                    result.broken.append(href)
+                d.attrs["href"] = resolved or href
+            name = "callout" if d.name in CALLOUTS else d.name
+            return self.env.get_template(f"components/{name}.html.jinja").render(
+                directive=d,
+                body=Markup(body),
+                children=[(c, Markup(b)) for c, b in children],
+                id=f"dk-tabs-{next(tabs)}" if d.name == "tabs" else "",
+            )
+
+        try:
+            tokens = fold(tokens, render_inner, render_directive, line_offset)
+        except DirectiveError as e:
+            raise DirectiveError(f"{rel}: {e}") from None
+        result.html = render_inner(tokens)
         return result
 
     def _rewrite(self, children: list[Token], source_dir: PurePosixPath, broken: list[str]) -> None:

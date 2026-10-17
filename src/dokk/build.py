@@ -32,7 +32,8 @@ def build(root: Path, drafts: bool = False) -> Config:
     order = ordered_pages(tree)
     index_pages = {p.rel.parent: p for p in pages if p.rel.stem == "index"}
     env = make_env(cfg)
-    renderer = Renderer({p.rel.as_posix(): p.url for p in pages}, cfg.content_dir, cfg.base_path)
+    page_urls = {p.rel.as_posix(): p.url for p in pages}
+    renderer = Renderer(page_urls, cfg.content_dir, cfg.base_path, env)
 
     out = cfg.out_dir
     if out.exists():
@@ -46,7 +47,7 @@ def build(root: Path, drafts: bool = False) -> Config:
     )
 
     for page in pages:
-        rendered = renderer.render(page.body, page.rel)
+        rendered = renderer.render(page.body, page.rel, page.line_offset)
         page.html, page.toc = rendered.html, rendered.toc
         page.description = page.description or rendered.description
         for href in rendered.broken:
@@ -70,6 +71,6 @@ def build(root: Path, drafts: bool = False) -> Config:
 
 
 def _render_404(env: Environment, tree: Node, page: Page | None, renderer: Renderer) -> str:
-    body = renderer.render(page.body, page.rel).html if page else ""
+    body = renderer.render(page.body, page.rel, page.line_offset).html if page else ""
     title = page.title if page else "Page not found"
     return render_template(env, "404.html.jinja", title=title, body=body, menu=build_menu(tree, ""))

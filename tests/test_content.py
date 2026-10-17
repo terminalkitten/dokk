@@ -56,3 +56,9 @@ def test_scan_skips_drafts(tmp_path: Path) -> None:
     (tmp_path / "c.txt").write_text("not markdown")
     assert [p.rel.name for p in scan(tmp_path)] == ["a.md"]
     assert [p.rel.name for p in scan(tmp_path, drafts=True)] == ["a.md", "b.md"]
+
+
+def test_line_offset(tmp_path: Path) -> None:
+    assert _page(tmp_path, "a.md", "---\ntitle: A\n---\nBody\n").line_offset == 3
+    assert _page(tmp_path, "b.md", "# Title\n\nBody\n").line_offset == 1
+    assert _page(tmp_path, "c.md", "Body\n").line_offset == 0

@@ -192,3 +192,51 @@ html.dark .dk-icon-moon { display: none; }
 .dk-prose .footnotes-sep { margin-top: 3rem; }
 .dk-prose .footnotes { font-size: 0.875rem; color: var(--muted-foreground); }
 .dk-prose .footnote-ref a, .dk-prose .footnote-backref { text-decoration: none; }
+
+/* Callouts (Basecoat .alert) */
+.dk-prose .dk-callout { margin: 0 0 1.25rem; border-left: 4px solid var(--dk-callout-color); }
+.dk-callout[data-callout="note"] { --dk-callout-color: oklch(0.62 0.17 255); }
+.dk-callout[data-callout="tip"] { --dk-callout-color: oklch(0.65 0.16 150); }
+.dk-callout[data-callout="caution"] { --dk-callout-color: oklch(0.75 0.16 75); }
+.dk-callout[data-callout="danger"] { --dk-callout-color: oklch(0.6 0.22 25); }
+.dk-callout > svg { color: var(--dk-callout-color); }
+.dk-prose .dk-callout > section > :last-child { margin-bottom: 0; }
+
+/* Tabs (Basecoat .tabs) */
+.dk-prose .dk-tabs { margin: 0 0 1.25rem; }
+.dk-prose .dk-tabs [role="tabpanel"] { padding-top: 0.75rem; }
+.dk-prose .dk-tabs [role="tabpanel"] > :last-child { margin-bottom: 0; }
+
+/* Cards (Basecoat .card) */
+.dk-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 1rem; margin: 0 0 1.25rem; }
+.dk-card { position: relative; }
+.dk-card:has(.dk-card-link):hover { background: var(--accent); }
+.dk-prose .dk-card-link { color: inherit; text-decoration: none; }
+.dk-card-link::after { content: ""; position: absolute; inset: 0; } /* whole card is clickable */
+.dk-prose .dk-card section > :last-child { margin-bottom: 0; }
+
+/* Steps: numbered procedure from an ordered list */
+.dk-prose .dk-steps > ol { list-style: none; padding-left: 0; counter-reset: dk-step; }
+.dk-prose .dk-steps > ol > li {
+  position: relative;
+  counter-increment: dk-step;
+  padding: 0 0 1.25rem 2.75rem;
+  border-left: 1px solid var(--border);
+  margin-left: 0.875rem;
+}
+.dk-prose .dk-steps > ol > li:last-child { border-left-color: transparent; }
+.dk-prose .dk-steps > ol > li::before {
+  content: counter(dk-step);
+  position: absolute;
+  left: -0.875rem;
+  top: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.dk-prose .dk-steps > ol > li { padding-left: 1.75rem; }

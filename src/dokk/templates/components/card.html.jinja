@@ -1,0 +1,9 @@
+{% set href = directive.attrs.get('href') %}
+<div class="card dk-card">
+  {% if directive.title %}
+  <header>
+    {% if href %}<a class="card-title dk-card-link" href="{{ href }}">{{ directive.title }}</a>{% else %}<strong class="card-title">{{ directive.title }}</strong>{% endif %}
+  </header>
+  {% endif %}
+  <section>{{ body }}</section>
+</div>

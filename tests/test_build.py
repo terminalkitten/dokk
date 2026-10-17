@@ -34,6 +34,7 @@ def test_example_output_files(example: Path) -> None:
         "getting-started/index.html",
         "getting-started/install/index.html",
         "guides/advanced/deep/nested/index.html",
+        "guides/components/index.html",
         "guides/img/diagram.png",
         "guides/markdown/index.html",
         "guides/secret/index.html",  # hidden from the menu, still built
@@ -119,6 +120,12 @@ def test_build_is_deterministic(example: Path, tmp_path: Path) -> None:
 
     first = digest()
     assert digest() == first
+
+
+def test_unknown_directive_fails_build_with_file_and_line(make_site, capsys) -> None:
+    root = make_site({"index.md": "---\ntitle: Home\n---\n\n:::nope\nx\n:::\n"})
+    assert main(["build", "--root", str(root)]) == 1
+    assert "index.md: line 5: unknown directive ':::nope'" in capsys.readouterr().err
 
 
 def test_public_dir_copied_to_root(make_site) -> None:

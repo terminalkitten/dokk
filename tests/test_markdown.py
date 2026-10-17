@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from dokk.markdown import Renderer, TocItem, _truncate, highlight_code, pygments_css
+from dokk.render import base_env
 
 GOLDEN = Path(__file__).parent / "golden"
 EXAMPLE_DOCS = Path(__file__).resolve().parents[1] / "examples" / "basic" / "docs"
@@ -28,7 +29,7 @@ def _renderer(content: Path, base: str = "") -> Renderer:
         "guides/intro.md": f"{base}/guides/intro/",
         "guides/index.md": f"{base}/guides/",
     }
-    return Renderer(urls, content, base)
+    return Renderer(urls, content, base, base_env())
 
 
 def _hrefs(html: str) -> list[str]:
@@ -42,7 +43,11 @@ def test_golden_rich_page() -> None:
         "getting-started/install.md": "/repo/getting-started/install/",
         "index.md": "/repo/",
     }
-    html = Renderer(urls, EXAMPLE_DOCS, "/repo").render(body, Path("guides/markdown.md")).html
+    html = (
+        Renderer(urls, EXAMPLE_DOCS, "/repo", base_env())
+        .render(body, Path("guides/markdown.md"))
+        .html
+    )
     golden = GOLDEN / "markdown.html"
     if os.environ.get("DOKK_UPDATE_GOLDEN"):
         golden.parent.mkdir(exist_ok=True)
