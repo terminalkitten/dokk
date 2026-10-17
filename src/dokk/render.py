@@ -23,7 +23,7 @@ def base_env(user_templates: Path | None = None) -> Environment:
     )
 
 
-def make_env(cfg: Config) -> Environment:
+def make_env(cfg: Config, dev: bool = False) -> Environment:
     env = base_env(cfg.root / "templates")
 
     def url(route: str) -> str:
@@ -35,6 +35,7 @@ def make_env(cfg: Config) -> Environment:
     env.globals.update(
         url=url,
         asset=asset,
+        dev=dev,
         site={
             "title": cfg.title,
             "description": cfg.description,

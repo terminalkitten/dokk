@@ -29,6 +29,7 @@ class Page:
     toc: list[Any] = field(default_factory=list)  # filled in Phase 2
     draft: bool = False
     line_offset: int = 0  # lines before `body` in the source file
+    has_title: bool = True  # False when the title fell back to the file name
 
     @property
     def sidebar(self) -> dict[str, Any]:
@@ -64,6 +65,7 @@ def load_page(src: Path, content_dir: Path) -> Page:
     text = src.read_text(encoding="utf-8")
     meta, body = split_front_matter(text, src)
     title = meta.get("title")
+    has_title = True
     if title is None:
         # Title from a leading H1, which is then removed so it is not rendered twice.
         h1 = _LEADING_H1.match(body)
@@ -72,6 +74,7 @@ def load_page(src: Path, content_dir: Path) -> Page:
         else:
             name = src.stem if src.stem != "index" else rel.parent.name
             title = titleize(name) or "Home"
+            has_title = False
     return Page(
         src=src,
         rel=rel,
@@ -80,6 +83,7 @@ def load_page(src: Path, content_dir: Path) -> Page:
         title=str(title),
         description=str(meta.get("description", "")),
         draft=meta.get("draft") is True,
+        has_title=has_title,
         line_offset=text[: len(text) - len(body)].count("\n"),  # body is a suffix of text
     )
 

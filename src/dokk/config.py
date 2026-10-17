@@ -85,8 +85,11 @@ def load_config(root: Path, dev: bool = False) -> Config:
     if not content_dir.is_dir():
         raise ConfigError(f"content directory not found: {content_dir}")
     out_dir = (root / _str(data, "out_dir", "dist")).resolve()
-    if out_dir == root or out_dir in root.parents or content_dir.resolve().is_relative_to(out_dir):
+    content = content_dir.resolve()
+    if out_dir == root or out_dir in root.parents or content.is_relative_to(out_dir):
         raise ConfigError(f"{CONFIG_FILE}: 'out_dir' must not contain the site or its content")
+    if out_dir.is_relative_to(content) or (root / ".dokk").is_relative_to(content):
+        raise ConfigError(f"{CONFIG_FILE}: 'content_dir' must not contain 'out_dir' or .dokk/")
 
     theme = {"code_light": "default", "code_dark": "github-dark", **_table(data, "theme")}
     for key in ("code_light", "code_dark"):

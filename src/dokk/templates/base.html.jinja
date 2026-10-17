@@ -31,5 +31,6 @@
       {% block aside %}{% endblock %}
     </div>
   </div>
+  {% if dev %}{% include 'partials/dev_reload.html.jinja' %}{% endif %}
 </body>
 </html>

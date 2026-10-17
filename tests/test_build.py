@@ -95,8 +95,8 @@ def test_base_path_prefixes_every_internal_url(example: Path) -> None:
 def test_every_internal_url_resolves(example: Path, site_url: str) -> None:
     toml = example / "dokk.toml"
     toml.write_text(toml.read_text().replace("https://example.com/", site_url))
-    cfg = build(example)
-    out = cfg.out_dir
+    result = build(example)
+    cfg, out = result.cfg, result.out_dir
     missing = set()
     for page in out.rglob("*.html"):
         for url in re.findall(r'(?:href|src)="(/[^"#]*)', page.read_text()):
@@ -158,6 +158,8 @@ def test_cli_build_and_error(make_site, capsys: pytest.CaptureFixture[str]) -> N
 
 def test_cli_init_then_build(tmp_path: Path) -> None:
     assert main(["init", "--root", str(tmp_path)]) == 0
+    workflow = (tmp_path / ".github" / "workflows" / "docs.yml").read_text()
+    assert "actions/deploy-pages@v5" in workflow and "dokk check" in workflow
     assert main(["build", "--root", str(tmp_path)]) == 0
     assert (tmp_path / "dist" / "index.html").is_file()
     assert main(["init", "--root", str(tmp_path)]) == 1  # refuses to overwrite

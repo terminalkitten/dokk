@@ -1,5 +1,5 @@
 import shutil
-import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from jinja2 import Environment
@@ -21,8 +21,20 @@ def _write(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-def build(root: Path, drafts: bool = False) -> Config:
-    cfg = load_config(root)
+@dataclass
+class BuildResult:
+    cfg: Config
+    out_dir: Path
+    pages: list[Page]
+    menu_pages: list[Page]  # pages reachable from the menu, in menu order
+    broken: dict[Path, list[str]] = field(default_factory=dict)  # source rel -> hrefs
+
+
+def build(
+    root: Path, drafts: bool = False, dev: bool = False, out_dir: Path | None = None
+) -> BuildResult:
+    """Build the site. `dev` drops base_path and injects the reload script."""
+    cfg = load_config(root, dev=dev)
     pages = scan(cfg.content_dir, drafts)
     not_found = next((p for p in pages if p.rel == NOT_FOUND), None)
     pages = [p for p in pages if p is not not_found]
@@ -31,11 +43,12 @@ def build(root: Path, drafts: bool = False) -> Config:
     tree = build_tree(pages)
     order = ordered_pages(tree)
     index_pages = {p.rel.parent: p for p in pages if p.rel.stem == "index"}
-    env = make_env(cfg)
+    env = make_env(cfg, dev=dev)
     page_urls = {p.rel.as_posix(): p.url for p in pages}
     renderer = Renderer(page_urls, cfg.content_dir, cfg.base_path, env)
 
-    out = cfg.out_dir
+    out = out_dir or cfg.out_dir
+    result = BuildResult(cfg, out, pages, order)
     if out.exists():
         shutil.rmtree(out)
     copy_static(out)
@@ -50,8 +63,8 @@ def build(root: Path, drafts: bool = False) -> Config:
         rendered = renderer.render(page.body, page.rel, page.line_offset)
         page.html, page.toc = rendered.html, rendered.toc
         page.description = page.description or rendered.description
-        for href in rendered.broken:
-            print(f"warning: {page.rel}: broken link {href!r}", file=sys.stderr)
+        if rendered.broken:
+            result.broken[page.rel] = rendered.broken
         prev, next_ = prev_next(order, page)
         html = render_template(
             env,
@@ -67,7 +80,7 @@ def build(root: Path, drafts: bool = False) -> Config:
 
     _write(out / "404.html", _render_404(env, tree, not_found, renderer))
     _write(out / ".nojekyll", "")
-    return cfg
+    return result
 
 
 def _render_404(env: Environment, tree: Node, page: Page | None, renderer: Renderer) -> str:

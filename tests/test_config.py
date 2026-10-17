@@ -42,6 +42,8 @@ def test_dev_forces_empty_base_path(make_site) -> None:
         ('title = "T"\nbogus = 1\n', "unknown key(s): bogus"),
         ('title = "T"\nsite_url = "example.com"\n', "site_url"),
         ('title = "T"\nout_dir = "."\n', "out_dir"),
+        ('title = "T"\ncontent_dir = "."\n', "must not contain 'out_dir'"),
+        ('title = "T"\nout_dir = "docs/out"\n', "must not contain 'out_dir'"),
         ('title = "T"\ntheme = "x"\n', "[theme] must be a table"),
         ("title = \n", "dokk.toml"),
         ('title = "T"\n[theme]\ncode_dark = "nope"\n', "unknown Pygments style 'nope'"),
