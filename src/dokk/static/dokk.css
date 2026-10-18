@@ -7,6 +7,10 @@
   --dk-content-width: 46rem;
 }
 
+html {
+  scrollbar-gutter: stable; /* no sideways jump between short and long pages */
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);

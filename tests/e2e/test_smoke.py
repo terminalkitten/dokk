@@ -124,3 +124,16 @@ def test_search_palette(page, site: str) -> None:  # type: ignore[no-untyped-def
     page.keyboard.press("Enter")
     page.wait_for_url("**/guides/advanced/deep/nested/")
     assert page.problems == []
+
+
+def test_content_does_not_jump_between_pages(browser, site: str) -> None:  # type: ignore[no-untyped-def]
+    """Pages with and without an "On this page" column put the content in the same place."""
+    for width in (1400, 1000, 390):
+        context = browser.new_context(viewport={"width": width, "height": 800})
+        page = context.new_page()
+        xs = set()
+        for path in ("/", "/guides/markdown/", "/guides/advanced/deep/nested/"):
+            page.goto(site + path)
+            xs.add(round(page.locator("main.dk-main").bounding_box()["x"]))
+        assert len(xs) == 1, (width, xs)
+        context.close()

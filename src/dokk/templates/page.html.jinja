@@ -31,5 +31,7 @@
 {% block aside %}
   {% if page.toc %}
   <aside class="dk-toc" data-pagefind-ignore>{% include 'partials/toc.html.jinja' %}</aside>
+  {% else %}
+  {{ super() }}
   {% endif %}
 {% endblock %}
