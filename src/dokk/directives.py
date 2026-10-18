@@ -93,20 +93,22 @@ def _badge_rule(state: StateInline, silent: bool) -> bool:
     if not match:
         return False
     attrs = dict(_ATTR.findall(match.group(2) or ""))
-    variant = attrs.get("variant", "default")
-    if variant not in BADGE_VARIANTS:
-        allowed = ", ".join(BADGE_VARIANTS)
-        raise DirectiveError(f"badge {match.group(1)!r}: variant must be one of {allowed}")
+    html = badge(match.group(1), attrs.get("variant", "default"))  # validate even when silent
     if not silent:
-        token = state.push("html_inline", "", 0)
-        data = BADGE_VARIANTS[variant]
-        token.content = str(
-            Markup('<span class="badge"{}>{}</span>').format(
-                Markup(' data-variant="{}"').format(data) if data else "", match.group(1)
-            )
-        )
+        state.push("html_inline", "", 0).content = str(html)
     state.pos = match.end()
     return True
+
+
+def badge(text: str, variant: str) -> Markup:
+    """A Basecoat badge; shared by `:badge[...]` and the sidebar's `sidebar.badge`."""
+    if variant not in BADGE_VARIANTS:
+        allowed = ", ".join(BADGE_VARIANTS)
+        raise DirectiveError(f"badge {text!r}: variant must be one of {allowed}")
+    data = BADGE_VARIANTS[variant]
+    return Markup('<span class="badge"{}>{}</span>').format(
+        Markup(' data-variant="{}"').format(data) if data else "", text
+    )
 
 
 # (directive, body_html, child directives with their bodies, raw inner tokens) -> html

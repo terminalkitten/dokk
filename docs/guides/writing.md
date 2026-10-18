@@ -18,6 +18,7 @@ collapsible submenus.
 | `docs/Getting Started.md` | `/getting-started/` |
 
 A folder's `index.md` is the first item inside it. Two files that map to the same URL fail the build.
+Files and folders whose name starts with a dot (`.obsidian/`, `.notes.md`) are skipped.
 
 ## Front matter
 
@@ -31,7 +32,7 @@ sidebar:
   label: Install               # menu text instead of the title
   order: 1                     # lower comes first; unordered pages follow by file name
   hidden: true                 # built, but not in the menu
-  badge: New                   # or {text: New, variant: secondary}
+  badge: New                   # or {text: New, variant: secondary}; variants as :badge
 ---
 ```
 

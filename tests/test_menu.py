@@ -96,14 +96,14 @@ def test_labels_escaped_once() -> None:
         _p("evil/index.md", evil),
         _p("evil/x.md"),
         _p("evil/sub/y.md", evil),
-        _p("evil/sub/index.md", evil, badge={"text": "<b>", "variant": '"x'}),
+        _p("evil/sub/index.md", evil, badge={"text": "<b>", "variant": "danger"}),
     ]
     assign_routes(pages, "")
     menu = build_menu(auto_nav(build_tree(pages)))
     assert menu[0]["items"][0]["label"] == "&lt;script&gt;alert(1)&lt;/script&gt; &amp; co"
     submenu = menu[1]["items"][1]
     assert submenu["type"] == "submenu" and "<script>" not in submenu["label"]
-    badge = '<span class="badge" data-variant="&#34;x">&lt;b&gt;</span>'
+    badge = '<span class="badge" data-variant="destructive">&lt;b&gt;</span>'
     assert badge in submenu["items"][0]["label"]
     assert menu[1]["label"] == evil  # group labels are escaped by the macro
 
@@ -113,6 +113,13 @@ def test_badge_string() -> None:
     assign_routes(pages, "")
     label = build_menu(auto_nav(build_tree(pages)))[0]["items"][0]["label"]
     assert label == 'A <span class="badge" data-variant="secondary">New</span>'
+
+
+def test_badge_variant_checked() -> None:
+    pages = [_p("a.md", "A", badge={"text": "X", "variant": '"x'})]
+    assign_routes(pages, "")
+    with pytest.raises(NavError, match="a.md: sidebar.badge 'X': variant must be one of default"):
+        build_menu(auto_nav(build_tree(pages)))
 
 
 def test_pager_follows_menu_order() -> None:

@@ -48,6 +48,22 @@ def test_dev_build(server: tuple[str, DevState]) -> None:
     assert not (state.root / "dist").exists()
 
 
+def test_rebuild_keeps_serving_the_old_site(server: tuple[str, DevState], monkeypatch) -> None:
+    base, state = server
+    import dokk.build as build_module
+
+    real_copy = build_module.copy_static
+
+    def copy_static(*args, **kwargs):  # runs after the build cleared its output folder
+        assert _get(base + "/")[0] == 200  # mid-rebuild: the old site is still served
+        return real_copy(*args, **kwargs)
+
+    monkeypatch.setattr(build_module, "copy_static", copy_static)
+    state.rebuild()
+    assert state.error is None and _get(base + "/")[0] == 200
+    assert sorted(p.name for p in state.out.parent.iterdir()) == ["dev"]
+
+
 def test_version_increments_on_rebuild(server: tuple[str, DevState]) -> None:
     base, state = server
     assert _get(base + "/__dokk/version") == (200, "1")

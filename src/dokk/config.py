@@ -54,11 +54,26 @@ def _str(data: dict[str, Any], key: str, default: str) -> str:
     return value
 
 
-def _table(data: dict[str, Any], key: str) -> dict[str, Any]:
+def _table(data: dict[str, Any], key: str, known: tuple[str, ...] | None = None) -> dict[str, Any]:
+    """A [table]; with `known`, other keys are an error (catches typos like `enable`)."""
     value = data.get(key, {})
     if not isinstance(value, dict):
         raise ConfigError(f"{CONFIG_FILE}: [{key}] must be a table")
+    unknown = sorted(set(value) - set(known)) if known is not None else []
+    if unknown:
+        raise ConfigError(
+            f"{CONFIG_FILE}: unknown [{key}] key(s): {', '.join(unknown)} "
+            f"(supported: {', '.join(known or ())})"
+        )
     return value
+
+
+def _switch(data: dict[str, Any], key: str) -> dict[str, Any]:
+    """A table with only `enabled = true|false`, like [search] and [llms]."""
+    table = _table(data, key, ("enabled",))
+    if not isinstance(table.get("enabled", False), bool):
+        raise ConfigError(f"{CONFIG_FILE}: '{key}.enabled' must be true or false")
+    return table
 
 
 def base_path_from(site_url: str) -> str:
@@ -96,14 +111,7 @@ def load_config(root: Path, dev: bool = False) -> Config:
     if out_dir.is_relative_to(content) or (root / ".dokk").is_relative_to(content):
         raise ConfigError(f"{CONFIG_FILE}: 'content_dir' must not contain 'out_dir' or .dokk/")
 
-    theme_in = _table(data, "theme")
-    keys = ("style", "base", "color", "code_light", "code_dark")
-    unknown_theme = sorted(set(theme_in) - set(keys))
-    if unknown_theme:
-        raise ConfigError(
-            f"{CONFIG_FILE}: unknown [theme] key(s): {', '.join(unknown_theme)} "
-            f"(supported: {', '.join(keys)})"
-        )
+    theme_in = _table(data, "theme", ("style", "base", "color", "code_light", "code_dark"))
     for key, allowed, default in (
         ("style", STYLES, "vega"),
         ("base", BASES, "neutral"),
@@ -146,7 +154,7 @@ def load_config(root: Path, dev: bool = False) -> Config:
         base_path="" if dev else base_path_from(site_url),
         theme=theme,
         links=_table(data, "links"),
-        search=_table(data, "search"),
+        search=_switch(data, "search"),
         sidebar=sidebar,
-        llms=_table(data, "llms"),
+        llms=_switch(data, "llms"),
     )

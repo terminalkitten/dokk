@@ -191,11 +191,19 @@ def test_cli_init_then_build(tmp_path: Path) -> None:
 def test_parallel_markdown_matches_serial(example: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import dokk.build as build_module
 
-    def snapshot(**kw: object) -> dict[str, bytes]:
-        out = build(example, search=False, **kw).out_dir  # type: ignore[arg-type]
+    def snapshot(parallel: bool = False) -> dict[str, bytes]:
+        out = build(example, search=False, parallel=parallel).out_dir
         return {f: (out / f).read_bytes() for f in _files(out)}
 
+    # A user override that needs the template globals, which workers must have too.
+    builtin = Path(build_module.__file__).parent / "templates/components/callout.html.jinja"
+    override = example / "templates/components/callout.html.jinja"
+    override.parent.mkdir(parents=True)
+    override.write_text(
+        builtin.read_text() + "<i data-test=\"{{ url('/') }}{{ site.title }}\"></i>"
+    )
     serial = snapshot()
+    assert any(b"data-test=" in html for html in serial.values())
     monkeypatch.setattr(build_module, "PARALLEL_MIN_PAGES", 0)
     assert snapshot(parallel=True) == serial
 

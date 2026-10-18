@@ -8,6 +8,8 @@ from markupsafe import Markup, escape
 
 from dokk import DokkError
 from dokk.content import Page, titleize
+from dokk.directives import DirectiveError
+from dokk.directives import badge as badge_span
 from dokk.tree import Node
 
 
@@ -144,7 +146,10 @@ def badge_html(page: Page) -> Markup:
         text, variant = badge.get("text", ""), badge.get("variant", "secondary")
     else:
         text, variant = badge, "secondary"
-    return Markup(' <span class="badge" data-variant="{}">{}</span>').format(variant, text)
+    try:
+        return Markup(" ") + badge_span(str(text), str(variant))
+    except DirectiveError as e:
+        raise NavError(f"{page.rel.as_posix()}: sidebar.{e}") from None
 
 
 def _menu_items(items: list[Nav], keys: dict[int, str]) -> list[dict[str, Any]]:

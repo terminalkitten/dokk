@@ -35,6 +35,9 @@ enabled = true              # writes llms.txt and llms-full.txt for AI tools
 
 `{path}` in `edit_url` is the page's file path inside `content_dir`.
 
+Unknown keys are an error, so a typo like `enable = true` fails the build instead of being
+ignored. `[links]` is the exception: custom templates can read any key from it.
+
 ## Sidebar
 
 Without `[[sidebar]]` the menu follows your folders. Add `[[sidebar]]` tables to choose the

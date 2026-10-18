@@ -54,6 +54,11 @@ def test_dev_forces_empty_base_path(make_site) -> None:
         ),
         ('title = "T"\n[theme]\ncolor = "zinc"\n', "unknown theme.color 'zinc'; choose from amber"),
         ('title = "T"\n[theme]\nbase = "pink"\n', "unknown theme.base 'pink'; choose from neutral"),
+        (
+            'title = "T"\n[llms]\nenable = true\n',
+            "unknown [llms] key(s): enable (supported: enabled)",
+        ),
+        ('title = "T"\n[search]\nenabled = "no"\n', "'search.enabled' must be true or false"),
     ],
 )
 def test_errors(make_site, toml: str, message: str) -> None:

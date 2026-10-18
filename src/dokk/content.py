@@ -95,6 +95,16 @@ def load_page(src: Path, content_dir: Path) -> Page:
     )
 
 
+def is_hidden(rel: Path) -> bool:
+    """Dot files and folders (.git, .obsidian, ...) are never published."""
+    return any(part.startswith(".") for part in rel.parts)
+
+
 def scan(content_dir: Path, drafts: bool = False) -> list[Page]:
-    pages = [load_page(p, content_dir) for p in sorted(content_dir.rglob("*.md")) if p.is_file()]
+    sources = sorted(content_dir.rglob("*.md"))
+    pages = [
+        load_page(p, content_dir)
+        for p in sources
+        if p.is_file() and not is_hidden(p.relative_to(content_dir))
+    ]
     return [p for p in pages if drafts or not p.draft]

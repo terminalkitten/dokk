@@ -1,3 +1,4 @@
+import shutil
 import threading
 import traceback
 from functools import partial
@@ -26,14 +27,22 @@ class DevState:
     def rebuild(self) -> None:
         with self.lock:
             try:
+                # Build next to the served folder, then swap, so requests during a rebuild
+                # still get the previous site instead of a half-written one.
+                fresh, stale = self.out.with_name("dev.next"), self.out.with_name("dev.old")
                 build(
                     self.root,
                     drafts=True,
                     dev=True,
-                    out_dir=self.out,
+                    out_dir=fresh,
                     search=self.search,
                     parallel=True,
                 )
+                shutil.rmtree(stale, ignore_errors=True)
+                if self.out.exists():
+                    self.out.rename(stale)
+                fresh.rename(self.out)
+                shutil.rmtree(stale, ignore_errors=True)
                 self.error = None
                 print(f"Built (version {self.version + 1})", flush=True)
             except Exception as e:  # show any failure in the browser, keep serving

@@ -26,7 +26,7 @@ from dokk.menu import (
     ordered_pages,
     submenu_keys,
 )
-from dokk.render import base_env, canonical, make_env, render_template
+from dokk.render import canonical, make_env, render_template
 from dokk.routes import assign_routes, markdown_path, output_path, url_for
 from dokk.search import build_index, search_available
 from dokk.seo import last_modified
@@ -110,7 +110,7 @@ def build(
     )
 
     sidebar = Sidebar(env, nav)
-    all_rendered = _render_markdown(cfg, page_urls, pages, renderer, parallel)
+    all_rendered = _render_markdown(cfg, page_urls, pages, renderer, parallel, dev, with_search)
     for page, rendered in zip(pages, all_rendered, strict=True):
         page.html, page.toc = rendered.html, rendered.toc
         page.description = page.description or rendered.description
@@ -180,9 +180,10 @@ def _edit_url(cfg: Config, page: Page) -> str:
 _worker_renderer: Renderer | None = None
 
 
-def _init_worker(page_urls: dict[str, str], content_dir: Path, base_path: str, root: Path) -> None:
+def _init_worker(cfg: Config, page_urls: dict[str, str], dev: bool, search: bool) -> None:
     global _worker_renderer
-    _worker_renderer = Renderer(page_urls, content_dir, base_path, base_env(root / "templates"))
+    env = make_env(cfg, dev=dev, search=search)  # same globals as the main process
+    _worker_renderer = Renderer(page_urls, cfg.content_dir, cfg.base_path, env)
 
 
 def _render_in_worker(job: tuple[str, Path, int]) -> Rendered:
@@ -191,13 +192,19 @@ def _render_in_worker(job: tuple[str, Path, int]) -> Rendered:
 
 
 def _render_markdown(
-    cfg: Config, page_urls: dict[str, str], pages: list[Page], renderer: Renderer, parallel: bool
+    cfg: Config,
+    page_urls: dict[str, str],
+    pages: list[Page],
+    renderer: Renderer,
+    parallel: bool,
+    dev: bool,
+    search: bool,
 ) -> list[Rendered]:
     """Markdown is the slowest step and pages are independent: use all cores on big sites."""
     jobs = [(p.body, p.rel, p.line_offset) for p in pages]
     workers = os.cpu_count() or 1
     if parallel and len(pages) >= PARALLEL_MIN_PAGES and workers > 1:
-        initargs = (page_urls, cfg.content_dir, cfg.base_path, cfg.root)
+        initargs = (cfg, page_urls, dev, search)
         chunk = max(1, len(jobs) // (workers * 4))
         try:
             with ProcessPoolExecutor(workers, initializer=_init_worker, initargs=initargs) as pool:
