@@ -21,7 +21,12 @@ from dokk import DokkError
 CALLOUTS = ("note", "tip", "caution", "danger")
 CHILDREN = {"tabs": "tab"}  # parent: only allowed child
 PARENTS = {child: parent for parent, child in CHILDREN.items()}
-KNOWN = {*CALLOUTS, "tabs", "tab", "cards", "card", "steps", "filetree", "linkbutton", "details"}
+KNOWN = {
+    *CALLOUTS,
+    *("tabs", "tab", "cards", "card", "steps", "filetree", "linkbutton", "details", "image"),
+}
+# Template used by every callout type; not a directive name of its own.
+CALLOUT_TEMPLATE = "callout"
 BADGE_VARIANTS = {
     "default": "",
     "secondary": "secondary",
@@ -138,6 +143,7 @@ def fold(
     render_inner: Callable[[list[Token]], str],
     render_directive: RenderDirective,
     line_offset: int = 0,
+    known: set[str] | frozenset[str] = frozenset(KNOWN),
 ) -> list[Token]:
     """Replace every directive container with one html_block, innermost first.
 
@@ -150,7 +156,7 @@ def fold(
             directive = parse_info(tok.info)
             assert directive  # validated by the container plugin
             directive.line = (tok.map[0] + 1 + line_offset) if tok.map else 0
-            if directive.name not in KNOWN:
+            if directive.name not in known:
                 raise DirectiveError(
                     f"line {directive.line}: unknown directive ':::{directive.name}'"
                 )

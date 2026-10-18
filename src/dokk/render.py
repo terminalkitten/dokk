@@ -57,6 +57,8 @@ def make_env(cfg: Config, dev: bool = False, search: bool = False) -> Environmen
             "site_url": cfg.site_url,
             "links": cfg.links,
             "style": cfg.theme.get("style", "vega"),
+            "base": cfg.theme.get("base", "neutral"),
+            "color": cfg.theme.get("color", ""),
             "favicon": public(FAVICONS),
             "logo": public(LOGOS),
             "logo_dark": public(DARK_LOGOS),

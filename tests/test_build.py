@@ -6,6 +6,7 @@ from urllib.parse import unquote
 
 import pytest
 
+from dokk import DokkError
 from dokk.build import build
 from dokk.cli import main
 
@@ -269,3 +270,29 @@ def test_footer_credit_and_text(make_site) -> None:
     toml = 'title = "T"\n[footer]\ncredit = false\n'
     html = (build(make_site({"index.md": "Home"}, toml)).out_dir / "index.html").read_text()
     assert "dk-site-footer" not in html  # nothing to show, no empty footer
+
+
+def test_custom_component_from_site_templates(make_site) -> None:
+    root = make_site(
+        {
+            "index.md": (
+                '::greet[Hello]{who="<you>"}\n\n'
+                ":::greet[Twice]\nWith **body**.\n:::\n\n"
+                "::::tabs\n:::tab[a]\nA\n:::\n::::\n"
+            ),
+            "img/x.png": "",
+        }
+    )
+    components = root / "templates" / "components"
+    components.mkdir(parents=True)
+    (components / "greet.html.jinja").write_text(
+        '<p id="{{ id }}">{{ directive.title }}, {{ directive.attrs.get("who", "") }}</p>{{ body }}'
+    )
+    html = (build(root).out_dir / "index.html").read_text()
+    assert '<p id="dk-greet-1">Hello, &lt;you&gt;</p>' in html  # attributes are escaped
+    assert '<p id="dk-greet-2">Twice, </p><p>With <strong>body</strong>.</p>' in html
+    assert 'id="dk-tabs-1"' in html  # built-in ids are unchanged
+
+    (root / "docs" / "index.md").write_text("::nope\n")
+    with pytest.raises(DokkError, match="unknown directive ':::nope'"):
+        build(root)

@@ -1,0 +1,14 @@
+{# ::image[Alt text]{src="img/x.png" caption="..." width="1280" height="800"}: click to enlarge.
+   Without JavaScript the link opens the image itself. #}
+<figure class="dk-image">
+  <a href="{{ directive.attrs.src }}" class="dk-image-zoom" data-dk-zoom aria-label="Enlarge image: {{ directive.title }}">
+    <img src="{{ directive.attrs.src }}" alt="{{ directive.title }}" loading="lazy" decoding="async"
+      {%- if directive.attrs.get('width') %} width="{{ directive.attrs.width }}"{% endif %}
+      {%- if directive.attrs.get('height') %} height="{{ directive.attrs.height }}"{% endif %}>
+  </a>
+  {% if body %}
+  <figcaption>{{ body }}</figcaption>
+  {% elif directive.attrs.get('caption') %}
+  <figcaption>{{ directive.attrs.caption }}</figcaption>
+  {% endif %}
+</figure>

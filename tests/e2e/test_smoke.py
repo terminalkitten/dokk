@@ -145,6 +145,18 @@ def test_sidebar_state_remembered(page, site: str) -> None:  # type: ignore[no-u
     assert page.evaluate("localStorage.getItem('dk-sidebar')") == "open"
 
 
+def test_image_opens_in_lightbox(page, site: str) -> None:  # type: ignore[no-untyped-def]
+    page.goto(site + "/guides/components/")
+    page.get_by_role("link", name="Enlarge image: The sprocket assembly diagram").click()
+    dialog = page.locator("dialog.dk-lightbox")
+    dialog.wait_for(state="visible")
+    assert dialog.locator("img").get_attribute("alt") == "The sprocket assembly diagram"
+    assert page.url.endswith("/guides/components/")  # stayed on the page
+    page.keyboard.press("Escape")
+    dialog.wait_for(state="hidden")
+    assert page.problems == []
+
+
 def test_theme_persists_across_reload(page, site: str) -> None:  # type: ignore[no-untyped-def]
     page.goto(site + "/")
     is_dark = "document.documentElement.classList.contains('dark')"

@@ -1,7 +1,8 @@
 import itertools
 import posixpath
 import re
-from collections.abc import Sequence
+from collections import defaultdict
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from typing import Any, cast
@@ -24,7 +25,15 @@ from pygments.lexers.special import TextLexer
 from pygments.util import ClassNotFound
 
 from dokk import DokkError
-from dokk.directives import CALLOUTS, Directive, DirectiveError, directive_plugin, fold
+from dokk.directives import (
+    CALLOUT_TEMPLATE,
+    CALLOUTS,
+    KNOWN,
+    Directive,
+    DirectiveError,
+    directive_plugin,
+    fold,
+)
 from dokk.filetree import file_tree
 
 DESCRIPTION_LENGTH = 160
@@ -157,6 +166,7 @@ class Renderer:
         self.content_dir = content_dir
         self.base_path = base_path
         self.env = env
+        self.known = KNOWN | component_names(env)
 
     def render(self, body: str, rel: Path, line_offset: int = 0) -> Rendered:
         env: dict[str, Any] = {}
@@ -174,7 +184,8 @@ class Renderer:
                 result.description = _truncate(_plain_text(tokens[i + 1]))
             if tok.type == "inline":
                 self._rewrite(tok.children or [], source_dir, result.broken)
-        tabs = itertools.count(1)  # explicit, per-page tab ids keep builds deterministic
+        # Explicit per-page ids (dk-tabs-1, dk-image-2, ...) keep builds deterministic.
+        counters: dict[str, Iterator[int]] = defaultdict(lambda: itertools.count(1))
 
         renderer = cast(RendererHTML, self.md.renderer)  # MarkdownIt's default renderer
 
@@ -193,6 +204,8 @@ class Renderer:
                     extra["entries"] = file_tree(inner, render_inline)
                 except DokkError as e:
                     raise DirectiveError(f"line {d.line}: {e}") from None
+            if d.name == "image" and (not d.title or not d.attrs.get("src")):
+                raise DirectiveError(f'line {d.line}: use ::image[Alt text]{{src="..."}}')
             if d.name == "linkbutton":
                 if not d.title or not d.attrs.get("href"):
                     raise DirectiveError(f'line {d.line}: use ::linkbutton[Text]{{href="..."}}')
@@ -202,23 +215,24 @@ class Renderer:
                         f"line {d.line}: linkbutton variant must be one of {variants}"
                     )
                 extra["external"] = _is_external(d.attrs["href"])
-            href = d.attrs.get("href")
-            if href:
-                resolved = self._resolve(href, source_dir, is_link=True)
-                if resolved is None:
-                    result.broken.append(href)
-                d.attrs["href"] = resolved or href
-            name = "callout" if d.name in CALLOUTS else d.name
+            for attr in ("href", "src"):  # relative links and files, as in Markdown
+                value = d.attrs.get(attr)
+                if value:
+                    resolved = self._resolve(value, source_dir, is_link=attr == "href")
+                    if resolved is None:
+                        result.broken.append(value)
+                    d.attrs[attr] = resolved or value
+            name = CALLOUT_TEMPLATE if d.name in CALLOUTS else d.name
             return self.env.get_template(f"components/{name}.html.jinja").render(
                 directive=d,
                 body=Markup(body),
                 children=[(c, Markup(b)) for c, b in children],
-                id=f"dk-tabs-{next(tabs)}" if d.name == "tabs" else "",
+                id=f"dk-{d.name}-{next(counters[d.name])}",
                 **extra,
             )
 
         try:
-            tokens = fold(tokens, render_inner, render_directive, line_offset)
+            tokens = fold(tokens, render_inner, render_directive, line_offset, self.known)
         except DirectiveError as e:
             raise DirectiveError(f"{rel}: {e}") from None
         result.html = render_inner(tokens)
@@ -238,6 +252,11 @@ class Renderer:
                 broken.append(value)
             else:
                 child.attrSet(attr, new)
+            # Images load as they scroll into view; {loading=eager} on an image opts out.
+            if child.type == "image":
+                for key, value in (("loading", "lazy"), ("decoding", "async")):
+                    if child.attrGet(key) is None:
+                        child.attrSet(key, value)
 
     def _resolve(self, href: str, source_dir: PurePosixPath, is_link: bool) -> str | None:
         """New URL for `href`, or None if it points to a missing page or file."""
@@ -259,6 +278,17 @@ class Renderer:
         if not (self.content_dir / target).is_file():
             return None
         return f"{self.base_path}/{quote(target)}{fragment}"
+
+
+def component_names(env: Environment) -> set[str]:
+    """Directive names from `components/<name>.html.jinja`, built in or in the site's
+    templates/: adding a template there registers a component."""
+    names = {
+        t.removeprefix("components/").removesuffix(".html.jinja")
+        for t in env.list_templates()
+        if t.startswith("components/") and t.endswith(".html.jinja") and t.count("/") == 1
+    }
+    return names - {CALLOUT_TEMPLATE}
 
 
 def pygments_css(light: str, dark: str) -> str:

@@ -273,3 +273,30 @@ def test_inline_kbd_and_swatch(renderer: Renderer) -> None:
 def test_swatch_rejects_non_colors(renderer: Renderer, color: str) -> None:
     with pytest.raises(DirectiveError, match="not a CSS color"):
         _render(renderer, f":swatch[{color}]\n")
+
+
+def test_image(renderer: Renderer) -> None:
+    (renderer.content_dir / "img").mkdir()
+    (renderer.content_dir / "img" / "a.png").write_bytes(b"")
+    html = _render(
+        renderer,
+        '::image[A <chart>]{src="img/a.png" width="640" height="400" caption="Sales"}\n\n'
+        ':::image[Second]{src="img/a.png"}\nWith a **caption**.\n:::\n',
+    )
+    assert (
+        '<a href="/repo/img/a.png" class="dk-image-zoom" data-dk-zoom '
+        'aria-label="Enlarge image: A &lt;chart&gt;">'
+    ) in html
+    assert (
+        '<img src="/repo/img/a.png" alt="A &lt;chart&gt;" loading="lazy" decoding="async" '
+        'width="640" height="400">'
+    ) in html
+    assert "<figcaption>Sales</figcaption>" in html
+    assert "<figcaption><p>With a <strong>caption</strong>.</p>\n</figcaption>" in html
+
+
+def test_image_errors(renderer: Renderer) -> None:
+    with pytest.raises(DirectiveError, match=r"page.md: line 1: use ::image\[Alt text\]"):
+        _render(renderer, '::image{src="img/a.png"}\n')
+    result = renderer.render('::image[Gone]{src="img/gone.png"}\n', Path("page.md"))
+    assert result.broken == ["img/gone.png"]

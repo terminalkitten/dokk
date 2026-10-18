@@ -148,3 +148,12 @@ def test_pygments_css_is_scoped() -> None:
 def test_task_list_checkboxes_are_labelled(content: Path) -> None:
     html = _renderer(content).render("- [x] done\n", Path("index.md")).html
     assert "<label><input" in html and "done</label>" in html
+
+
+def test_images_load_lazily(content: Path) -> None:
+    renderer = Renderer({}, content, "", base_env())
+    html = renderer.render(
+        "![a](https://x.io/a.png) ![b](https://x.io/b.png){loading=eager}\n", Path("p.md")
+    ).html
+    assert '<img src="https://x.io/a.png" alt="a" loading="lazy" decoding="async" />' in html
+    assert 'alt="b" loading="eager" decoding="async"' in html

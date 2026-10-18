@@ -109,6 +109,32 @@
     });
   }
 
+  // ::image: open the full image in one shared dialog. Esc, the close button or a click
+  // outside closes it. Without JavaScript the link opens the image file.
+  let lightbox;
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("[data-dk-zoom]");
+    if (!link || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    if (!lightbox) {
+      lightbox = document.createElement("dialog");
+      lightbox.className = "dk-lightbox";
+      lightbox.innerHTML = '<button type="button" class="btn" data-variant="secondary" data-size="icon" aria-label="Close">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
+        "</button><img alt=\"\">";
+      lightbox.addEventListener("click", (ev) => {
+        if (ev.target === lightbox || ev.target.closest("button")) lightbox.close();
+      });
+      document.body.append(lightbox);
+    }
+    const img = link.querySelector("img");
+    const full = lightbox.querySelector("img");
+    full.src = link.href;
+    full.alt = img ? img.alt : "";
+    lightbox.setAttribute("aria-label", full.alt || "Image");
+    lightbox.showModal();
+  });
+
   // Remember whether the sidebar is collapsed (desktop only: on phones it is an overlay that
   // starts closed). base.html.jinja restores it before the first paint.
   const sidebar = document.getElementById("dk-sidebar");

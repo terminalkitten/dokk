@@ -195,6 +195,25 @@ html.dark .dk-icon-moon { display: none; }
 .dk-prose dd { margin: 0.25rem 0 0; padding-left: 1rem; border-left: 2px solid var(--border); }
 .dk-prose dd > p:last-child { margin-bottom: 0; }
 
+/* ::image: click to enlarge in a dialog */
+.dk-prose .dk-image { margin: 0 0 1.25rem; }
+.dk-image-zoom { display: block; cursor: zoom-in; }
+.dk-image-zoom img { display: block; border: 1px solid var(--border); }
+.dk-prose .dk-image figcaption { margin-top: 0.5rem; font-size: 0.875rem; color: var(--muted-foreground); }
+.dk-prose .dk-image figcaption > p { margin: 0; }
+.dk-lightbox {
+  margin: auto; /* centered: Basecoat's reset clears the dialog's default margin */
+  max-width: 96vw;
+  max-height: 96vh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+.dk-lightbox::backdrop { background: rgb(0 0 0 / 0.8); }
+.dk-lightbox img { display: block; max-width: 96vw; max-height: 92vh; object-fit: contain; border-radius: var(--radius); }
+.dk-lightbox button { position: absolute; top: 0.5rem; right: 0.5rem; }
+
 /* :swatch[color] and :kbd[key] */
 .dk-swatch {
   display: inline-block;

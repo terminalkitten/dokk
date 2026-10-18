@@ -107,6 +107,10 @@ The sprocket :badge[New] spins :badge[Beta]{variant="secondary"} and the anvil
 Spin the sprocket with :kbd[Shift+S]. Widgets come in :swatch[#db2777] pink,
 :swatch[oklch(0.6 0.18 250)] blue and :swatch[teal] teal.
 
+## Image
+
+::image[The sprocket assembly diagram]{src="img/diagram.png" caption="Click to enlarge."}
+
 ## File tree
 
 :::filetree
