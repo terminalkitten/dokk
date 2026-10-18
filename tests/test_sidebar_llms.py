@@ -76,7 +76,7 @@ def test_llms_off_by_default(make_site) -> None:
 
 
 def test_build_speed(tmp_path: Path, make_site) -> None:
-    """Regression alarm (PLAN.md section 7): 300 rich pages, serial, well under the budget."""
+    """Regression alarm for build speed: 300 rich pages, serial, well under the budget."""
     import time
 
     body = "## H\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\n```python\nx = 1\n```\n\n:::note\nhi\n:::\n"

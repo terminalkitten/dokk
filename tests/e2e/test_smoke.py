@@ -1,4 +1,4 @@
-"""Browser smoke tests (PLAN.md phase 6). Need the e2e extra plus `playwright install chromium`."""
+"""Browser smoke tests. Need the e2e extra plus `playwright install chromium`."""
 
 import os
 import shutil
