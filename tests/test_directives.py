@@ -212,3 +212,45 @@ def test_leaf_syntax_only_on_its_own_line(renderer: Renderer) -> None:
 def test_broken_linkbutton_href_is_recorded(renderer: Renderer) -> None:
     result = renderer.render('::linkbutton[Go]{href="missing.md"}\n', Path("page.md"))
     assert result.broken == ["missing.md"]
+
+
+def test_code_block_title_and_highlighted_lines(renderer: Renderer) -> None:
+    html = _render(renderer, '```py title="app.py" {2,4-5}\na\nb\nc\nd\ne\n```\n')
+    assert html.startswith('<figure class="dk-codeblock"><figcaption>app.py</figcaption><pre')
+    assert html.count('<span class="hll">') == 3
+    plain = _render(renderer, "```py\nx\n```\n")
+    assert plain.startswith('<pre class="code hl">') and "hll" not in plain
+
+
+def test_code_block_title_escaped(renderer: Renderer) -> None:
+    html = _render(renderer, '```sh title="<b>x</b>"\nls\n```\n')
+    assert "<figcaption>&lt;b&gt;x&lt;/b&gt;</figcaption>" in html
+
+
+def test_details(renderer: Renderer) -> None:
+    html = _render(renderer, ":::details[More]\nHidden *text*.\n:::\n\n:::details\nx\n:::\n")
+    assert '<details class="dk-details">\n  <summary>More</summary>' in html
+    assert "<em>text</em>" in html and "<summary>Details</summary>" in html
+
+
+def test_inline_badges(renderer: Renderer) -> None:
+    html = _render(
+        renderer,
+        'A :badge[New] b :badge[Beta]{variant="secondary"} :badge[<x>]{variant="danger"} '
+        "a:b[c] ::badge[x] `:badge[code]`\n",
+    )
+    assert '<span class="badge">New</span>' in html
+    assert '<span class="badge" data-variant="secondary">Beta</span>' in html
+    assert '<span class="badge" data-variant="destructive">&lt;x&gt;</span>' in html
+    assert "a:b[c] ::badge[x] <code>:badge[code]</code>" in html
+
+
+def test_badge_bad_variant(renderer: Renderer) -> None:
+    with pytest.raises(DirectiveError, match="page.md: badge 'x': variant must be one of"):
+        _render(renderer, ':badge[x]{variant="huge"}\n')
+
+
+def test_synced_tabs(renderer: Renderer) -> None:
+    html = _render(renderer, '::::tabs{sync="pkg"}\n:::tab[pip]\nx\n:::\n::::\n')
+    assert 'data-sync="pkg"' in html
+    assert "data-sync" not in _render(renderer, "::::tabs\n:::tab[pip]\nx\n:::\n::::\n")

@@ -137,3 +137,20 @@ def test_content_does_not_jump_between_pages(browser, site: str) -> None:  # typ
             xs.add(round(page.locator("main.dk-main").bounding_box()["x"]))
         assert len(xs) == 1, (width, xs)
         context.close()
+
+
+def test_synced_tabs_switch_together_and_persist(page, site: str) -> None:  # type: ignore[no-untyped-def]
+    page.goto(site + "/guides/components/")
+    page.wait_for_function("document.querySelector('.dk-tabs[data-sync]')?.dataset.tabsInitialized")
+    selected = (
+        "() => [...document.querySelectorAll('.dk-tabs[data-sync] [aria-selected=true][role=tab]')]"
+        ".map(t => t.textContent.trim())"
+    )
+    assert page.evaluate(selected) == ["pip", "pip"]
+    page.locator(".dk-tabs[data-sync] [role=tab]", has_text="uv").first.click()
+    assert page.evaluate(selected) == ["uv", "uv"]  # both sets switched
+    page.reload()
+    page.wait_for_function("document.querySelector('.dk-tabs[data-sync]')?.dataset.tabsInitialized")
+    page.wait_for_timeout(100)
+    assert page.evaluate(selected) == ["uv", "uv"]  # remembered
+    assert page.problems == []

@@ -62,6 +62,40 @@ And `danger`.
 An outer fence needs more colons than the one inside it, as with `::::tabs` around `:::tab`.
 :::
 
+### Synced tabs
+
+Give tab sets the same `sync` key and they switch together. The reader's choice is remembered
+on every page.
+
+```md
+::::tabs{sync="pkg"}
+:::tab[pip]
+`pip install dokk`
+:::
+:::tab[uv]
+`uv pip install dokk`
+:::
+::::
+```
+
+::::tabs{sync="pkg"}
+:::tab[pip]
+`pip install dokk`
+:::
+:::tab[uv]
+`uv pip install dokk`
+:::
+::::
+
+::::tabs{sync="pkg"}
+:::tab[pip]
+`pip install "dokk[search]"`
+:::
+:::tab[uv]
+`uv pip install "dokk[search]"`
+:::
+::::
+
 ## Cards
 
 ```md
@@ -94,6 +128,31 @@ Cards without `href` are not clickable.
 1. Install dokk.
 2. Run `dokk init`.
 :::
+
+## Details
+
+A collapsible block. The title is the summary, "Details" by default.
+
+```md
+:::details[Show the full config]
+Anything in Markdown.
+:::
+```
+
+:::details[Show the full config]
+Anything in Markdown.
+:::
+
+## Badges
+
+Inline, inside any text: `:badge[Text]`, with an optional `variant`: `default`, `secondary`,
+`outline` or `danger`.
+
+```md
+Search :badge[New] works offline :badge[Beta]{variant="secondary"}.
+```
+
+Search :badge[New] works offline :badge[Beta]{variant="secondary"}.
 
 ## File tree
 

@@ -65,4 +65,18 @@ def hello(name: str) -> str:
     return f"Hello, {name}!"
 ```
 
+Add a title and highlight lines after the language:
+
+````md
+```python title="hello.py" {2}
+def hello(name: str) -> str:
+    return f"Hello, {name}!"
+```
+````
+
+```python title="hello.py" {2}
+def hello(name: str) -> str:
+    return f"Hello, {name}!"
+```
+
 [^1]: Like this one.

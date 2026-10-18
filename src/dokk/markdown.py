@@ -26,7 +26,6 @@ from dokk.filetree import file_tree
 
 DESCRIPTION_LENGTH = 160
 LINKBUTTON_VARIANTS = ("primary", "secondary", "minimal")
-_FORMATTER = HtmlFormatter(nowrap=True)
 
 
 @dataclass(frozen=True)
@@ -44,16 +43,44 @@ class Rendered:
     broken: list[str] = field(default_factory=list)  # unresolved links and assets
 
 
+_TITLE = re.compile(r'title="([^"]*)"')
+_LINES = re.compile(r"\{([\d,\s-]+)\}")
+
+
+def _line_numbers(spec: str) -> list[int]:
+    """ "2,4-6" -> [2, 4, 5, 6]"""
+    lines: list[int] = []
+    for part in filter(None, (p.strip() for p in spec.split(","))):
+        start, _, end = part.partition("-")
+        lines += range(int(start), int(end or start) + 1)
+    return lines
+
+
 def highlight_code(code: str, lang: str, attrs: str) -> str:
+    """A code block, highlighted at build time. `attrs` is the rest of the fence's info
+    string: title="file.py" adds a caption, {2,4-6} highlights lines."""
     try:
         lexer = get_lexer_by_name(lang) if lang else TextLexer()
     except ClassNotFound:
         lexer = TextLexer()
-    code_html = Markup(highlight(code, lexer, _FORMATTER))  # Pygments escapes the code
+    lines = _LINES.search(attrs)
+    formatter = HtmlFormatter(nowrap=True, hl_lines=_line_numbers(lines.group(1)) if lines else [])
+    code_html = Markup(highlight(code, lexer, formatter))  # Pygments escapes the code
     html = Markup('<pre class="code hl"><code class="language-{}">{}</code></pre>').format(
         lang or "text", code_html
     )
+    title = _TITLE.search(attrs)
+    if title:
+        html = Markup('<figure class="dk-codeblock"><figcaption>{}</figcaption>{}</figure>').format(
+            title.group(1), html
+        )
     return str(html)  # plain str: markdown-it concatenates, and str + Markup escapes the str
+
+
+def _fence(self: Any, tokens: Sequence[Token], idx: int, options: Any, env: Any) -> str:
+    info = tokens[idx].info.strip()
+    lang, _, attrs = info.partition(" ")
+    return highlight_code(tokens[idx].content, lang, attrs) + "\n"
 
 
 def _table_open(self: Any, tokens: Sequence[Token], idx: int, options: Any, env: Any) -> str:
@@ -67,7 +94,7 @@ def _table_close(self: Any, tokens: Sequence[Token], idx: int, options: Any, env
 
 def make_md() -> MarkdownIt:
     md = (
-        MarkdownIt("commonmark", {"html": True, "typographer": True, "highlight": highlight_code})
+        MarkdownIt("commonmark", {"html": True, "typographer": True})
         .enable(["table", "strikethrough", "replacements", "smartquotes"])
         .use(anchors_plugin, min_level=2, max_level=3, permalink=True, permalinkSymbol="#")
         .use(footnote_plugin)
@@ -76,6 +103,7 @@ def make_md() -> MarkdownIt:
         .use(attrs_plugin)
         .use(directive_plugin)
     )
+    md.add_render_rule("fence", _fence)
     md.add_render_rule("table_open", _table_open)
     md.add_render_rule("table_close", _table_close)
     return md
@@ -129,7 +157,10 @@ class Renderer:
 
     def render(self, body: str, rel: Path, line_offset: int = 0) -> Rendered:
         env: dict[str, Any] = {}
-        tokens = self.md.parse(body, env)
+        try:
+            tokens = self.md.parse(body, env)
+        except DirectiveError as e:  # raised by inline directives such as :badge
+            raise DirectiveError(f"{rel}: {e}") from None
         result = Rendered(html="")
         source_dir = PurePosixPath(rel.as_posix()).parent
         for i, tok in enumerate(tokens):
@@ -233,6 +264,9 @@ def pygments_css(light: str, dark: str) -> str:
         (dark, "html.dark .dk-prose .hl"),
     ):
         defs = HtmlFormatter(style=style).get_style_defs(scope)
-        css += [line for line in defs.splitlines() if line.startswith(scope)]
+        # .hll (highlighted lines) is styled in dokk.css so it works with every style.
+        css += [
+            line for line in defs.splitlines() if line.startswith(scope) and " .hll " not in line
+        ]
     # Drop Pygments' per-rule "/* Token */" comments: about 40% of the file.
     return "\n".join(re.sub(r"\s*/\*.*?\*/", "", line) for line in css) + "\n"

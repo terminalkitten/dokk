@@ -90,6 +90,37 @@
     });
   }
 
+  // Synced tabs: tab sets with the same data-sync key switch together, and the
+  // choice is remembered across pages.
+  const synced = [...document.querySelectorAll(".dk-tabs[data-sync]")];
+  const choose = (sync, label) => {
+    for (const tabs of synced.filter((t) => t.dataset.sync === sync)) {
+      const tab = [...tabs.querySelectorAll('[role="tab"]')].find((b) => b.textContent.trim() === label);
+      if (tab && tab.getAttribute("aria-selected") !== "true") tab.click();
+    }
+  };
+  for (const tabs of synced) {
+    tabs.addEventListener("click", (e) => {
+      const tab = e.target.closest('[role="tab"]');
+      if (!tab) return;
+      const label = tab.textContent.trim();
+      try {
+        localStorage.setItem("dk-tabs:" + tabs.dataset.sync, label);
+      } catch {}
+      choose(tabs.dataset.sync, label);
+    });
+  }
+  // Restore after Basecoat has initialized the tabs (it does so on DOMContentLoaded).
+  document.addEventListener("DOMContentLoaded", () => {
+    for (const sync of new Set(synced.map((t) => t.dataset.sync))) {
+      let label = null;
+      try {
+        label = localStorage.getItem("dk-tabs:" + sync);
+      } catch {}
+      if (label) choose(sync, label);
+    }
+  });
+
   // TOC scrollspy: mark the last heading that scrolled past the top.
   const links = [...document.querySelectorAll(".dk-toc a[href^='#']")];
   const heads = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));

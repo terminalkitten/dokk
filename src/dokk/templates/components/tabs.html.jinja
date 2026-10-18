@@ -4,4 +4,7 @@
   {# The macro emits tab labels with |safe: escape them here. #}
   {% set _ = tabsets.append({'tab': (tab.title or 'Tab ' ~ loop.index) | e, 'panel': panel}) %}
 {% endfor %}
-{{ tabs(id=id, tabsets=tabsets, main_attrs={'class': 'dk-tabs'}) }}
+{# sync="key": tab sets with the same key switch together and remember the choice. #}
+{% set main = {'class': 'dk-tabs'} %}
+{% if directive.attrs.get('sync') %}{% set _ = main.update({'data-sync': directive.attrs.sync}) %}{% endif %}
+{{ tabs(id=id, tabsets=tabsets, main_attrs=main) }}

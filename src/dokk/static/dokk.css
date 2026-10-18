@@ -325,3 +325,39 @@ html.dark .dk-search mark { background: oklch(0.45 0.1 95); }
   background: var(--accent);
   font-weight: 600;
 }
+
+/* Code block title (```py title="app.py") */
+.dk-prose .dk-codeblock { margin: 0 0 1.25rem; }
+.dk-codeblock figcaption {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+.dk-codeblock pre { border-top-left-radius: 0; border-top-right-radius: 0; }
+
+/* Highlighted lines (```py {2,4-6}) */
+.dk-prose .hl .hll {
+  display: block;
+  margin: 0 -1rem;
+  padding: 0 1rem;
+  background: color-mix(in oklab, var(--foreground) 9%, transparent);
+  box-shadow: inset 2px 0 0 var(--foreground);
+}
+
+/* Collapsible block (:::details) */
+.dk-details {
+  margin: 0 0 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.dk-details > summary { padding: 0.625rem 1rem; cursor: pointer; font-weight: 500; }
+.dk-details > div { padding: 0 1rem 0.25rem; }
+.dk-details > div > :last-child { margin-bottom: 1rem; }
+
+/* Inline badges (:badge[Text]) sit on the text baseline */
+.dk-prose .badge { vertical-align: 0.1em; }

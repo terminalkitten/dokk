@@ -73,3 +73,23 @@ A plain card.
 2. Run `dokk init`.
 3. Run `dokk build` and open `dist/`.
 :::
+
+## Synced tabs
+
+::::tabs{sync="pkg"}
+:::tab[pip]
+`pip install dokk`
+:::
+:::tab[uv]
+`uv pip install dokk`
+:::
+::::
+
+::::tabs{sync="pkg"}
+:::tab[pip]
+`pip install "dokk[search]"`
+:::
+:::tab[uv]
+`uv pip install "dokk[search]"`
+:::
+::::

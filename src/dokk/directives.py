@@ -11,7 +11,9 @@ from dataclasses import dataclass, field
 
 from markdown_it import MarkdownIt
 from markdown_it.rules_block import StateBlock
+from markdown_it.rules_inline import StateInline
 from markdown_it.token import Token
+from markupsafe import Markup
 from mdit_py_plugins.container import container_plugin
 
 from dokk import DokkError
@@ -19,10 +21,17 @@ from dokk import DokkError
 CALLOUTS = ("note", "tip", "caution", "danger")
 CHILDREN = {"tabs": "tab"}  # parent: only allowed child
 PARENTS = {child: parent for parent, child in CHILDREN.items()}
-KNOWN = {*CALLOUTS, "tabs", "tab", "cards", "card", "steps", "filetree", "linkbutton"}
+KNOWN = {*CALLOUTS, "tabs", "tab", "cards", "card", "steps", "filetree", "linkbutton", "details"}
+BADGE_VARIANTS = {
+    "default": "",
+    "secondary": "secondary",
+    "outline": "outline",
+    "danger": "destructive",
+}
 
 _INFO = re.compile(r"^\s*([A-Za-z][\w-]*)(?:\[(.*?)\])?(?:\{(.*)\})?\s*$")
 _LEAF = re.compile(r"^::(?!:)(.+)$")  # exactly two colons
+_BADGE = re.compile(r":badge\[([^\]\n]*)\](?:\{([^}\n]*)\})?")
 _ATTR = re.compile(r'([A-Za-z_][\w-]*)\s*=\s*"([^"]*)"')
 _OPEN, _CLOSE = "container_directive_open", "container_directive_close"
 
@@ -72,6 +81,32 @@ def directive_plugin(md: MarkdownIt) -> None:
     )
     alt = ["paragraph", "reference", "blockquote", "list"]
     md.block.ruler.before("fence", "directive_leaf", _leaf_rule, {"alt": alt})
+    md.inline.ruler.before("emphasis", "directive_badge", _badge_rule)
+
+
+def _badge_rule(state: StateInline, silent: bool) -> bool:
+    """`:badge[Text]{variant="secondary"}` inline (a text directive)."""
+    pos = state.pos
+    if state.src[pos] != ":" or (pos and state.src[pos - 1] == ":"):
+        return False
+    match = _BADGE.match(state.src, pos)
+    if not match:
+        return False
+    attrs = dict(_ATTR.findall(match.group(2) or ""))
+    variant = attrs.get("variant", "default")
+    if variant not in BADGE_VARIANTS:
+        allowed = ", ".join(BADGE_VARIANTS)
+        raise DirectiveError(f"badge {match.group(1)!r}: variant must be one of {allowed}")
+    if not silent:
+        token = state.push("html_inline", "", 0)
+        data = BADGE_VARIANTS[variant]
+        token.content = str(
+            Markup('<span class="badge"{}>{}</span>').format(
+                Markup(' data-variant="{}"').format(data) if data else "", match.group(1)
+            )
+        )
+    state.pos = match.end()
+    return True
 
 
 # (directive, body_html, child directives with their bodies, raw inner tokens) -> html
