@@ -1,0 +1,11 @@
+{# Site footer: [footer] text and the "Built with dokk" credit; [footer] credit = false hides it. #}
+{% if site.footer.text or site.footer.credit %}
+<footer class="dk-site-footer" data-pagefind-ignore>
+  {% if site.footer.text %}
+  <p>{{ site.footer.text }}</p>
+  {% endif %}
+  {% if site.footer.credit %}
+  <p>Built with <a href="{{ site.homepage }}">dokk</a></p>
+  {% endif %}
+</footer>
+{% endif %}

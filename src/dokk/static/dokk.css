@@ -289,6 +289,21 @@ html.dark .dk-callout[data-callout="caution"] {
 }
 .dk-prose .dk-steps > ol > li { padding-left: 1.75rem; }
 
+/* Site footer: [footer] text and the "Built with dokk" credit */
+.dk-site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1.5rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+.dk-site-footer p { margin: 0; }
+.dk-site-footer a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.dk-site-footer a:hover { color: var(--foreground); }
+
 /* Page footer: edit link and last updated */
 .dk-page-meta {
   display: flex;

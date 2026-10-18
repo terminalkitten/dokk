@@ -253,3 +253,19 @@ def test_themes_page_matches_vendored_colors() -> None:
         code = "`{}` / `{}`".format(*code_styles(name))
         assert f"| `{name}` | :swatch[{light}] | :swatch[{dark}] |" in page, name
         assert code in page, name
+
+
+def test_footer_credit_and_text(make_site) -> None:
+    credit = '<p>Built with <a href="https://terminalkitten.github.io/dokk/">dokk</a></p>'
+    out = build(make_site({"index.md": "Home"})).out_dir
+    assert credit in (out / "index.html").read_text()  # on by default
+    assert credit in (out / "404.html").read_text()
+
+    toml = 'title = "T"\n[footer]\ntext = "© 2026 <Acme>"\ncredit = false\n'
+    html = (build(make_site({"index.md": "Home"}, toml)).out_dir / "index.html").read_text()
+    assert "<p>© 2026 &lt;Acme&gt;</p>" in html
+    assert "Built with" not in html
+
+    toml = 'title = "T"\n[footer]\ncredit = false\n'
+    html = (build(make_site({"index.md": "Home"}, toml)).out_dir / "index.html").read_text()
+    assert "dk-site-footer" not in html  # nothing to show, no empty footer

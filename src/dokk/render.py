@@ -28,6 +28,8 @@ def base_env(user_templates: Path | None = None) -> Environment:
 # Picked up from public/ when present, first match wins.
 FAVICONS = ("favicon.svg", "favicon.ico", "favicon.png")
 LOGOS = ("logo.svg", "logo.png")
+# Where the footer's "Built with dokk" credit links to.
+HOMEPAGE = "https://terminalkitten.github.io/dokk/"
 DARK_LOGOS = ("logo-dark.svg", "logo-dark.png")
 
 
@@ -58,6 +60,8 @@ def make_env(cfg: Config, dev: bool = False, search: bool = False) -> Environmen
             "favicon": public(FAVICONS),
             "logo": public(LOGOS),
             "logo_dark": public(DARK_LOGOS),
+            "footer": cfg.footer or {"text": "", "credit": True},
+            "homepage": HOMEPAGE,
         },
     )
     env.globals.update(template_globals)

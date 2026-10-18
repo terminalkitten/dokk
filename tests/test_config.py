@@ -59,6 +59,9 @@ def test_dev_forces_empty_base_path(make_site) -> None:
             "unknown [llms] key(s): enable (supported: enabled)",
         ),
         ('title = "T"\n[search]\nenabled = "no"\n', "'search.enabled' must be true or false"),
+        ('title = "T"\n[footer]\ncredit = "no"\n', "'footer.credit' must be true or false"),
+        ('title = "T"\n[footer]\ntext = 3\n', "'footer.text' must be a string"),
+        ('title = "T"\n[footer]\nlink = "x"\n', "unknown [footer] key(s): link"),
     ],
 )
 def test_errors(make_site, toml: str, message: str) -> None:

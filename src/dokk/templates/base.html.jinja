@@ -42,6 +42,7 @@
       {# Always reserve the TOC column so the content does not jump between pages. #}
       {% block aside %}<div class="dk-toc"></div>{% endblock %}
     </div>
+    {% include 'partials/footer.html.jinja' %}
   </div>
   {% if search %}{% include 'partials/search.html.jinja' %}{% endif %}
   {% if dev %}{% include 'partials/dev_reload.html.jinja' %}{% endif %}

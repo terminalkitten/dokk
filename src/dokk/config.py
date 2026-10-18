@@ -25,6 +25,7 @@ _KNOWN_KEYS = {
     "search",
     "sidebar",
     "llms",
+    "footer",
 }
 
 
@@ -47,6 +48,7 @@ class Config:
     search: dict[str, Any] = field(default_factory=dict)
     sidebar: list[Any] = field(default_factory=list)  # empty: generate from folders
     llms: dict[str, Any] = field(default_factory=dict)
+    footer: dict[str, Any] = field(default_factory=dict)  # {"text": str, "credit": bool}
 
 
 def _str(data: dict[str, Any], key: str, default: str) -> str:
@@ -68,6 +70,17 @@ def _table(data: dict[str, Any], key: str, known: tuple[str, ...] | None = None)
             f"(supported: {', '.join(known or ())})"
         )
     return value
+
+
+def _footer(data: dict[str, Any]) -> dict[str, Any]:
+    """[footer]: an optional line of `text`, and the "Built with dokk" `credit` (on by default)."""
+    table = _table(data, "footer", ("text", "credit"))
+    text, credit = table.get("text", ""), table.get("credit", True)
+    if not isinstance(text, str):
+        raise ConfigError(f"{CONFIG_FILE}: 'footer.text' must be a string")
+    if not isinstance(credit, bool):
+        raise ConfigError(f"{CONFIG_FILE}: 'footer.credit' must be true or false")
+    return {"text": text, "credit": credit}
 
 
 def _switch(data: dict[str, Any], key: str) -> dict[str, Any]:
@@ -159,4 +172,5 @@ def load_config(root: Path, dev: bool = False) -> Config:
         search=_switch(data, "search"),
         sidebar=sidebar,
         llms=_switch(data, "llms"),
+        footer=_footer(data),
     )
