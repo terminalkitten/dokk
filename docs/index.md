@@ -16,7 +16,7 @@ Install dokk and build your first site in a minute.
 :::card[Write pages]{href="guides/writing.md"}
 Front matter, the sidebar, links and images.
 :::
-:::card[Components]{href="guides/components.md"}
+:::card[Components]{href="guides/components/index.md"}
 Callouts, tabs, cards and steps, straight from Markdown.
 :::
 :::card[Deploy]{href="guides/deploy.md"}

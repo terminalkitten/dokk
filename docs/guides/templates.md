@@ -2,7 +2,7 @@
 title: Templates and styling
 description: Override any template from your site's templates/ folder.
 sidebar:
-  order: 3
+  order: 4
 ---
 
 dokk renders pages with [Jinja](https://jinja.palletsprojects.com). A file in your site's `templates/`

@@ -236,3 +236,20 @@ def test_page_actions_and_markdown_copy(example: Path) -> None:
 def test_no_ai_links_without_site_url(make_site) -> None:
     html = (build(make_site({"index.md": "# Home\n\nHi"})).out_dir / "index.html").read_text()
     assert "Open in Claude" not in html and "View as Markdown" in html
+
+
+def test_themes_page_matches_vendored_colors() -> None:
+    """docs/guides/themes.md lists every base and accent with its real values."""
+    import json
+
+    from dokk.themes import ACCENTS, BASES, code_styles
+
+    page = (EXAMPLE.parents[1] / "docs" / "guides" / "themes.md").read_text()
+    data = json.loads((EXAMPLE.parents[1] / "src/dokk/data/shadcn-themes.json").read_text())
+    for name in BASES:
+        assert f":swatch[{data[name]['dark']['background']}]" in page, name
+    for name in ACCENTS:
+        light, dark = data[name]["light"]["primary"], data[name]["dark"]["primary"]
+        code = "`{}` / `{}`".format(*code_styles(name))
+        assert f"| `{name}` | :swatch[{light}] | :swatch[{dark}] |" in page, name
+        assert code in page, name

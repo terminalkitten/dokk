@@ -8,7 +8,24 @@ sidebar:
 ## Folders become the menu
 
 Every `.md` file under `docs/` is a page. Folders become sidebar groups, and nested folders become
-collapsible submenus.
+collapsible submenus. A typical site:
+
+:::filetree
+- dokk.toml settings
+- **docs/** your pages
+  - index.md the home page, `/`
+  - guides/
+    - index.md first in the Guides group, `/guides/`
+    - intro.md `/guides/intro/`
+    - img/
+      - diagram.png copied next to the page
+  - `.obsidian/` skipped: starts with a dot
+- public/ copied to the site root
+  - logo.svg
+  - favicon.svg
+- templates/ optional overrides of the built-in templates
+- .dokk/ build output, ignored by git
+:::
 
 | Source file | URL |
 |---|---|
@@ -83,5 +100,16 @@ def hello(name: str) -> str:
 def hello(name: str) -> str:
     return f"Hello, {name}!"
 ```
+
+Definition lists put a term on one line and `: ` with its description below. They are handy for
+options and glossaries:
+
+```md
+`--port PORT`
+: Port to listen on. Default: `8002`.
+```
+
+`--port PORT`
+: Port to listen on. Default: `8002`.
 
 [^1]: Like this one.

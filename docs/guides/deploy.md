@@ -2,7 +2,7 @@
 title: Deploy to GitHub Pages
 description: Publish with the workflow dokk init creates.
 sidebar:
-  order: 4
+  order: 5
 ---
 
 :::steps
