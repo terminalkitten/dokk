@@ -254,3 +254,22 @@ def test_synced_tabs(renderer: Renderer) -> None:
     html = _render(renderer, '::::tabs{sync="pkg"}\n:::tab[pip]\nx\n:::\n::::\n')
     assert 'data-sync="pkg"' in html
     assert "data-sync" not in _render(renderer, "::::tabs\n:::tab[pip]\nx\n:::\n::::\n")
+
+
+def test_inline_kbd_and_swatch(renderer: Renderer) -> None:
+    html = _render(
+        renderer, "Press :kbd[Ctrl+K] or :kbd[<x>]. Pink :swatch[oklch(0.65 0.24 354)].\n"
+    )
+    assert '<kbd class="kbd">Ctrl+K</kbd>' in html
+    assert '<kbd class="kbd">&lt;x&gt;</kbd>' in html
+    color = "oklch(0.65 0.24 354)"
+    assert (
+        f'<span class="dk-swatch" style="--dk-swatch: {color}" role="img" '
+        f'aria-label="{color}" title="{color}"></span>'
+    ) in html
+
+
+@pytest.mark.parametrize("color", ["red;background:url(x)", 'red" onclick="x', ""])
+def test_swatch_rejects_non_colors(renderer: Renderer, color: str) -> None:
+    with pytest.raises(DirectiveError, match="not a CSS color"):
+        _render(renderer, f":swatch[{color}]\n")

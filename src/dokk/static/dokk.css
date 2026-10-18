@@ -189,8 +189,22 @@ html.dark .dk-icon-moon { display: none; }
 .dk-prose img { max-width: 100%; height: auto; border-radius: var(--radius); }
 .dk-prose hr:not([role="separator"]) { border: 0; border-top: 1px solid var(--border); margin: 2rem 0; } /* leave Basecoat button-group separators alone */
 .dk-prose blockquote { border-left: 3px solid var(--border); padding-left: 1rem; color: var(--muted-foreground); }
-.dk-prose dt { font-weight: 600; }
-.dk-prose dd { margin: 0 0 0.75rem 1.5rem; }
+/* Definition lists read like a reference: term, then its description under a guide line. */
+.dk-prose dt { font-weight: 600; margin-top: 1rem; }
+.dk-prose dt:first-child { margin-top: 0; }
+.dk-prose dd { margin: 0.25rem 0 0; padding-left: 1rem; border-left: 2px solid var(--border); }
+.dk-prose dd > p:last-child { margin-bottom: 0; }
+
+/* :swatch[color] and :kbd[key] */
+.dk-swatch {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  border-radius: 0.25em;
+  background: var(--dk-swatch);
+}
+.dk-prose .kbd { font-size: 0.8em; }
 
 /* Code */
 .dk-prose code { font-family: var(--font-mono); font-size: 0.875em; }

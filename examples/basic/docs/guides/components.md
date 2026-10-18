@@ -102,6 +102,11 @@ One widget, two bolts and a slightly crumpled manual.
 The sprocket :badge[New] spins :badge[Beta]{variant="secondary"} and the anvil
 :badge[Heavy]{variant="outline"} is :badge[Deprecated]{variant="danger"}.
 
+## Keys and colors
+
+Spin the sprocket with :kbd[Shift+S]. Widgets come in :swatch[#db2777] pink,
+:swatch[oklch(0.6 0.18 250)] blue and :swatch[teal] teal.
+
 ## File tree
 
 :::filetree

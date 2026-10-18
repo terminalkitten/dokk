@@ -31,7 +31,9 @@ BADGE_VARIANTS = {
 
 _INFO = re.compile(r"^\s*([A-Za-z][\w-]*)(?:\[(.*?)\])?(?:\{(.*)\})?\s*$")
 _LEAF = re.compile(r"^::(?!:)(.+)$")  # exactly two colons
-_BADGE = re.compile(r":badge\[([^\]\n]*)\](?:\{([^}\n]*)\})?")
+_INLINE = re.compile(r":(badge|kbd|swatch)\[([^\]\n]*)\](?:\{([^}\n]*)\})?")
+# A CSS color: hex, a name or a function like oklch(0.6 0.2 30); nothing that ends the property.
+_COLOR = re.compile(r"[#\w(),.%/\s-]+")
 _ATTR = re.compile(r'([A-Za-z_][\w-]*)\s*=\s*"([^"]*)"')
 _OPEN, _CLOSE = "container_directive_open", "container_directive_close"
 
@@ -81,23 +83,39 @@ def directive_plugin(md: MarkdownIt) -> None:
     )
     alt = ["paragraph", "reference", "blockquote", "list"]
     md.block.ruler.before("fence", "directive_leaf", _leaf_rule, {"alt": alt})
-    md.inline.ruler.before("emphasis", "directive_badge", _badge_rule)
+    md.inline.ruler.before("emphasis", "directive_inline", _inline_rule)
 
 
-def _badge_rule(state: StateInline, silent: bool) -> bool:
-    """`:badge[Text]{variant="secondary"}` inline (a text directive)."""
+def _inline_rule(state: StateInline, silent: bool) -> bool:
+    """Text directives: `:badge[Text]{variant="secondary"}`, `:kbd[Ctrl+K]`, `:swatch[#e11d48]`."""
     pos = state.pos
     if state.src[pos] != ":" or (pos and state.src[pos - 1] == ":"):
         return False
-    match = _BADGE.match(state.src, pos)
+    match = _INLINE.match(state.src, pos)
     if not match:
         return False
-    attrs = dict(_ATTR.findall(match.group(2) or ""))
-    html = badge(match.group(1), attrs.get("variant", "default"))  # validate even when silent
+    name, text, attrs = match.group(1), match.group(2), dict(_ATTR.findall(match.group(3) or ""))
+    if name == "badge":
+        html = badge(text, attrs.get("variant", "default"))  # validate even when silent
+    elif name == "kbd":
+        html = Markup('<kbd class="kbd">{}</kbd>').format(text)
+    else:
+        html = swatch(text)
     if not silent:
         state.push("html_inline", "", 0).content = str(html)
     state.pos = match.end()
     return True
+
+
+def swatch(color: str) -> Markup:
+    """A small color chip; the color is its accessible name."""
+    color = color.strip()
+    if not _COLOR.fullmatch(color):
+        raise DirectiveError(f"swatch {color!r}: not a CSS color")
+    return Markup(
+        '<span class="dk-swatch" style="--dk-swatch: {0}" role="img" aria-label="{0}" title="{0}">'
+        "</span>"
+    ).format(color)
 
 
 def badge(text: str, variant: str) -> Markup:
