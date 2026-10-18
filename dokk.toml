@@ -4,6 +4,10 @@ description = "A tiny static docs generator in pure Python: Markdown folders in,
 site_url = "https://terminalkitten.github.io/dokk/"
 content_dir = "docs"
 
+[links]
+github = "https://github.com/terminalkitten/dokk"
+edit_url = "https://github.com/terminalkitten/dokk/edit/main/docs/{path}"
+
 [theme]
 style = "vega"
 color = "blue"
@@ -22,6 +26,7 @@ autogenerate = "reference"
 [[sidebar]]
 label = "Links"
 items = [
+  { label = "GitHub", link = "https://github.com/terminalkitten/dokk" },
   { label = "Basecoat", link = "https://basecoatui.com" },
   { label = "Pagefind", link = "https://pagefind.app" },
 ]
