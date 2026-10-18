@@ -245,7 +245,7 @@ def test_themes_page_matches_vendored_colors() -> None:
 
     from dokk.themes import ACCENTS, BASES, code_styles
 
-    page = (EXAMPLE.parents[1] / "docs" / "guides" / "themes.md").read_text()
+    page = (EXAMPLE.parents[1] / "docs" / "guides" / "themes" / "index.md").read_text()
     data = json.loads((EXAMPLE.parents[1] / "src/dokk/data/shadcn-themes.json").read_text())
     for name in BASES:
         assert f":swatch[{data[name]['dark']['background']}]" in page, name

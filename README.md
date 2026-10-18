@@ -19,6 +19,7 @@
   <a href="https://terminalkitten.github.io/dokk/getting-started/">Quick start</a> ·
   <a href="https://terminalkitten.github.io/dokk/guides/components/">Components</a> ·
   <a href="https://terminalkitten.github.io/dokk/guides/themes/">Themes</a> ·
+  <a href="https://terminalkitten.github.io/dokk/guides/themes/showcase/">Theme showcase</a> ·
   <a href="https://pypi.org/project/dokk/">PyPI</a>
 </p>
 

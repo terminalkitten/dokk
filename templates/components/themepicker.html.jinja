@@ -1,0 +1,116 @@
+{# ::themepicker — a custom component of dokk's own docs (templates/components/ registers it).
+   Restyles this page with any style pack, base color and accent color. Normal dokk sites only
+   ship the style pack named in dokk.toml; these docs also publish the others for this picker:
+   public/basecoat/ and public/shadcn-themes.json are symlinks into the package. #}
+<div class="dk-themepicker" id="{{ id }}"
+  data-styles="{{ url('/basecoat/') }}" data-themes="{{ url('/shadcn-themes.json') }}"
+  data-style="{{ site.style }}" data-base="{{ site.base }}" data-color="{{ site.color }}">
+  <form class="dk-themepicker-form" onsubmit="return false">
+    <div class="field">
+      <label class="label" for="{{ id }}-style">Style</label>
+      <select id="{{ id }}-style" name="style">
+        {% for s in ['vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera', 'rhea'] %}
+        <option>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label class="label" for="{{ id }}-base">Base</label>
+      <select id="{{ id }}-base" name="base"><option>neutral</option></select>
+    </div>
+    <div class="field">
+      <label class="label" for="{{ id }}-color">Color</label>
+      <select id="{{ id }}-color" name="color"><option value="">none</option></select>
+    </div>
+    <button type="reset" class="btn" data-variant="outline">Reset</button>
+  </form>
+  <pre class="dk-themepicker-toml"><code></code></pre>
+</div>
+<style>
+  .dk-themepicker-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: end; gap: 0.75rem; }
+  .dk-prose .dk-themepicker-toml { margin-top: 1rem; }
+  @media (max-width: 640px) { .dk-themepicker-form { grid-template-columns: 1fr 1fr; } }
+  /* The preview elements on the showcase page */
+  .dk-showcase-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+  .dk-showcase-form { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem 1rem; margin-bottom: 1.25rem; }
+  .dk-showcase-form .dk-showcase-wide { grid-column: 1 / -1; }
+  .dk-showcase-form > .label { display: flex; align-items: center; gap: 0.5rem; font-weight: 400; }
+</style>
+<script>
+(() => {
+  const root = document.getElementById("{{ id }}");
+  const form = root.querySelector("form");
+  const toml = root.querySelector(".dk-themepicker-toml code");
+  const select = (name) => form.elements.namedItem(name); // not form.style: that is the CSS
+  let pack = document.querySelector('link[href*="basecoat-"][href$=".cdn.min.css"]');
+  const ownHref = pack.href;
+  const ownStyle = root.dataset.style;
+  let themes = null;
+
+  const css = (vars) =>
+    Object.entries(vars).filter(([k]) => k !== "radius").map(([k, v]) => `--${k}:${v};`).join("");
+
+  // Swap the style pack without a flash: load the new one, then drop the old one. A pack that
+  // finishes loading after the reader already picked another one is dropped.
+  let wanted = pack.href;
+  function usePack(href) {
+    wanted = href;
+    if (pack.href === href) return;
+    const next = pack.cloneNode();
+    next.href = href;
+    next.addEventListener("load", () => {
+      if (next.href !== wanted) return next.remove();
+      pack.remove();
+      pack = next;
+    }, { once: true });
+    pack.after(next);
+  }
+
+  const choice = () => Object.fromEntries(new FormData(form));
+  function showToml() {
+    const { style, base, color } = choice();
+    toml.textContent = `[theme]\nstyle = "${style}"\nbase = "${base}"` + (color ? `\ncolor = "${color}"` : "");
+  }
+
+  function apply() {
+    if (!themes) return;
+    const { style, base, color } = choice();
+    usePack(style === ownStyle ? ownHref : new URL(root.dataset.styles + `basecoat-${style}.cdn.min.css`, location).href);
+    // Base tokens with the accent on top, as dokk writes theme.css (radius belongs to the style).
+    const accent = color ? themes[color] : { light: {}, dark: {} };
+    let tag = document.getElementById("dk-picked-theme");
+    if (!tag) {
+      tag = document.createElement("style");
+      tag.id = "dk-picked-theme";
+      document.head.append(tag); // after theme.css, so these tokens win
+    }
+    tag.textContent = `:root{${css({ ...themes[base].light, ...accent.light })}}` +
+      `.dark{${css({ ...themes[base].dark, ...accent.dark })}}`;
+    showToml();
+  }
+
+  fetch(root.dataset.themes).then((r) => r.json()).then((data) => {
+    themes = data;
+    const names = Object.keys(data);
+    const bases = names.filter((n) => "background" in data[n].light);
+    const add = (into, list) => into.append(...list.map((n) => new Option(n, n)));
+    select("base").replaceChildren();
+    add(select("base"), bases);
+    add(select("color"), names.filter((n) => !bases.includes(n)));
+    // Start from these docs' own theme; Reset returns to it.
+    for (const name of ["style", "base", "color"]) {
+      const option = [...select(name).options].find((o) => o.value === root.dataset[name]);
+      if (option) option.selected = option.defaultSelected = true;
+    }
+    showToml();
+  });
+  form.addEventListener("change", apply);
+  form.addEventListener("reset", () => {
+    setTimeout(() => {
+      usePack(ownHref);
+      document.getElementById("dk-picked-theme")?.remove();
+      showToml();
+    });
+  });
+})();
+</script>

@@ -44,4 +44,10 @@ Links styled as buttons.
 :::card[Badges, keys and colors]{href="inline.md"}
 Inline badges, keyboard keys and color swatches.
 :::
+:::card[Image]{href="image.md"}
+An image that opens full size when clicked.
+:::
+:::card[Custom components]{href="custom.md"}
+Add a template to register your own.
+:::
 ::::

@@ -14,7 +14,7 @@ Folders, front matter, the sidebar, links and images.
 :::card[Components]{href="components/index.md"}
 Callouts, tabs, cards and steps written as directives.
 :::
-:::card[Themes]{href="themes.md"}
+:::card[Themes]{href="themes/index.md"}
 Style packs, base and accent colors, code highlighting.
 :::
 :::card[Templates and styling]{href="templates.md"}

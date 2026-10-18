@@ -91,6 +91,6 @@ code_dark = "nord"
 
 To change single colors, override `templates/files/theme.css.jinja` in your site. It receives
 `base`, `color` and `vars`, with the final tokens in `vars.light` and `vars.dark`. See
-[Templates and styling](templates.md).
+[Templates and styling](../templates.md).
 
 Colors are from [shadcn/ui](https://ui.shadcn.com/themes) (MIT), as vendored in dokk.

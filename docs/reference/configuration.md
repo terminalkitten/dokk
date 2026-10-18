@@ -78,4 +78,4 @@ page's Markdown source in one file. Pages with `noindex: true` are left out.
 ## Theme
 
 `[theme]` picks a Basecoat style pack, a base color, an accent color and code highlighting. See
-[Themes](../guides/themes.md) for every option, with color swatches.
+[Themes](../guides/themes/index.md) for every option, with color swatches.
