@@ -12,7 +12,7 @@ title = "My docs"
 description = "Shown in search results"
 site_url = "https://you.github.io/my-docs/"  # canonical URLs, sitemap, base path
 content_dir = "docs"
-out_dir = "dist"
+out_dir = ".dokk/build"
 lang = "en"
 
 [theme]

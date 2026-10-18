@@ -11,6 +11,8 @@ from dokk import DokkError
 from dokk.themes import ACCENTS, BASES, STYLES, code_styles
 
 CONFIG_FILE = "dokk.toml"
+# Next to .dokk/dev (dokk serve): one ignored folder, and no clash with dist/ (Python wheels).
+DEFAULT_OUT_DIR = ".dokk/build"
 _KNOWN_KEYS = {
     "title",
     "description",
@@ -37,7 +39,7 @@ class Config:
     description: str = ""
     site_url: str = ""
     content_dir: Path = Path("docs")
-    out_dir: Path = Path("dist")
+    out_dir: Path = Path(".dokk/build")
     lang: str = "en"
     base_path: str = ""
     theme: dict[str, Any] = field(default_factory=dict)
@@ -104,7 +106,7 @@ def load_config(root: Path, dev: bool = False) -> Config:
     content_dir = root / _str(data, "content_dir", "docs")
     if not content_dir.is_dir():
         raise ConfigError(f"content directory not found: {content_dir}")
-    out_dir = (root / _str(data, "out_dir", "dist")).resolve()
+    out_dir = (root / _str(data, "out_dir", DEFAULT_OUT_DIR)).resolve()
     content = content_dir.resolve()
     if out_dir == root or out_dir in root.parents or content.is_relative_to(out_dir):
         raise ConfigError(f"{CONFIG_FILE}: 'out_dir' must not contain the site or its content")

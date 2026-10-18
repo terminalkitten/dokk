@@ -45,7 +45,7 @@ def test_dev_build(server: tuple[str, DevState]) -> None:
     assert "/__dokk/version" in html  # reload script injected
     assert _get(base + "/wip/")[0] == 200  # drafts included
     assert state.out == state.root / ".dokk" / "dev"
-    assert not (state.root / "dist").exists()
+    assert not (state.root / ".dokk" / "build").exists()
 
 
 def test_rebuild_keeps_serving_the_old_site(server: tuple[str, DevState], monkeypatch) -> None:

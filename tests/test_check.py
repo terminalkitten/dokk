@@ -13,7 +13,7 @@ def test_example_is_clean(tmp_path: Path) -> None:
     root = tmp_path / "basic"
     shutil.copytree(EXAMPLE, root, ignore=shutil.ignore_patterns("dist", ".dokk"))
     assert [i for i in check(root) if i.level == "error"] == []
-    assert not (root / "dist").exists()  # check builds into a temp dir
+    assert not (root / ".dokk" / "build").exists()  # check builds into a temp dir
 
 
 @pytest.mark.parametrize("site_url", ["https://x.io/", "https://x.io/repo/"])

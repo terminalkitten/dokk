@@ -24,7 +24,7 @@ def test_defaults(make_site) -> None:
     cfg = load_config(root)
     assert cfg.title == "Test"
     assert cfg.content_dir == root / "docs"
-    assert cfg.out_dir == (root / "dist").resolve()
+    assert cfg.out_dir == (root / ".dokk" / "build").resolve()
     assert cfg.base_path == ""
 
 

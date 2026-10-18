@@ -3,7 +3,6 @@ title = "dokk"
 description = "A small static documentation generator: Markdown folders in, a fast static site out."
 site_url = "https://example.github.io/dokk/"  # placeholder: set to the real Pages URL
 content_dir = "docs"
-out_dir = "_site"  # not dist/: that holds Python build artifacts
 
 [theme]
 style = "vega"

@@ -20,7 +20,7 @@ def _files(out: Path) -> list[str]:
 @pytest.fixture
 def example(tmp_path: Path) -> Path:
     root = tmp_path / "basic"
-    shutil.copytree(EXAMPLE, root, ignore=shutil.ignore_patterns("dist"))
+    shutil.copytree(EXAMPLE, root, ignore=shutil.ignore_patterns("dist", ".dokk"))
     return root
 
 
@@ -183,8 +183,10 @@ def test_cli_init_then_build(tmp_path: Path) -> None:
     workflow = (tmp_path / ".github" / "workflows" / "docs.yml").read_text()
     assert "actions/deploy-pages@v5" in workflow and "dokk check" in workflow
     assert "      url: ${{ steps.deployment.outputs.page_url }}\n    steps:" in workflow
+    assert "path: .dokk/build" in workflow
+    assert (tmp_path / ".gitignore").read_text() == ".dokk/\n"  # covers the build output
     assert main(["build", "--root", str(tmp_path)]) == 0
-    assert (tmp_path / "dist" / "index.html").is_file()
+    assert (tmp_path / ".dokk" / "build" / "index.html").is_file()
     assert main(["init", "--root", str(tmp_path)]) == 1  # refuses to overwrite
 
 

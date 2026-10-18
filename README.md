@@ -46,7 +46,7 @@ To look at a production build instead:
 
 ```sh
 dokk build --root examples/basic
-python -m http.server 8002 -d examples/basic/dist
+python -m http.server 8002 -d examples/basic/.dokk/build
 ```
 
 ### Vendored assets

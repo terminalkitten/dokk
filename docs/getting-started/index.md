@@ -42,7 +42,7 @@ The `serve` extra adds the dev server, `search` adds the Pagefind index. Both ar
 
 3. Edit `my-docs/docs/index.md`. The browser reloads when you save.
 
-4. Build the production site into `my-docs/dist/`:
+4. Build the production site into `my-docs/.dokk/build/`:
 
    ```sh
    dokk build --root my-docs
