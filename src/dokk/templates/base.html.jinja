@@ -34,6 +34,17 @@
 <body>
   {{ sidebar_html }}
   <div class="dk-shell">{# must be the element right after .sidebar #}
+    <script>
+      /* Restore a collapsed sidebar before first paint. Basecoat reads data-initial-open when it
+         starts; on phones the sidebar starts closed anyway. dokk.js saves the state. */
+      (function () { try {
+        if (localStorage.getItem('dk-sidebar') !== 'closed') return;
+        var s = document.getElementById('dk-sidebar');
+        s.dataset.initialOpen = 'false';
+        s.setAttribute('aria-hidden', 'true');
+        s.setAttribute('inert', '');
+      } catch (e) {} })();
+    </script>
     {% include 'partials/header.html.jinja' %}
     <div class="dk-content">
       <main class="dk-main" data-pagefind-body>

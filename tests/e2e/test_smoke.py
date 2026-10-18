@@ -108,6 +108,43 @@ def test_brand_shown_once(page, site: str) -> None:  # type: ignore[no-untyped-d
     assert top.is_visible()  # sidebar collapsed: the brand moves to the top bar
 
 
+def test_sidebar_state_remembered(page, site: str) -> None:  # type: ignore[no-untyped-def]
+    hidden = "document.getElementById('dk-sidebar').getAttribute('aria-hidden')"
+    ready = "document.getElementById('dk-sidebar').dataset.sidebarInitialized"
+    # Record the state at DOMContentLoaded, before Basecoat runs: no open-then-close flash.
+    page.add_init_script(
+        "addEventListener('DOMContentLoaded', () => { window.firstHidden ="
+        " document.getElementById('dk-sidebar').getAttribute('aria-hidden'); })"
+    )
+    page.goto(site + "/guides/markdown/")
+    page.wait_for_function(ready)
+    assert page.evaluate(hidden) == "false"
+    page.get_by_role("button", name="Toggle menu").click()
+    page.wait_for_function(f"{hidden} === 'true'")
+
+    page.goto(site + "/guides/writing/")
+    page.wait_for_function(ready)
+    assert page.evaluate("window.firstHidden") == "true"  # collapsed from the first paint
+    assert page.evaluate(hidden) == "true"
+
+    page.get_by_role("button", name="Toggle menu").click()
+    page.wait_for_function(f"{hidden} === 'false'")
+    page.goto(site + "/")
+    page.wait_for_function(ready)
+    assert page.evaluate(hidden) == "false"
+
+    # On phones the sidebar is an overlay: opening and closing it is not remembered.
+    page.set_viewport_size({"width": 390, "height": 800})
+    page.goto(site + "/guides/markdown/")
+    page.wait_for_function(ready)
+    assert page.evaluate(hidden) == "true"  # phones start closed, whatever was saved
+    page.get_by_role("button", name="Toggle menu").click()
+    page.wait_for_function(f"{hidden} === 'false'")
+    page.get_by_role("button", name="Toggle menu").click(force=True)
+    page.wait_for_function(f"{hidden} === 'true'")
+    assert page.evaluate("localStorage.getItem('dk-sidebar')") == "open"
+
+
 def test_theme_persists_across_reload(page, site: str) -> None:  # type: ignore[no-untyped-def]
     page.goto(site + "/")
     is_dark = "document.documentElement.classList.contains('dark')"

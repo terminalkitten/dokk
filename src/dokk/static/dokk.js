@@ -109,6 +109,18 @@
     });
   }
 
+  // Remember whether the sidebar is collapsed (desktop only: on phones it is an overlay that
+  // starts closed). base.html.jinja restores it before the first paint.
+  const sidebar = document.getElementById("dk-sidebar");
+  if (sidebar) {
+    new MutationObserver(() => {
+      if (innerWidth < (parseInt(sidebar.dataset.breakpoint) || 768)) return;
+      try {
+        localStorage.setItem("dk-sidebar", sidebar.getAttribute("aria-hidden") === "true" ? "closed" : "open");
+      } catch {}
+    }).observe(sidebar, { attributes: true, attributeFilter: ["aria-hidden"] });
+  }
+
   // Synced tabs: tab sets with the same data-sync key switch together, and the
   // choice is remembered across pages.
   const synced = [...document.querySelectorAll(".dk-tabs[data-sync]")];
