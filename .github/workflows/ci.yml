@@ -18,6 +18,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: uv pip install -e ".[dev]"
       - run: ruff check . && ruff format --check .
+      - run: ty check
       - run: pytest
 
   e2e:

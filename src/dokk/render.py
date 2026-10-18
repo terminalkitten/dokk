@@ -37,7 +37,7 @@ def make_env(cfg: Config, dev: bool = False, search: bool = False) -> Environmen
     def asset(path: str) -> str:
         return url(f"/{ASSETS_DIR}/{path}")
 
-    env.globals.update(
+    template_globals: dict[str, Any] = dict(
         url=url,
         asset=asset,
         dev=dev,
@@ -56,6 +56,7 @@ def make_env(cfg: Config, dev: bool = False, search: bool = False) -> Environmen
         # The sidebar macro emits `header` with |safe, so build it as escaped Markup.
         sidebar_header=Markup('<a class="dk-brand" href="{}">{}</a>').format(url("/"), cfg.title),
     )
+    env.globals.update(template_globals)
     return env
 
 

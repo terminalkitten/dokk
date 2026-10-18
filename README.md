@@ -24,8 +24,10 @@ playwright install chromium   # once, for the browser tests in tests/e2e
 Run the checks:
 
 ```sh
-pytest
-ruff check . && ruff format --check .
+make lint        # all of the below
+make format      # ruff: fix lint issues, then format
+make typecheck   # ty
+make test        # pytest
 ```
 
 ### Serving the sites

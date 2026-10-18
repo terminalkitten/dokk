@@ -4,11 +4,12 @@ import re
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
-from typing import Any
+from typing import Any, cast
 from urllib.parse import quote, unquote, urlsplit
 
 from jinja2 import Environment
 from markdown_it import MarkdownIt
+from markdown_it.renderer import RendererHTML
 from markdown_it.token import Token
 from markupsafe import Markup
 from mdit_py_plugins.anchors import anchors_plugin
@@ -17,8 +18,9 @@ from mdit_py_plugins.deflist import deflist_plugin
 from mdit_py_plugins.footnote import footnote_plugin
 from mdit_py_plugins.tasklists import tasklists_plugin
 from pygments import highlight
-from pygments.formatters import HtmlFormatter
-from pygments.lexers import TextLexer, get_lexer_by_name
+from pygments.formatters.html import HtmlFormatter
+from pygments.lexers import get_lexer_by_name
+from pygments.lexers.special import TextLexer
 from pygments.util import ClassNotFound
 
 from dokk import DokkError
@@ -174,11 +176,13 @@ class Renderer:
                 self._rewrite(tok.children or [], source_dir, result.broken)
         tabs = itertools.count(1)  # explicit, per-page tab ids keep builds deterministic
 
+        renderer = cast(RendererHTML, self.md.renderer)  # MarkdownIt's default renderer
+
         def render_inner(inner: list[Token]) -> str:
-            return self.md.renderer.render(inner, self.md.options, env)
+            return renderer.render(inner, self.md.options, env)
 
         def render_inline(inline: list[Token]) -> str:
-            return self.md.renderer.renderInline(inline, self.md.options, env)
+            return renderer.renderInline(inline, self.md.options, env)
 
         def render_directive(
             d: Directive, body: str, children: list[tuple[Directive, str]], inner: list[Token]
