@@ -65,13 +65,8 @@ build-backend = "hatchling.build"
 path = "src/dokk/__init__.py"
 
 [tool.hatch.build.targets.sdist]
-exclude = [
-    ".github/assets",  # README screenshots, loaded from GitHub
-    # Docs-only symlinks into src/dokk/: followed, they would take the vendored files away
-    # from the package.
-    "public/basecoat",
-    "public/shadcn-themes.json",
-]
+# only what is needed to build the wheel
+only-include = ["src", "README.md", "LICENSE"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dokk"]
