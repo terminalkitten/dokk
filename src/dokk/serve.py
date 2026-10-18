@@ -1,7 +1,6 @@
 import threading
 import traceback
 from functools import partial
-from html import escape
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -9,10 +8,10 @@ from typing import Any
 from dokk import DokkError
 from dokk.build import build
 from dokk.config import CONFIG_FILE, load_config
+from dokk.render import base_env, render_template
 
 DEV_DIR = Path(".dokk") / "dev"
 VERSION_PATH = "/__dokk/version"
-_RELOAD = (Path(__file__).parent / "templates" / "partials" / "dev_reload.html.jinja").read_text()
 
 
 class DevState:
@@ -45,14 +44,9 @@ class DevState:
 
 
 def error_page(message: str, trace: str) -> bytes:
-    return (
-        "<!doctype html><meta charset='utf-8'><title>dokk: build error</title>"
-        "<body style='font-family:system-ui;margin:2rem'><h1>Build failed</h1>"
-        f"<p><strong>{escape(message)}</strong></p>"
-        "<p>Fix the problem and save; this page reloads.</p>"
-        "<details><summary>Traceback</summary>"
-        f"<pre style='white-space:pre-wrap'>{escape(trace)}</pre></details>"
-        f"{_RELOAD}</body>"
+    # Built-in templates only: the site's own templates may be what is broken.
+    return render_template(
+        base_env(), "dev_error.html.jinja", message=message, trace=trace
     ).encode()
 
 

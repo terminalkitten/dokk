@@ -164,6 +164,7 @@ def test_cli_init_then_build(tmp_path: Path) -> None:
     assert main(["init", "--root", str(tmp_path)]) == 0
     workflow = (tmp_path / ".github" / "workflows" / "docs.yml").read_text()
     assert "actions/deploy-pages@v5" in workflow and "dokk check" in workflow
+    assert "      url: ${{ steps.deployment.outputs.page_url }}\n    steps:" in workflow
     assert main(["build", "--root", str(tmp_path)]) == 0
     assert (tmp_path / "dist" / "index.html").is_file()
     assert main(["init", "--root", str(tmp_path)]) == 1  # refuses to overwrite

@@ -16,7 +16,8 @@ def base_env(user_templates: Path | None = None) -> Environment:
     search_path = [p for p in (user_templates, BUILTIN_TEMPLATES) if p and p.is_dir()]
     return Environment(
         loader=FileSystemLoader(search_path),  # user overrides win
-        autoescape=select_autoescape(["html", "jinja"]),
+        # Escape HTML and XML output; text formats (.txt, .md, .toml, .yml) stay as written.
+        autoescape=select_autoescape(["html.jinja", "xml.jinja"], default=False),
         undefined=StrictUndefined,
         trim_blocks=True,
         lstrip_blocks=True,

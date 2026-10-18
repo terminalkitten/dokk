@@ -126,7 +126,8 @@ def test_highlight() -> None:
     assert '<span class="n">x</span>' in html
     assert 'class="language-text"' in highlight_code("x", "", "")
     assert "<span" not in highlight_code("x <y>", "nosuchlang", "")
-    assert 'class="language-&quot;x"' in highlight_code("x", '"x', "")
+    assert 'class="language-&#34;x"' in highlight_code("x", '"x', "")
+    assert type(highlight_code("x", "", "")) is str  # not Markup: see highlight_code
 
 
 def test_table_wrapped(content: Path) -> None:

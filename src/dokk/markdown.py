@@ -2,7 +2,6 @@ import posixpath
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from html import escape
 from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import quote, unquote, urlsplit
@@ -47,9 +46,11 @@ def highlight_code(code: str, lang: str, attrs: str) -> str:
         lexer = get_lexer_by_name(lang) if lang else TextLexer()
     except ClassNotFound:
         lexer = TextLexer()
-    cls = escape(f"language-{lang or 'text'}")
-    code_html = highlight(code, lexer, _FORMATTER)
-    return f'<pre class="code hl"><code class="{cls}">{code_html}</code></pre>'
+    code_html = Markup(highlight(code, lexer, _FORMATTER))  # Pygments escapes the code
+    html = Markup('<pre class="code hl"><code class="language-{}">{}</code></pre>').format(
+        lang or "text", code_html
+    )
+    return str(html)  # plain str: markdown-it concatenates, and str + Markup escapes the str
 
 
 def _table_open(self: Any, tokens: Sequence[Token], idx: int, options: Any, env: Any) -> str:

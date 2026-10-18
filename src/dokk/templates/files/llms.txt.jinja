@@ -1,0 +1,15 @@
+{# https://llmstxt.org: a Markdown index of the site for AI tools. #}
+# {{ site.title }}
+{% if site.description %}
+
+> {{ site.description }}
+{% endif %}
+{% for label, pages in sections %}
+
+## {{ label }}
+
+{% for p in pages %}
+- [{{ p.title }}]({{ absolute(p) }}){% if p.description %}: {{ p.description }}{% endif %}
+
+{% endfor %}
+{% endfor %}

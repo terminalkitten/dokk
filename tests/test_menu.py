@@ -103,7 +103,7 @@ def test_labels_escaped_once() -> None:
     assert menu[0]["items"][0]["label"] == "&lt;script&gt;alert(1)&lt;/script&gt; &amp; co"
     submenu = menu[1]["items"][1]
     assert submenu["type"] == "submenu" and "<script>" not in submenu["label"]
-    badge = '<span class="badge" data-variant="&quot;x">&lt;b&gt;</span>'
+    badge = '<span class="badge" data-variant="&#34;x">&lt;b&gt;</span>'
     assert badge in submenu["items"][0]["label"]
     assert menu[1]["label"] == evil  # group labels are escaped by the macro
 

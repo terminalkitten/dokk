@@ -6,70 +6,26 @@ from dokk import DokkError, __version__
 from dokk.build import build
 from dokk.check import check
 from dokk.config import CONFIG_FILE
+from dokk.render import base_env
+from dokk.writer import SiteWriter
 
-_WORKFLOW = """\
-name: Docs
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0  # full history for "last updated" dates
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.13"
-      - run: pip install "dokk[search]"
-      - run: dokk check
-      - run: dokk build
-      - uses: actions/configure-pages@v6
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v5
-"""
-
-_INIT_FILES = {
-    CONFIG_FILE: 'title = "My docs"\n# site_url = "https://example.github.io/my-docs/"\n',
-    "docs/index.md": "---\ntitle: Welcome\n---\n\nStart writing in `docs/`.\n",
-    ".gitignore": "dist/\n.dokk/\n",
-    ".github/workflows/docs.yml": _WORKFLOW,
+# Destination -> template in templates/init/.
+INIT_FILES = {
+    CONFIG_FILE: "init/dokk.toml.jinja",
+    "docs/index.md": "init/index.md.jinja",
+    ".gitignore": "init/gitignore.jinja",
+    ".github/workflows/docs.yml": "init/docs.yml.jinja",
 }
 
 
 def cmd_init(args: argparse.Namespace) -> int:
     root = Path(args.root)
-    existing = [name for name in _INIT_FILES if (root / name).exists()]
+    existing = [name for name in INIT_FILES if (root / name).exists()]
     if existing:
         raise DokkError(f"refusing to overwrite: {', '.join(existing)}")
-    for name, text in _INIT_FILES.items():
-        path = root / name
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text, encoding="utf-8")
+    writer = SiteWriter(base_env(), root)
+    for name, template in INIT_FILES.items():
+        writer.render(name, template)
     print(f"Created a dokk site in {root.resolve()}. Run: dokk serve --root {root}")
     return 0
 

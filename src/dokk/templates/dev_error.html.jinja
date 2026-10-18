@@ -1,0 +1,10 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>dokk: build error</title>
+<body style="font-family: system-ui; margin: 2rem">
+  <h1>Build failed</h1>
+  <p><strong>{{ message }}</strong></p>
+  <p>Fix the problem and save; this page reloads.</p>
+  <details><summary>Traceback</summary><pre style="white-space: pre-wrap">{{ trace }}</pre></details>
+  {% include 'partials/dev_reload.html.jinja' %}
+</body>

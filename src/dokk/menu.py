@@ -1,9 +1,10 @@
 """Navigation: sidebar tree (automatic or from dokk.toml), menu, breadcrumbs, prev/next."""
 
 from dataclasses import dataclass
-from html import escape
 from pathlib import Path
 from typing import Any
+
+from markupsafe import Markup, escape
 
 from dokk import DokkError
 from dokk.content import Page, titleize
@@ -135,15 +136,15 @@ def submenu_keys(nav: list[Nav]) -> tuple[dict[int, str], dict[int, tuple[str, .
     return keys, around
 
 
-def badge_html(page: Page) -> str:
+def badge_html(page: Page) -> Markup:
     badge = page.sidebar.get("badge")
     if not badge:
-        return ""
+        return Markup("")
     if isinstance(badge, dict):
         text, variant = badge.get("text", ""), badge.get("variant", "secondary")
     else:
         text, variant = badge, "secondary"
-    return f' <span class="badge" data-variant="{escape(str(variant))}">{escape(str(text))}</span>'
+    return Markup(' <span class="badge" data-variant="{}">{}</span>').format(variant, text)
 
 
 def _menu_items(items: list[Nav], keys: dict[int, str]) -> list[dict[str, Any]]:
@@ -193,8 +194,8 @@ def mark_current(sidebar_html: str, url: str, open_keys: tuple[str, ...] = ()) -
     """
     for key in open_keys:
         sidebar_html = sidebar_html.replace(f'data-sub="{key}"', f'open data-sub="{key}"', 1)
-    link = f'<a href="{escape(url)}"'
-    return sidebar_html.replace(link, f'{link} aria-current="page"', 1)
+    link = Markup('<a href="{}"').format(url)
+    return sidebar_html.replace(link, link + Markup(' aria-current="page"'), 1)
 
 
 class Pager:

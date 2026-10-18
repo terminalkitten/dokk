@@ -1,0 +1,12 @@
+{# Every page's Markdown source in one file. #}
+# {{ site.title }}
+{% for p in pages %}
+
+---
+
+# {{ p.title }}
+
+URL: {{ absolute(p) }}
+
+{{ p.body.strip() }}
+{% endfor %}

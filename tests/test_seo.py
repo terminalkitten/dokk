@@ -11,22 +11,27 @@ import pytest
 from dokk.build import build
 from dokk.check import heading_issues
 from dokk.content import Page
+from dokk.render import base_env, render_template
 from dokk.search import search_available
-from dokk.seo import last_modified, robots, sitemap
+from dokk.seo import last_modified
 
 EXAMPLE = Path(__file__).resolve().parents[1] / "examples" / "basic"
 
 
-def test_sitemap_xml() -> None:
-    xml = sitemap([("https://x.io/a&b/", date(2026, 1, 2)), ("https://x.io/", None)])
+def test_sitemap_template() -> None:
+    entries = [("https://x.io/a&b/", date(2026, 1, 2)), ("https://x.io/", None)]
+    xml = render_template(base_env(), "files/sitemap.xml.jinja", entries=entries)
     assert "<loc>https://x.io/a&amp;b/</loc><lastmod>2026-01-02</lastmod>" in xml
     assert "<url><loc>https://x.io/</loc></url>" in xml
     assert xml.startswith('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns=')
 
 
-def test_robots() -> None:
+def test_robots_template() -> None:
+    def robots(url: str) -> str:
+        return render_template(base_env(), "files/robots.txt.jinja", sitemap_url=url)
+
     assert robots("https://x.io/sitemap.xml").endswith("Sitemap: https://x.io/sitemap.xml\n")
-    assert "Sitemap" not in robots("")
+    assert robots("") == "User-agent: *\nAllow: /\n"
 
 
 def _git(cwd: Path, *args: str, when: str = "2026-03-04T12:00:00") -> None:

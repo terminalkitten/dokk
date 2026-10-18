@@ -13,7 +13,7 @@ from markupsafe import Markup
 from dokk.assets import ASSETS_DIR, copy_page_assets, copy_public, copy_static
 from dokk.config import Config, load_config
 from dokk.content import Page, scan
-from dokk.llms import llms_full_txt, llms_txt
+from dokk.llms import llms_sections
 from dokk.markdown import Rendered, Renderer, pygments_css
 from dokk.menu import (
     Nav,
@@ -29,17 +29,13 @@ from dokk.menu import (
 from dokk.render import base_env, canonical, make_env, render_template
 from dokk.routes import assign_routes, output_path
 from dokk.search import build_index, search_available
-from dokk.seo import last_modified, robots, sitemap
+from dokk.seo import last_modified
 from dokk.tree import build_tree
+from dokk.writer import SiteWriter
 
 NOT_FOUND = Path("404.md")
 # ponytail: below this, starting worker processes costs more than it saves.
 PARALLEL_MIN_PAGES = 200
-
-
-def _write(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text, encoding="utf-8")
 
 
 @dataclass
@@ -99,9 +95,9 @@ def build(
     copy_static(out)
     copy_page_assets(cfg.content_dir, out)
     copy_public(cfg.root, out)
-    _write(
-        out / ASSETS_DIR / "pygments.css",
-        pygments_css(cfg.theme["code_light"], cfg.theme["code_dark"]),
+    writer = SiteWriter(env, out)
+    writer.text(
+        f"{ASSETS_DIR}/pygments.css", pygments_css(cfg.theme["code_light"], cfg.theme["code_dark"])
     )
 
     sidebar = Sidebar(env, nav)
@@ -113,8 +109,8 @@ def build(
         if rendered.broken:
             result.broken[page.rel] = rendered.broken
         prev, next_ = pager(page)
-        html = render_template(
-            env,
+        writer.render(
+            output_path(page.route),
             "page.html.jinja",
             page=page,
             sidebar_html=sidebar.for_page(page),
@@ -124,24 +120,35 @@ def build(
             canonical=canonical(cfg, page.route),
             edit_url=_edit_url(cfg, page),
         )
-        _write(out / output_path(page.route), html)
 
-    _write(out / "404.html", _render_404(env, sidebar, not_found, renderer))
-    _write(out / ".nojekyll", "")
+    writer.render(
+        "404.html",
+        "404.html.jinja",
+        title=not_found.title if not_found else "Page not found",
+        body=renderer.render(not_found.body, not_found.rel, not_found.line_offset).html
+        if not_found
+        else "",
+        sidebar_html=sidebar.for_page(None),
+    )
+    writer.text(".nojekyll", "")
     if cfg.site_url:
-        indexed = [(canonical(cfg, p.route), p.updated) for p in pages if not p.noindex]
-        _write(out / "sitemap.xml", sitemap(sorted(indexed, key=lambda e: e[0])))
+        indexed = sorted((canonical(cfg, p.route), p.updated) for p in pages if not p.noindex)
+        writer.render("sitemap.xml", "files/sitemap.xml.jinja", entries=indexed)
     if not (out / "robots.txt").exists():  # a robots.txt in public/ wins
-        _write(out / "robots.txt", robots(canonical(cfg, "/sitemap.xml")))
+        writer.render(
+            "robots.txt", "files/robots.txt.jinja", sitemap_url=canonical(cfg, "/sitemap.xml")
+        )
     if cfg.llms.get("enabled"):
 
         def absolute(p: Page) -> str:
             return canonical(cfg, p.route) or p.url
 
-        _write(out / "llms.txt", llms_txt(cfg, nav, absolute))
+        writer.render(
+            "llms.txt", "files/llms.txt.jinja", sections=llms_sections(nav), absolute=absolute
+        )
         in_menu = set(order)
-        rest = [p for p in pages if p not in in_menu]  # hidden pages last
-        _write(out / "llms-full.txt", llms_full_txt(cfg, order + rest, absolute))
+        full = [p for p in order + [p for p in pages if p not in in_menu] if not p.noindex]
+        writer.render("llms-full.txt", "files/llms-full.txt.jinja", pages=full, absolute=absolute)
     if with_search:
         build_index(out)
     return result
@@ -199,15 +206,3 @@ class Sidebar:
         if around is None:  # not in the menu
             return Markup(self.html)
         return Markup(mark_current(self.html, page.url, around))  # type: ignore[union-attr]
-
-
-def _render_404(env: Environment, sidebar: Sidebar, page: Page | None, renderer: Renderer) -> str:
-    body = renderer.render(page.body, page.rel, page.line_offset).html if page else ""
-    title = page.title if page else "Page not found"
-    return render_template(
-        env,
-        "404.html.jinja",
-        title=title,
-        body=body,
-        sidebar_html=sidebar.for_page(None),
-    )
