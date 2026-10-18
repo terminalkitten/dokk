@@ -23,9 +23,12 @@ The full documentation lives in `docs/` and is built with dokk itself.
 Install everything (dev tools, dev server, search, browser tests):
 
 ```sh
-uv pip install -e ".[dev,serve,search,e2e]"
-playwright install chromium   # once, for the browser tests in tests/e2e
+uv sync --all-extras          # .venv with the exact versions from uv.lock
+uv run playwright install chromium   # once, for the browser tests in tests/e2e
 ```
+
+Run tools through `make` (below) or activate `.venv`. Plain `uv sync` without `--all-extras`
+removes the extras again.
 
 Run the checks:
 

@@ -1,5 +1,5 @@
-# Dev tasks. Install first: uv pip install -e ".[dev,serve,search,e2e]"
-# --no-sync: use the installed .venv as is (a sync would drop the extras).
+# Dev tasks. Install first: uv sync --all-extras
+# --no-sync: use .venv as is (uv run's default sync would drop the extras).
 RUN = uv run --no-sync
 
 .PHONY: lint format typecheck test
