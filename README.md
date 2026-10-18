@@ -1,22 +1,60 @@
-<h1>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/terminalkitten/dokk/main/public/logo-dark.svg">
-    <img src="https://raw.githubusercontent.com/terminalkitten/dokk/main/public/logo.svg" alt="" width="32" height="32">
-  </picture>
-  dokk
-</h1>
+<p align="center">
+  <a href="https://terminalkitten.github.io/dokk/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/terminalkitten/dokk/main/public/logo-dark.svg">
+      <img src="https://raw.githubusercontent.com/terminalkitten/dokk/main/public/logo.svg" alt="dokk logo" width="72" height="72">
+    </picture>
+  </a>
+</p>
 
-A small static documentation generator. Folders of Markdown become a fast static site with a
-sidebar, search, dark mode and code highlighting, styled with [Basecoat](https://basecoatui.com).
-No Node needed to build.
+<h1 align="center">dokk</h1>
+
+<p align="center">
+  <strong>A tiny static docs generator in pure Python.</strong><br>
+  Folders of Markdown in, a fast static docs site out. No Node.
+</p>
+
+<p align="center">
+  <a href="https://terminalkitten.github.io/dokk/"><strong>Live demo and docs</strong></a> ·
+  <a href="https://terminalkitten.github.io/dokk/getting-started/">Quick start</a> ·
+  <a href="https://terminalkitten.github.io/dokk/guides/components/">Components</a> ·
+  <a href="https://terminalkitten.github.io/dokk/guides/themes/">Themes</a> ·
+  <a href="https://pypi.org/project/dokk/">PyPI</a>
+</p>
+
+<p align="center">
+  <a href="https://terminalkitten.github.io/dokk/guides/writing/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/terminalkitten/dokk/main/.github/assets/screenshot-dark.png">
+      <img src="https://raw.githubusercontent.com/terminalkitten/dokk/main/.github/assets/screenshot-light.png" alt="A dokk site: sidebar, page actions, a file tree and the on-this-page list" width="800">
+    </picture>
+  </a>
+</p>
+
+## Quick start
 
 ```sh
 pip install "dokk[serve,search]"
 dokk init --root my-docs
-dokk serve --root my-docs
+dokk serve --root my-docs     # http://127.0.0.1:8002/
 ```
 
-The full documentation lives in `docs/` and is built with dokk itself.
+`dokk build` writes plain HTML to `.dokk/build/`, ready for GitHub Pages or any static host.
+`dokk init` also creates a workflow that publishes it on every push.
+
+## What you get
+
+- A sidebar built from your folder tree, or arranged in `dokk.toml`.
+- Markdown with tables, footnotes, task lists, definition lists and heading anchors.
+- Components as Markdown directives: callouts, tabs, cards, steps, file trees, badges and more.
+- Code highlighting at build time, in light and dark.
+- Full-text search with [Pagefind](https://pagefind.app), fully static.
+- Eight [Basecoat](https://basecoatui.com) styles and the shadcn/ui colors, vendored: no CDN, no
+  third-party requests.
+- `dokk serve` with live reload, and `dokk check` for broken links and anchors.
+- A sitemap, a Markdown copy of every page and optional `llms.txt`, for search engines and AI tools.
+
+The [documentation](https://terminalkitten.github.io/dokk/) is built with dokk from the `docs/` folder in this repository.
 
 ## Development
 

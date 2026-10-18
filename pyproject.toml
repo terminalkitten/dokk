@@ -1,10 +1,38 @@
 [project]
 name = "dokk"
 dynamic = ["version"]  # from src/dokk/__init__.py
-description = "Small static documentation generator"
+description = "A tiny static docs generator in pure Python"
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "terminalkitten", email = "25918382+terminalkitten@users.noreply.github.com" }]
 requires-python = ">=3.11"
+keywords = [
+    "documentation",
+    "docs",
+    "static-site-generator",
+    "markdown",
+    "github-pages",
+    "basecoat",
+    "shadcn",
+    "jinja2",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Documentation",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Text Processing :: Markup :: Markdown",
+    "Topic :: Internet :: WWW/HTTP :: Site Management",
+]
 dependencies = [
     "jinja2>=3.1.6",
     "markdown-it-py>=4.2.0",
@@ -23,12 +51,21 @@ e2e = ["playwright>=1.64"]  # browser smoke tests; also run: playwright install 
 [project.scripts]
 dokk = "dokk.cli:main"
 
+[project.urls]
+Homepage = "https://terminalkitten.github.io/dokk/"
+Documentation = "https://terminalkitten.github.io/dokk/"
+Repository = "https://github.com/terminalkitten/dokk"
+Issues = "https://github.com/terminalkitten/dokk/issues"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
 path = "src/dokk/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = [".github/assets"]  # README screenshots, loaded from GitHub
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dokk"]

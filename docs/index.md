@@ -1,6 +1,6 @@
 ---
 title: dokk
-description: A small static documentation generator. Markdown folders in, a fast static site out.
+description: A tiny static docs generator in pure Python. Markdown folders in, a fast static site out.
 sidebar:
   label: Introduction
 ---

@@ -63,7 +63,7 @@ def cmd_check(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="dokk", description="Small static documentation generator."
+        prog="dokk", description="A tiny static docs generator in pure Python."
     )
     parser.add_argument("--version", action="version", version=f"dokk {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
