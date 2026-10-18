@@ -1,6 +1,6 @@
 [project]
 name = "dokk"
-dynamic = ["version"]  # from src/dokk/__init__.py
+dynamic = ["version"]  # from the git tag (hatch-vcs): tag v0.0.2 -> 0.0.2
 description = "A tiny static docs generator in pure Python"
 readme = "README.md"
 license = "MIT"
@@ -58,11 +58,12 @@ Repository = "https://github.com/terminalkitten/dokk"
 Issues = "https://github.com/terminalkitten/dokk/issues"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
-path = "src/dokk/__init__.py"
+source = "vcs"
+raw-options = { version_scheme = "no-guess-dev", fallback_version = "0.0.0" }
 
 [tool.hatch.build.targets.sdist]
 # only what is needed to build the wheel
