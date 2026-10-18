@@ -8,6 +8,7 @@ from pygments.styles import get_style_by_name
 from pygments.util import ClassNotFound
 
 from dokk import DokkError
+from dokk.themes import ACCENTS, BASES, STYLES, code_styles
 
 CONFIG_FILE = "dokk.toml"
 _KNOWN_KEYS = {
@@ -95,7 +96,33 @@ def load_config(root: Path, dev: bool = False) -> Config:
     if out_dir.is_relative_to(content) or (root / ".dokk").is_relative_to(content):
         raise ConfigError(f"{CONFIG_FILE}: 'content_dir' must not contain 'out_dir' or .dokk/")
 
-    theme = {"code_light": "default", "code_dark": "github-dark", **_table(data, "theme")}
+    theme_in = _table(data, "theme")
+    keys = ("style", "base", "color", "code_light", "code_dark")
+    unknown_theme = sorted(set(theme_in) - set(keys))
+    if unknown_theme:
+        raise ConfigError(
+            f"{CONFIG_FILE}: unknown [theme] key(s): {', '.join(unknown_theme)} "
+            f"(supported: {', '.join(keys)})"
+        )
+    for key, allowed, default in (
+        ("style", STYLES, "vega"),
+        ("base", BASES, "neutral"),
+        ("color", ACCENTS, ""),
+    ):
+        value = theme_in.get(key, default)
+        if value != default and value not in allowed:
+            raise ConfigError(
+                f"{CONFIG_FILE}: unknown theme.{key} {value!r}; choose from {', '.join(allowed)}"
+            )
+    color = theme_in.get("color", "")
+    code_light, code_dark = code_styles(color)
+    theme = {
+        "style": theme_in.get("style", "vega"),
+        "base": theme_in.get("base", "neutral"),
+        "color": color,
+        "code_light": theme_in.get("code_light", code_light),
+        "code_dark": theme_in.get("code_dark", code_dark),
+    }
     for key in ("code_light", "code_dark"):
         try:
             get_style_by_name(theme[key])

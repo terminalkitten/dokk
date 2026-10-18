@@ -45,7 +45,12 @@ def test_example_output_files(example: Path) -> None:
         "robots.txt",
         "sitemap.xml",
     ]
-    for asset in ("dokk.css", "dokk.js", "pygments.css", "vendor/basecoat/basecoat.cdn.min.css"):
+    for asset in (
+        "dokk.css",
+        "dokk.js",
+        "pygments.css",
+        "vendor/basecoat/basecoat-vega.cdn.min.css",
+    ):
         assert f"_dokk/{asset}" in files
 
 

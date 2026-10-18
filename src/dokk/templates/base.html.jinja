@@ -18,7 +18,8 @@
       document.documentElement.classList.toggle('dark', dark);
     } catch (e) {} })();
   </script>
-  <link rel="stylesheet" href="{{ asset('vendor/basecoat/basecoat.cdn.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('vendor/basecoat/basecoat-' ~ site.style ~ '.cdn.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('theme.css') }}">
   <link rel="stylesheet" href="{{ asset('pygments.css') }}">
   <link rel="stylesheet" href="{{ asset('dokk.css') }}">
   <script src="{{ asset('vendor/basecoat/all.min.js') }}" defer></script>

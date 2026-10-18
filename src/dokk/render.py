@@ -48,6 +48,7 @@ def make_env(cfg: Config, dev: bool = False, search: bool = False) -> Environmen
             "lang": cfg.lang,
             "site_url": cfg.site_url,
             "links": cfg.links,
+            "style": cfg.theme.get("style", "vega"),
             "favicon": next(
                 (url(f"/{f}") for f in FAVICONS if (cfg.root / "public" / f).is_file()), ""
             ),

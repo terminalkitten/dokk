@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from dokk.cli import main
+from dokk.themes import STYLES
 
 ROOT = Path(__file__).resolve().parents[1]
 PKG = ROOT / "src" / "dokk"
@@ -27,7 +28,9 @@ def test_python_m_dokk_runs() -> None:
 @pytest.mark.parametrize(
     "rel",
     [
-        "static/vendor/basecoat/basecoat.cdn.min.css",
+        *(f"static/vendor/basecoat/basecoat-{s}.cdn.min.css" for s in STYLES),
+        "data/shadcn-themes.json",
+        "data/SHADCN-LICENSE",
         "static/vendor/basecoat/all.min.js",
         "static/vendor/basecoat/LICENSE",
         "templates/basecoat/sidebar.html.jinja",

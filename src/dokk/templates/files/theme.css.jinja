@@ -1,0 +1,13 @@
+/* Color theme "{{ base }}{% if color %} + {{ color }}{% endif %}": shadcn/ui theme tokens (MIT),
+   loaded after the Basecoat style pack as Basecoat's customization docs describe. */
+:root {
+{% for name, value in vars.light.items() %}
+  --{{ name }}: {{ value }};
+{% endfor %}
+}
+
+.dark {
+{% for name, value in vars.dark.items() %}
+  --{{ name }}: {{ value }};
+{% endfor %}
+}

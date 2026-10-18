@@ -30,6 +30,7 @@ from dokk.render import base_env, canonical, make_env, render_template
 from dokk.routes import assign_routes, output_path
 from dokk.search import build_index, search_available
 from dokk.seo import last_modified
+from dokk.themes import theme_vars
 from dokk.tree import build_tree
 from dokk.writer import SiteWriter
 
@@ -92,12 +93,20 @@ def build(
     updated = last_modified(cfg.content_dir, pages)
     if out.exists():
         shutil.rmtree(out)
-    copy_static(out)
+    copy_static(out, cfg.theme["style"])
     copy_page_assets(cfg.content_dir, out)
     copy_public(cfg.root, out)
     writer = SiteWriter(env, out)
     writer.text(
         f"{ASSETS_DIR}/pygments.css", pygments_css(cfg.theme["code_light"], cfg.theme["code_dark"])
+    )
+    base, color = cfg.theme["base"], cfg.theme["color"]
+    writer.render(
+        f"{ASSETS_DIR}/theme.css",
+        "files/theme.css.jinja",
+        base=base,
+        color=color,
+        vars=theme_vars(base, color),
     )
 
     sidebar = Sidebar(env, nav)

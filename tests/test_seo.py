@@ -149,3 +149,20 @@ def test_search_index_and_ui(tmp_path: Path) -> None:
     first = {p: p.read_bytes() for p in (out / "pagefind").rglob("*") if p.is_file()}
     out2 = build(root).out_dir
     assert {p: p.read_bytes() for p in (out2 / "pagefind").rglob("*") if p.is_file()} == first
+
+
+def test_style_and_color_theme(make_site) -> None:
+    toml = 'title = "T"\n[theme]\nstyle = "rhea"\nbase = "zinc"\ncolor = "pink"\n'
+    out = build(make_site({"index.md": "x"}, toml)).out_dir
+    css = (out / "_dokk" / "theme.css").read_text()
+    light, dark = css.split(".dark {")
+    assert "--background: oklch(1 0 0);" in light  # from the zinc base
+    assert "--primary: oklch(0.525 0.223 3.958);" in light  # pink accent, light
+    assert "--primary: oklch(0.459 0.187 3.815);" in dark  # pink accent, dark
+    assert "--chart-2: oklch(0.656 0.241 354.308);" in light
+    assert "--radius" not in css  # shape belongs to the style pack
+    vendor = sorted(p.name for p in (out / "_dokk" / "vendor" / "basecoat").glob("*.css"))
+    assert vendor == ["basecoat-rhea.cdn.min.css"]  # only the chosen style pack ships
+    html = (out / "index.html").read_text()
+    order = [html.index(n) for n in ("basecoat-rhea.cdn.min.css", "theme.css", "dokk.css")]
+    assert order == sorted(order)  # theme after the style pack, as Basecoat documents

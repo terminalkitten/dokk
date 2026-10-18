@@ -5,6 +5,10 @@ site_url = "https://example.github.io/dokk/"  # placeholder: set to the real Pag
 content_dir = "docs"
 out_dir = "_site"  # not dist/: that holds Python build artifacts
 
+[theme]
+style = "vega"
+color = "pink"
+
 # Sidebar: pages, generated folders and external links. Leave out for a fully automatic menu.
 [[sidebar]]
 label = "Start"

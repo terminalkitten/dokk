@@ -4,6 +4,7 @@ site_url = "https://example.com/"
 
 [theme]
 style = "vega"
+color = "pink"
 
 [links]
 github = "https://github.com/example/dokk"

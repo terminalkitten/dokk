@@ -16,8 +16,11 @@ out_dir = "dist"
 lang = "en"
 
 [theme]
-code_light = "default"      # any Pygments style
-code_dark = "github-dark"
+style = "vega"              # Basecoat style pack, see below
+base = "neutral"            # shadcn base color
+color = "blue"              # shadcn accent color (optional)
+code_light = "vs"           # any Pygments style; defaults follow the color
+code_dark = "one-dark"
 
 [links]
 github = "https://github.com/you/my-docs"
@@ -61,3 +64,29 @@ still built; `dokk check` warns about them unless they have `sidebar.hidden: tru
 With `[llms] enabled = true`, the build writes [`llms.txt`](https://llmstxt.org): a Markdown
 index of your pages grouped like the sidebar, with descriptions. `llms-full.txt` holds every
 page's Markdown source in one file. Pages with `noindex: true` are left out.
+
+## Style and color
+
+dokk themes the way [Basecoat](https://basecoatui.com/customization/) does: one style pack,
+then shadcn/ui color tokens on top.
+
+- `style` picks the Basecoat style pack: shape, density and radius. One of `vega` (default),
+  `nova`, `maia`, `lyra`, `mira`, `luma`, `sera` or `rhea`.
+- `base` picks a shadcn base color: every token, tuned for light and dark. One of `neutral`
+  (default), `stone`, `zinc`, `mauve`, `olive`, `mist` or `taupe`.
+- `color` adds a shadcn accent on top: primary, secondary, sidebar accent and five chart colors,
+  each tuned for light and dark. One of `amber`, `blue`, `cyan`, `emerald`, `fuchsia`, `green`,
+  `indigo`, `lime`, `orange`, `pink`, `purple`, `red`, `rose`, `sky`, `teal`, `violet` or `yellow`.
+
+```toml
+[theme]
+style = "rhea"
+base = "zinc"
+color = "pink"
+```
+
+The accent also picks matching code highlighting (pink uses `pastie` and `monokai`);
+`code_light` and `code_dark` override it. Only the chosen style pack is copied into your site.
+
+To fine-tune colors, override `templates/files/theme.css.jinja` in your site. It receives
+`base`, `color` and `vars` (`vars.light` and `vars.dark`).
