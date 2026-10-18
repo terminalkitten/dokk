@@ -1,8 +1,8 @@
 # Release dokk: push a tag v<version>; the version comes from the tag (hatch-vcs), nothing to
-# bump. Builds the wheel and sdist and tests the wheel on Linux, macOS and Windows. The publish
-# job then waits for a required reviewer to approve the `pypi` environment
-# (Settings > Environments); once approved it publishes to PyPI and creates the GitHub release
-# with the files attached.
+# bump. Builds the wheel and sdist and tests the wheel on Linux (ci.yml covers macOS and Windows
+# on every push). The publish job then waits for a required reviewer to approve the `pypi`
+# environment (Settings > Environments); once approved it publishes to PyPI and creates the
+# GitHub release with the files attached.
 name: release
 
 on:
@@ -27,17 +27,11 @@ jobs:
           name: dist
           path: dist
 
-  # install the built wheel (not the source tree) and run the test suite
+  # install the built wheel (not the source tree) and run the test suite: catches a package
+  # with missing files. Platforms are covered by CI on every push (ci.yml).
   test-wheel:
     needs: build
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7 # for tests/ and the example site they build
       - uses: actions/download-artifact@v8

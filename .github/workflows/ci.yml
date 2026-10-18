@@ -7,10 +7,17 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest]
         python-version: ["3.11", "3.12", "3.13"]
+        include:  # platform bugs (paths, line endings, git, Pagefind) show up here, not at release
+          - os: macos-latest
+            python-version: "3.13"
+          - os: windows-latest
+            python-version: "3.13"
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
@@ -18,8 +25,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           activate-environment: true  # .venv on PATH for the steps below
       - run: uv sync --locked --extra dev --extra serve --extra search
-      - run: ruff check . && ruff format --check .
-      - run: ty check
+      - if: matrix.os == 'ubuntu-latest'  # Windows checks out CRLF, which a format check flags
+        run: ruff check . && ruff format --check . && ty check
       - run: pytest
 
   e2e:

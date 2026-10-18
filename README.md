@@ -100,9 +100,9 @@ python -m http.server 8002 -d examples/basic/.dokk/build
 ### Releasing
 
 The version comes from the git tag (hatch-vcs); there is nothing to bump. Push a tag such as
-`v0.0.2` and `.github/workflows/release.yml` builds the wheel and sdist, tests the wheel on
-Linux, macOS and Windows, and, once the `pypi` environment is approved, publishes to PyPI and
-creates the GitHub release.
+`v0.0.2` and `.github/workflows/release.yml` builds the wheel and sdist and tests the wheel. Once
+the `pypi` environment is approved, it publishes to PyPI and creates the GitHub release. CI tests
+Linux, macOS and Windows on every push.
 
 ### Vendored assets
 
