@@ -1,0 +1,37 @@
+{# Basecoat docs-style page actions: copy as Markdown (+ menu), previous/next. #}
+{% from 'basecoat/dropdown-menu.html.jinja' import dropdown_menu %}
+{% set icon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' %}
+{% set items = [{'label': 'View as Markdown', 'url': md_url, 'attrs': {'target': '_blank', 'rel': 'noopener'},
+  'icon': icon ~ '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>'}] %}
+{% if ask_url %}
+{% set _ = items.append({'label': 'Open in ChatGPT', 'url': 'https://chatgpt.com/?q=' ~ ask_url, 'attrs': {'target': '_blank', 'rel': 'noopener'}, 'icon': icon ~ '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>'}) %}
+{% set _ = items.append({'label': 'Open in Claude', 'url': 'https://claude.ai/new?q=' ~ ask_url, 'attrs': {'target': '_blank', 'rel': 'noopener'}, 'icon': icon ~ '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>'}) %}
+{% endif %}
+<div class="dk-page-actions" data-pagefind-ignore>
+  <div role="group" class="button-group">
+    <button type="button" class="btn" data-variant="secondary" data-size="sm" data-dk-copy-page="{{ md_url }}">
+      {{ icon | safe }}<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+      Copy page
+    </button>
+    <hr role="separator">
+    {{ dropdown_menu(
+      id='dk-page-actions',
+      trigger=icon ~ '<path d="m6 9 6 6 6-6"/></svg>',
+      items=items,
+      trigger_attrs={'class': 'btn', 'data-variant': 'secondary', 'data-size': 'icon-sm', 'aria-label': 'More page actions'},
+      popover_attrs={'data-align': 'end'},
+    ) }}
+  </div>
+  <div role="group" class="button-group">
+    {% for target, label, path in ((prev, 'Previous', 'm12 19-7-7 7-7M19 12H5'), (next, 'Next', 'M5 12h14M12 5l7 7-7 7')) %}
+    {% if target %}
+    <a href="{{ target.url }}" class="btn" data-variant="secondary" data-size="icon-sm" title="{{ label }}: {{ target.title }}" aria-label="{{ label }}: {{ target.title }}">
+      {{ icon | safe }}<path d="{{ path }}"/></svg>
+    </a>
+    {% else %}
+    <button type="button" class="btn" data-variant="secondary" data-size="icon-sm" disabled aria-label="{{ label }}">{{ icon | safe }}<path d="{{ path }}"/></svg></button>
+    {% endif %}
+    {% if loop.first %}<hr role="separator">{% endif %}
+    {% endfor %}
+  </div>
+</div>

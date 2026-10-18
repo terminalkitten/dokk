@@ -154,3 +154,29 @@ def test_synced_tabs_switch_together_and_persist(page, site: str) -> None:  # ty
     page.wait_for_timeout(100)
     assert page.evaluate(selected) == ["uv", "uv"]  # remembered
     assert page.problems == []
+
+
+def test_page_actions_menu_position_and_no_flicker(page, site: str) -> None:  # type: ignore[no-untyped-def]
+    page.set_viewport_size({"width": 1400, "height": 800})
+    page.goto(site + "/guides/components/")  # has a next page
+    page.add_init_script(
+        """window.__vis = []; const t0 = performance.now();
+        const tick = () => { const el = document.getElementById('dk-page-actions-popover');
+          const shown = el && getComputedStyle(el).visibility === 'visible';
+          if (shown) window.__vis.push(performance.now() - t0);
+          if (performance.now() - t0 < 1000) requestAnimationFrame(tick); };
+        requestAnimationFrame(tick);"""
+    )
+    page.locator('.dk-page-actions a[aria-label^="Next"]').click()
+    page.wait_for_timeout(1100)
+    assert page.evaluate("window.__vis") == []  # the menu never flashes while a page loads
+
+    page.get_by_role("button", name="More page actions").click()
+    page.wait_for_timeout(300)
+    trigger = page.locator("#dk-page-actions-trigger").bounding_box()
+    menu = page.locator("#dk-page-actions-popover").bounding_box()
+    assert 0 <= menu["y"] - (trigger["y"] + trigger["height"]) <= 8  # right under the button
+    assert (
+        abs((menu["x"] + menu["width"]) - (trigger["x"] + trigger["width"])) <= 2
+    )  # right-aligned
+    assert page.problems == []

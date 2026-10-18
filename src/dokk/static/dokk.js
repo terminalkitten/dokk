@@ -90,6 +90,25 @@
     });
   }
 
+  // Copy page: fetch the page's Markdown and put it on the clipboard.
+  const check = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  for (const btn of document.querySelectorAll("[data-dk-copy-page]")) {
+    btn.addEventListener("click", async () => {
+      const url = btn.dataset.dkCopyPage;
+      const icon = btn.querySelector("svg");
+      const original = icon.outerHTML;
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error(res.status);
+        await navigator.clipboard.writeText(await res.text());
+        btn.querySelector("svg").outerHTML = check;
+        setTimeout(() => (btn.querySelector("svg").outerHTML = original), 1200);
+      } catch {
+        window.open(url, "_blank", "noopener"); // no clipboard: show the Markdown instead
+      }
+    });
+  }
+
   // Synced tabs: tab sets with the same data-sync key switch together, and the
   // choice is remembered across pages.
   const synced = [...document.querySelectorAll(".dk-tabs[data-sync]")];

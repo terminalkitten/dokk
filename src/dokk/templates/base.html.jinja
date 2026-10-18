@@ -17,6 +17,12 @@
       var dark = m ? m === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
       document.documentElement.classList.toggle('dark', dark);
     } catch (e) {} })();
+    /* No transitions until the first frame is drawn, so popovers and the sidebar do not
+       animate in from their unstyled state (a flicker on every page load). */
+    document.documentElement.classList.add('dk-preload');
+    addEventListener('load', function () {
+      requestAnimationFrame(function () { document.documentElement.classList.remove('dk-preload'); });
+    });
   </script>
   <link rel="stylesheet" href="{{ asset('vendor/basecoat/basecoat-' ~ site.style ~ '.cdn.min.css') }}">
   <link rel="stylesheet" href="{{ asset('theme.css') }}">

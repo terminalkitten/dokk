@@ -27,7 +27,7 @@ from dokk.menu import (
     submenu_keys,
 )
 from dokk.render import base_env, canonical, make_env, render_template
-from dokk.routes import assign_routes, output_path
+from dokk.routes import assign_routes, markdown_path, output_path, url_for
 from dokk.search import build_index, search_available
 from dokk.seo import last_modified
 from dokk.themes import theme_vars
@@ -128,7 +128,10 @@ def build(
             next=next_,
             canonical=canonical(cfg, page.route),
             edit_url=_edit_url(cfg, page),
+            md_url=url_for(cfg.base_path, "/" + markdown_path(page.route)),
+            ask_url=_ask_url(cfg, page),
         )
+        writer.render(markdown_path(page.route), "files/page.md.jinja", page=page)
 
     writer.render(
         "404.html",
@@ -161,6 +164,12 @@ def build(
     if with_search:
         build_index(out)
     return result
+
+
+def _ask_url(cfg: Config, page: Page) -> str:
+    """URL-encoded prompt for "Open in ChatGPT/Claude"; needs a public site_url."""
+    url = canonical(cfg, page.route)
+    return quote(f"Read from {url} so I can ask questions about it.") if url else ""
 
 
 def _edit_url(cfg: Config, page: Page) -> str:

@@ -32,6 +32,11 @@ def output_path(route: str) -> Path:
     return Path(route.strip("/")) / "index.html"
 
 
+def markdown_path(route: str) -> str:
+    """Where a page's raw Markdown is published: /guides/intro/ -> guides/intro.md."""
+    return (route.strip("/") or "index") + ".md"
+
+
 def url_for(base_path: str, route: str) -> str:
     return base_path + route
 

@@ -11,6 +11,9 @@ html {
   scrollbar-gutter: stable; /* no sideways jump between short and long pages */
 }
 
+/* Set by an inline script until the page has loaded; see base.html.jinja. */
+.dk-preload *, .dk-preload *::before, .dk-preload *::after { transition: none !important; }
+
 body {
   margin: 0;
   font-family: var(--font-sans);
@@ -164,7 +167,7 @@ html.dark .dk-icon-moon { display: none; }
 .dk-prose a:not(.btn) { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
 .dk-prose strong { font-weight: 600; }
 .dk-prose img { max-width: 100%; height: auto; border-radius: var(--radius); }
-.dk-prose hr { border: 0; border-top: 1px solid var(--border); margin: 2rem 0; }
+.dk-prose hr:not([role="separator"]) { border: 0; border-top: 1px solid var(--border); margin: 2rem 0; } /* leave Basecoat button-group separators alone */
 .dk-prose blockquote { border-left: 3px solid var(--border); padding-left: 1rem; color: var(--muted-foreground); }
 .dk-prose dt { font-weight: 600; }
 .dk-prose dd { margin: 0 0 0.75rem 1.5rem; }
@@ -361,3 +364,16 @@ html.dark .dk-search mark { background: oklch(0.45 0.1 95); }
 
 /* Inline badges (:badge[Text]) sit on the text baseline */
 .dk-prose .badge { vertical-align: 0.1em; }
+
+/* Page title row with Basecoat-style page actions */
+.dk-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin: 0 0 1.5rem;
+}
+.dk-prose .dk-page-header h1 { margin: 0; }
+.dk-page-actions { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.375rem; }
+.dk-page-actions [role="menu"] a { text-decoration: none; color: inherit; }

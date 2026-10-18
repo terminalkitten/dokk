@@ -27,7 +27,20 @@ def example(tmp_path: Path) -> Path:
 def test_example_output_files(example: Path) -> None:
     out = build(example, search=False).out_dir
     files = _files(out)
-    assert [f for f in files if not f.startswith("_dokk/")] == [
+    assert [f for f in files if f.endswith(".md")] == [
+        "getting-started.md",
+        "getting-started/configuration.md",
+        "getting-started/install.md",
+        "guides/advanced/deep/nested.md",
+        "guides/components.md",
+        "guides/markdown.md",
+        "guides/secret.md",
+        "guides/writing.md",
+        "index.md",
+        "reference.md",
+        "reference/café-ünïcode.md",
+    ]
+    assert [f for f in files if not f.startswith("_dokk/") and not f.endswith(".md")] == [
         ".nojekyll",
         "404.html",
         "getting-started/configuration/index.html",
@@ -185,3 +198,30 @@ def test_parallel_markdown_matches_serial(example: Path, monkeypatch: pytest.Mon
     serial = snapshot()
     monkeypatch.setattr(build_module, "PARALLEL_MIN_PAGES", 0)
     assert snapshot(parallel=True) == serial
+
+
+def test_page_actions_and_markdown_copy(example: Path) -> None:
+    toml = example / "dokk.toml"
+    toml.write_text(toml.read_text().replace("https://example.com/", "https://example.com/repo/"))
+    out = build(example, search=False).out_dir
+    md = (out / "guides/writing.md").read_text()
+    assert md.startswith("# Writing pages\n\nSee [installation](../getting-started/install.md)")
+    html = (out / "guides/writing/index.html").read_text()
+    header = html[
+        html.index('<header class="dk-page-header">') : html.index(
+            "</header>", html.index("dk-page-header")
+        )
+    ]
+    assert "<h1>Writing pages</h1>" in header
+    assert 'data-dk-copy-page="/repo/guides/writing.md"' in header
+    assert 'href="/repo/guides/writing.md"' in header  # View as Markdown
+    assert (
+        "https://claude.ai/new?q=Read%20from%20https%3A//example.com/repo/guides/writing/" in header
+    )
+    assert 'title="Previous: Nested page"' in header  # sidebar order
+    assert 'disabled aria-label="Next"' in header  # last page
+
+
+def test_no_ai_links_without_site_url(make_site) -> None:
+    html = (build(make_site({"index.md": "# Home\n\nHi"})).out_dir / "index.html").read_text()
+    assert "Open in Claude" not in html and "View as Markdown" in html
