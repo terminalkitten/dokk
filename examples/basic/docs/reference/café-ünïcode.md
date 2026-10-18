@@ -2,4 +2,4 @@
 title: Café ünïcode
 ---
 
-Unicode filename test.
+A unicode file name. Widgets taste best with a café au lait.

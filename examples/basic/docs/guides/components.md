@@ -4,12 +4,12 @@ sidebar:
   order: 2
 ---
 
-Directives turn into static HTML at build time.
+Every component on one page, as a fixture for builds and browser tests.
 
 ## Callouts
 
 :::note
-A note with the default title.
+Widgets ship fully assembled, mostly.
 :::
 
 :::tip[Pro tip]
@@ -17,7 +17,7 @@ Callouts can hold **Markdown**, `code` and [links](../getting-started/install.md
 :::
 
 :::caution
-Careful now.
+Do not overtighten the sprocket.
 :::
 
 :::danger[Do not <script>]
@@ -26,15 +26,15 @@ Titles are escaped.
 
 ## Tabs
 
-::::tabs
-:::tab[pip]
+::::tabs{sync="pkg"}
+:::tab[npm]
 ```sh
-pip install dokk
+npm install acme-widgets
 ```
 :::
-:::tab[uv]
+:::tab[yarn]
 ```sh
-uv pip install dokk
+yarn add acme-widgets
 ```
 :::
 ::::
@@ -52,11 +52,28 @@ Directives nest inside tabs.
 ::::
 :::::
 
+## Synced tabs
+
+Same `sync` key as the install tabs above: they switch together.
+
+::::tabs{sync="pkg"}
+:::tab[npm]
+```sh
+npm run build
+```
+:::
+:::tab[yarn]
+```sh
+yarn build
+```
+:::
+::::
+
 ## Cards
 
 ::::cards
 :::card[Quick start]{href="../getting-started/index.md"}
-Install and build your first site.
+Unbox your first widget.
 :::
 :::card[Writing]{href="/guides/writing/"}
 Pages, links and images.
@@ -69,27 +86,42 @@ A plain card.
 ## Steps
 
 :::steps
-1. Install dokk.
-2. Run `dokk init`.
-3. Run `dokk build` and open `dist/`.
+1. Unbox the widget.
+2. Tighten the bolts.
+3. Press the big red button.
 :::
 
-## Synced tabs
+## Details
 
-::::tabs{sync="pkg"}
-:::tab[pip]
-`pip install dokk`
+:::details[What is inside the box?]
+One widget, two bolts and a slightly crumpled manual.
 :::
-:::tab[uv]
-`uv pip install dokk`
-:::
-::::
 
-::::tabs{sync="pkg"}
-:::tab[pip]
-`pip install "dokk[search]"`
+## Badges
+
+The sprocket :badge[New] spins :badge[Beta]{variant="secondary"} and the anvil
+:badge[Heavy]{variant="outline"} is :badge[Deprecated]{variant="danger"}.
+
+## File tree
+
+:::filetree
+- widget.toml
+- **src**
+  - sprocket.py the main part
+  - gears/
+  - …
+- `READ ME.md`
 :::
-:::tab[uv]
-`uv pip install "dokk[search]"`
-:::
-::::
+
+## Link buttons
+
+::linkbutton[Get started]{href="../getting-started/index.md"}
+::linkbutton[Acme on GitHub]{href="https://github.com/acme/widgets" variant="secondary"}
+::linkbutton[Order spare parts]{href="https://example.com" variant="minimal"}
+
+## Code
+
+```python title="sprocket.py" {2}
+def spin(speed: int) -> str:
+    return "whirr" * speed
+```

@@ -1,5 +1,5 @@
-title = "dokk example"
-description = "Fixture site for dokk acceptance checks"
+title = "Acme Widgets"
+description = "Docs for the Acme Widgets toolkit (a fictional example site)"
 site_url = "https://example.com/"
 
 [theme]
@@ -7,4 +7,4 @@ style = "vega"
 color = "pink"
 
 [links]
-github = "https://github.com/example/dokk"
+github = "https://github.com/acme/widgets"

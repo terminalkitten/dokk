@@ -146,13 +146,13 @@ def test_synced_tabs_switch_together_and_persist(page, site: str) -> None:  # ty
         "() => [...document.querySelectorAll('.dk-tabs[data-sync] [aria-selected=true][role=tab]')]"
         ".map(t => t.textContent.trim())"
     )
-    assert page.evaluate(selected) == ["pip", "pip"]
-    page.locator(".dk-tabs[data-sync] [role=tab]", has_text="uv").first.click()
-    assert page.evaluate(selected) == ["uv", "uv"]  # both sets switched
+    assert page.evaluate(selected) == ["npm", "npm"]
+    page.locator(".dk-tabs[data-sync] [role=tab]", has_text="yarn").first.click()
+    assert page.evaluate(selected) == ["yarn", "yarn"]  # both sets switched
     page.reload()
     page.wait_for_function("document.querySelector('.dk-tabs[data-sync]')?.dataset.tabsInitialized")
     page.wait_for_timeout(100)
-    assert page.evaluate(selected) == ["uv", "uv"]  # remembered
+    assert page.evaluate(selected) == ["yarn", "yarn"]  # remembered
     assert page.problems == []
 
 

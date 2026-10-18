@@ -1,11 +1,11 @@
-<p>Everything dokk renders at build time, with “smart quotes” – and no client-side parser.</p>
+<p>Everything a widget manual needs, with “smart quotes” – and no client-side parser.</p>
 <h2 id="code">Code <a class="header-anchor" href="#code">#</a></h2>
 <p>Python:</p>
-<pre class="code hl"><code class="language-python"><span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!"</span>
+<pre class="code hl"><code class="language-python"><span class="k">def</span><span class="w"> </span><span class="nf">assemble</span><span class="p">(</span><span class="n">widget</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Assembled </span><span class="si">{</span><span class="n">widget</span><span class="si">}</span><span class="s2">!"</span>
 </code></pre>
 <p>JavaScript:</p>
-<pre class="code hl"><code class="language-js"><span class="kd">const</span><span class="w"> </span><span class="nx">greet</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">name</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="sb">`Hello, </span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb">!`</span><span class="p">;</span>
+<pre class="code hl"><code class="language-js"><span class="kd">const</span><span class="w"> </span><span class="nx">assemble</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">widget</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="sb">`Assembled </span><span class="si">${</span><span class="nx">widget</span><span class="si">}</span><span class="sb">!`</span><span class="p">;</span>
 </code></pre>
 <p>Inline <code>code</code> and an unknown language:</p>
 <pre class="code hl"><code class="language-nosuchlang">plain text
@@ -14,28 +14,28 @@
 <div class="table-container"><table class="table">
 <thead>
 <tr>
-<th>Feature</th>
+<th>Widget</th>
 <th>Status</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Tables</td>
-<td><s>planned</s> done</td>
+<td>Sprocket</td>
+<td><s>planned</s> shipped</td>
 </tr>
 <tr>
-<td>Footnotes</td>
-<td>done<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></td>
+<td>Anvil</td>
+<td>heavy<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></td>
 </tr>
 </tbody>
 </table>
 </div><ul class="contains-task-list">
-<li class="task-list-item"><label><input class="task-list-item-checkbox" checked="checked" disabled="disabled" type="checkbox"> Task lists</label></li>
-<li class="task-list-item"><label><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Directives (Phase 3)</label></li>
+<li class="task-list-item"><label><input class="task-list-item-checkbox" checked="checked" disabled="disabled" type="checkbox"> Tighten bolts</label></li>
+<li class="task-list-item"><label><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Paint it beige</label></li>
 </ul>
 <dl>
-<dt>Term</dt>
-<dd>Definition lists work too.</dd>
+<dt>Gizmo</dt>
+<dd>A widget that does one thing, loudly.</dd>
 </dl>
 <h3 id="links-and-images">Links and images <a class="header-anchor" href="#links-and-images">#</a></h3>
 <p>Read <a href="/repo/getting-started/install/#requirements">installation</a>, <a href="/repo/">the home page</a>,
@@ -46,7 +46,7 @@ an <a href="/repo/getting-started/">absolute link</a> and <a href="https://examp
 <hr class="footnotes-sep" />
 <section class="footnotes">
 <ol class="footnotes-list">
-<li id="fn1" class="footnote-item"><p>Footnotes render at the bottom of the page. <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+<li id="fn1" class="footnote-item"><p>About 50 kg. Do not drop on feet. <a href="#fnref1" class="footnote-backref">↩︎</a></p>
 </li>
 </ol>
 </section>

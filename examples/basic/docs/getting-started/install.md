@@ -9,8 +9,19 @@ sidebar:
 
 ## Requirements
 
-Python 3.11 or newer.
+A flat surface and a widget kit, version 3 or newer.
 
 ## Install
 
-Run `pip install dokk`.
+::::tabs{sync="pkg"}
+:::tab[npm]
+```sh
+npm install acme-widgets
+```
+:::
+:::tab[yarn]
+```sh
+yarn add acme-widgets
+```
+:::
+::::

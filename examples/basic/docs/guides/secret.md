@@ -4,4 +4,4 @@ sidebar:
   hidden: true
 ---
 
-Built, but not in the menu.
+The recipe for the self-assembling widget. Built, but not in the menu.

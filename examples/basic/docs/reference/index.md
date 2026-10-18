@@ -5,4 +5,4 @@ sidebar:
   order: 2
 ---
 
-Labels must be escaped everywhere.
+Labels must be escaped everywhere. This title is an escaping test on purpose.

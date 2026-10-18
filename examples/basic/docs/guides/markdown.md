@@ -4,21 +4,21 @@ sidebar:
   order: 1
 ---
 
-Everything dokk renders at build time, with "smart quotes" -- and no client-side parser.
+Everything a widget manual needs, with "smart quotes" -- and no client-side parser.
 
 ## Code
 
 Python:
 
 ```python
-def greet(name: str) -> str:
-    return f"Hello, {name}!"
+def assemble(widget: str) -> str:
+    return f"Assembled {widget}!"
 ```
 
 JavaScript:
 
 ```js
-const greet = (name) => `Hello, ${name}!`;
+const assemble = (widget) => `Assembled ${widget}!`;
 ```
 
 Inline `code` and an unknown language:
@@ -29,16 +29,16 @@ plain text
 
 ## Tables and lists
 
-| Feature | Status |
+| Widget | Status |
 |---|---|
-| Tables | ~~planned~~ done |
-| Footnotes | done[^1] |
+| Sprocket | ~~planned~~ shipped |
+| Anvil | heavy[^1] |
 
-- [x] Task lists
-- [ ] Directives (Phase 3)
+- [x] Tighten bolts
+- [ ] Paint it beige
 
-Term
-: Definition lists work too.
+Gizmo
+: A widget that does one thing, loudly.
 
 ### Links and images
 
@@ -51,4 +51,4 @@ an [absolute link](/getting-started/) and [an external one](https://example.com)
 
 A heading named "Sidebar" must not clash with the layout's sidebar id.
 
-[^1]: Footnotes render at the bottom of the page.
+[^1]: About 50 kg. Do not drop on feet.

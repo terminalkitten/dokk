@@ -3,4 +3,4 @@ title: Draft page
 draft: true
 ---
 
-Only built with `--drafts`.
+The widget of the future. Only built with `--drafts`.
