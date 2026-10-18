@@ -105,7 +105,7 @@ def is_input(path: Path, inputs: list[Path]) -> bool:
     return any(path == p or path.is_relative_to(p) for p in inputs)
 
 
-def serve(root: Path, port: int = 8000, search: bool = False) -> None:
+def serve(root: Path, port: int = 8002, search: bool = False) -> None:
     try:
         from watchfiles import watch
     except ImportError:

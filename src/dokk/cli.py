@@ -79,7 +79,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     serve_cmd = sub.add_parser("serve", help="dev server with live reload (includes drafts)")
     serve_cmd.add_argument("--root", default=".", help="site root (default: .)")
-    serve_cmd.add_argument("--port", type=int, default=8000, help="port (default: 8000)")
+    serve_cmd.add_argument("--port", type=int, default=8002, help="port (default: 8002)")
     serve_cmd.add_argument(
         "--search", action="store_true", help="build the search index on every rebuild"
     )

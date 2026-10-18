@@ -34,7 +34,7 @@ The `serve` extra adds the dev server, `search` adds the Pagefind index. Both ar
    dokk init --root my-docs
    ```
 
-2. Start the dev server and open <http://127.0.0.1:8000/>:
+2. Start the dev server and open <http://127.0.0.1:8002/>:
 
    ```sh
    dokk serve --root my-docs
