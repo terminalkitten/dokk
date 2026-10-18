@@ -1,0 +1,8 @@
+{# Logo (public/logo.svg, plus public/logo-dark.svg for dark mode) and site title. #}
+{% if site.logo %}
+<img class="dk-logo{{ ' dk-logo-light' if site.logo_dark }}" src="{{ site.logo }}" alt="">
+{% endif %}
+{% if site.logo_dark %}
+<img class="dk-logo dk-logo-dark" src="{{ site.logo_dark }}" alt="">
+{% endif %}
+<span>{{ site.title }}</span>

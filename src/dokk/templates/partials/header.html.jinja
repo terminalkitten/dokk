@@ -2,7 +2,7 @@
   <button type="button" class="btn dk-menu-button" data-variant="ghost" data-size="icon" aria-label="Toggle menu" aria-controls="dk-sidebar" onclick="document.getElementById('dk-sidebar')?.toggle()">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
   </button>
-  <a class="dk-header-title" href="{{ url('/') }}">{{ site.title }}</a>
+  <a class="dk-header-title" href="{{ url('/') }}">{% include 'partials/brand.html.jinja' %}</a>
   <div class="dk-header-actions">
     {% if search %}
     <button type="button" class="btn dk-search-button" data-variant="outline" data-dk-search aria-label="Search" aria-haspopup="dialog">

@@ -53,6 +53,7 @@ def test_example_output_files(example: Path) -> None:
         "guides/secret/index.html",  # hidden from the menu, still built
         "guides/writing/index.html",
         "index.html",
+        "logo.svg",  # from public/
         "reference/café-ünïcode/index.html",
         "reference/index.html",
         "robots.txt",

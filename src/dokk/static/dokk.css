@@ -42,6 +42,9 @@ body {
 }
 
 .dk-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 600;
   color: inherit;
   text-decoration: none;
@@ -55,12 +58,23 @@ body {
 }
 
 .dk-brand {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.5rem;
   font-weight: 600;
   color: inherit;
   text-decoration: none;
 }
+
+/* Site logo next to the title; a logo-dark variant swaps in for dark mode. */
+.dk-logo {
+  height: 1.5rem;
+  width: auto;
+}
+.dk-logo-dark { display: none; }
+html.dark .dk-logo-light { display: none; }
+html.dark .dk-logo-dark { display: block; }
 
 /* Theme toggle: show the icon for the mode you would switch to. */
 .dk-icon-sun { display: none; }

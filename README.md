@@ -1,4 +1,10 @@
-# dokk
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/terminalkitten/dokk/main/public/logo-dark.svg">
+    <img src="https://raw.githubusercontent.com/terminalkitten/dokk/main/public/logo.svg" alt="" width="32" height="32">
+  </picture>
+  dokk
+</h1>
 
 A small static documentation generator. Folders of Markdown become a fast static site with a
 sidebar, search, dark mode and code highlighting, styled with [Basecoat](https://basecoatui.com).

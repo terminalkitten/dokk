@@ -25,7 +25,10 @@ def base_env(user_templates: Path | None = None) -> Environment:
     )
 
 
+# Picked up from public/ when present, first match wins.
 FAVICONS = ("favicon.svg", "favicon.ico", "favicon.png")
+LOGOS = ("logo.svg", "logo.png")
+DARK_LOGOS = ("logo-dark.svg", "logo-dark.png")
 
 
 def make_env(cfg: Config, dev: bool = False, search: bool = False) -> Environment:
@@ -36,6 +39,9 @@ def make_env(cfg: Config, dev: bool = False, search: bool = False) -> Environmen
 
     def asset(path: str) -> str:
         return url(f"/{ASSETS_DIR}/{path}")
+
+    def public(names: tuple[str, ...]) -> str:
+        return next((url(f"/{n}") for n in names if (cfg.root / "public" / n).is_file()), "")
 
     template_globals: dict[str, Any] = dict(
         url=url,
@@ -49,14 +55,18 @@ def make_env(cfg: Config, dev: bool = False, search: bool = False) -> Environmen
             "site_url": cfg.site_url,
             "links": cfg.links,
             "style": cfg.theme.get("style", "vega"),
-            "favicon": next(
-                (url(f"/{f}") for f in FAVICONS if (cfg.root / "public" / f).is_file()), ""
-            ),
+            "favicon": public(FAVICONS),
+            "logo": public(LOGOS),
+            "logo_dark": public(DARK_LOGOS),
         },
-        # The sidebar macro emits `header` with |safe, so build it as escaped Markup.
-        sidebar_header=Markup('<a class="dk-brand" href="{}">{}</a>').format(url("/"), cfg.title),
     )
     env.globals.update(template_globals)
+    # The sidebar macro emits `header` with |safe; the template escapes the title.
+    brand = Markup(render_template(env, "partials/brand.html.jinja"))
+    header: dict[str, Any] = {
+        "sidebar_header": Markup('<a class="dk-brand" href="{}">{}</a>').format(url("/"), brand)
+    }
+    env.globals.update(header)
     return env
 
 

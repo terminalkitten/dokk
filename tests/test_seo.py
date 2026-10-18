@@ -166,3 +166,21 @@ def test_style_and_color_theme(make_site) -> None:
     html = (out / "index.html").read_text()
     order = [html.index(n) for n in ("basecoat-rhea.cdn.min.css", "theme.css", "dokk.css")]
     assert order == sorted(order)  # theme after the style pack, as Basecoat documents
+
+
+def test_logo_from_public(make_site) -> None:
+    root = make_site({"index.md": "x"}, 'title = "<T>"\nsite_url = "https://x.io/repo/"\n')
+    out = build(root).out_dir
+    assert "dk-logo" not in (out / "index.html").read_text()  # no logo, title only
+
+    (root / "public").mkdir()
+    (root / "public" / "logo.svg").write_text("<svg/>")
+    html = (build(root).out_dir / "index.html").read_text()
+    logo = '<img class="dk-logo" src="/repo/logo.svg" alt="">'
+    assert html.count(logo) == 2  # top bar and sidebar header
+    assert html.count("<span>&lt;T&gt;</span>") == 2
+
+    (root / "public" / "logo-dark.svg").write_text("<svg/>")
+    html = (build(root).out_dir / "index.html").read_text()
+    assert html.count('<img class="dk-logo dk-logo-light" src="/repo/logo.svg" alt="">') == 2
+    assert html.count('<img class="dk-logo dk-logo-dark" src="/repo/logo-dark.svg" alt="">') == 2

@@ -52,6 +52,10 @@ See [installation](../getting-started/index.md#install).
 Files next to your Markdown (images, PDFs, …) are copied to the site. Files in `public/` are copied to
 the site root, for example `favicon.svg` or `CNAME`.
 
+A `public/logo.svg` (or `logo.png`) is shown next to the site title. Add `public/logo-dark.svg` for a
+version that suits dark mode. A `favicon.svg` can follow the browser's theme with a
+`@media (prefers-color-scheme: dark)` rule inside the SVG.
+
 :::caution
 Links written as raw HTML (`<a href>`, `<img src>`) are not rewritten. Use Markdown syntax.
 :::
