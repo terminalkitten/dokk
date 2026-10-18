@@ -1,14 +1,14 @@
 # dokk's own documentation, built with dokk.
 title = "dokk"
 description = "A small static documentation generator: Markdown folders in, a fast static site out."
-site_url = "https://example.github.io/dokk/"  # placeholder: set to the real Pages URL
+site_url = "https://terminalkitten.github.io/dokk/"
 content_dir = "docs"
 
 [theme]
 style = "vega"
-color = "pink"
+color = "blue"
 
-# Sidebar: pages, generated folders and external links. Leave out for a fully automatic menu.
+# Sidebar: pages, generated folders and external links.
 [[sidebar]]
 label = "Start"
 items = ["index.md", "getting-started/index.md"]
