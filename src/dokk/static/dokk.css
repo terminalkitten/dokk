@@ -197,14 +197,21 @@ html.dark .dk-icon-moon { display: none; }
 .dk-prose .footnotes { font-size: 0.875rem; color: var(--muted-foreground); }
 .dk-prose .footnote-ref a, .dk-prose .footnote-backref { text-decoration: none; }
 
-/* Callouts (Basecoat .alert) */
-.dk-prose .dk-callout { margin: 0 0 1.25rem; border-left: 4px solid var(--dk-callout-color); }
-.dk-callout[data-callout="note"] { --dk-callout-color: oklch(0.62 0.17 255); }
-.dk-callout[data-callout="tip"] { --dk-callout-color: oklch(0.65 0.16 150); }
-.dk-callout[data-callout="caution"] { --dk-callout-color: oklch(0.75 0.16 75); }
-.dk-callout[data-callout="danger"] { --dk-callout-color: oklch(0.6 0.22 25); }
-.dk-callout > svg { color: var(--dk-callout-color); }
+/* Callouts follow Basecoat's alert: note and tip are the default alert, danger is the
+   destructive variant, caution uses Basecoat's amber "custom colors" example. */
+.dk-prose .dk-callout { margin: 0 0 1.25rem; }
 .dk-prose .dk-callout > section > :last-child { margin-bottom: 0; }
+.dk-callout[data-callout="caution"] {
+  border-color: oklch(0.924 0.12 95.746);   /* amber-200 */
+  background: oklch(0.987 0.022 95.277);    /* amber-50 */
+  color: oklch(0.414 0.112 45.904);         /* amber-900 */
+}
+html.dark .dk-callout[data-callout="caution"] {
+  border-color: oklch(0.414 0.112 45.904);  /* amber-900 */
+  background: oklch(0.279 0.077 45.635);    /* amber-950 */
+  color: oklch(0.987 0.022 95.277);         /* amber-50 */
+}
+.dk-callout[data-callout="caution"] > section { color: inherit; }
 
 /* Tabs (Basecoat .tabs) */
 .dk-prose .dk-tabs { margin: 0 0 1.25rem; }
