@@ -33,7 +33,7 @@ def check(root: Path) -> list[Issue]:
     """Production build into a temp dir, then crawl it for broken links, anchors and assets."""
     with tempfile.TemporaryDirectory() as tmp:
         try:
-            result = build(root, out_dir=Path(tmp) / "site", search=False)
+            result = build(root, out_dir=Path(tmp) / "site", search=False, parallel=True)
         except DokkError as e:  # duplicate routes, bad front matter, unknown directives...
             return [Issue("error", "", str(e))]
 
@@ -79,8 +79,12 @@ def check(root: Path) -> list[Issue]:
                     and unquote(fragment) not in ids_of(target)
                 ):
                     issues.append(Issue("error", source, f"missing anchor: {url}"))
-        # ponytail: no orphan check; with the auto-generated menu every page is reachable
-        # unless hidden on purpose. Add it with explicit sidebar config (backlog).
+        if result.cfg.sidebar:  # the automatic menu always lists every non-hidden page
+            in_menu = set(result.menu_pages)
+            for page in result.pages:
+                if page not in in_menu and not page.sidebar.get("hidden"):
+                    msg = "not in the sidebar (add it, or set sidebar.hidden: true)"
+                    issues.append(Issue("warning", page.rel.as_posix(), msg))
         return issues
 
 

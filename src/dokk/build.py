@@ -1,22 +1,40 @@
+import os
+import re
 import shutil
+from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures.process import BrokenProcessPool
 from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import quote
 
 from jinja2 import Environment
+from markupsafe import Markup
 
 from dokk.assets import ASSETS_DIR, copy_page_assets, copy_public, copy_static
 from dokk.config import Config, load_config
 from dokk.content import Page, scan
-from dokk.markdown import Renderer, pygments_css
-from dokk.menu import breadcrumbs, build_menu, ordered_pages, prev_next
-from dokk.render import canonical, make_env, render_template
+from dokk.llms import llms_full_txt, llms_txt
+from dokk.markdown import Rendered, Renderer, pygments_css
+from dokk.menu import (
+    Nav,
+    Pager,
+    auto_nav,
+    breadcrumbs,
+    build_menu,
+    config_nav,
+    mark_current,
+    ordered_pages,
+    submenu_keys,
+)
+from dokk.render import base_env, canonical, make_env, render_template
 from dokk.routes import assign_routes, output_path
 from dokk.search import build_index, search_available
 from dokk.seo import last_modified, robots, sitemap
-from dokk.tree import Node, build_tree
+from dokk.tree import build_tree
 
 NOT_FOUND = Path("404.md")
+# ponytail: below this, starting worker processes costs more than it saves.
+PARALLEL_MIN_PAGES = 200
 
 
 def _write(path: Path, text: str) -> None:
@@ -41,11 +59,14 @@ def build(
     dev: bool = False,
     out_dir: Path | None = None,
     search: bool | None = None,
+    parallel: bool = False,
 ) -> BuildResult:
     """Build the site.
 
     `dev` drops base_path and injects the reload script. `search` overrides
     `search.enabled` from dokk.toml (default on when pagefind is installed).
+    `parallel` renders Markdown in worker processes on big sites; the caller's main
+    module must be import-safe (an `if __name__ == "__main__"` guard), as the CLI is.
     """
     cfg = load_config(root, dev=dev)
     want_search = bool(cfg.search.get("enabled", True)) if search is None else search
@@ -56,7 +77,13 @@ def build(
     assign_routes(pages, cfg.base_path)
 
     tree = build_tree(pages)
-    order = ordered_pages(tree)
+    if cfg.sidebar:
+        by_rel = {p.rel.as_posix(): p for p in pages}
+        nav = config_nav(cfg.sidebar, tree, by_rel, cfg.content_dir, cfg.base_path)
+    else:
+        nav = auto_nav(tree)
+    order = ordered_pages(nav)
+    pager = Pager(order)
     index_pages = {p.rel.parent: p for p in pages if p.rel.stem == "index"}
     env = make_env(cfg, dev=dev, search=with_search)
     page_urls = {p.rel.as_posix(): p.url for p in pages}
@@ -77,19 +104,20 @@ def build(
         pygments_css(cfg.theme["code_light"], cfg.theme["code_dark"]),
     )
 
-    for page in pages:
-        rendered = renderer.render(page.body, page.rel, page.line_offset)
+    sidebar = Sidebar(env, nav)
+    all_rendered = _render_markdown(cfg, page_urls, pages, renderer, parallel)
+    for page, rendered in zip(pages, all_rendered, strict=True):
         page.html, page.toc = rendered.html, rendered.toc
         page.description = page.description or rendered.description
         page.updated = updated[page.rel]
         if rendered.broken:
             result.broken[page.rel] = rendered.broken
-        prev, next_ = prev_next(order, page)
+        prev, next_ = pager(page)
         html = render_template(
             env,
             "page.html.jinja",
             page=page,
-            menu=build_menu(tree, page.route),
+            sidebar_html=sidebar.for_page(page),
             crumbs=breadcrumbs(page, index_pages),
             prev=prev,
             next=next_,
@@ -98,13 +126,22 @@ def build(
         )
         _write(out / output_path(page.route), html)
 
-    _write(out / "404.html", _render_404(env, tree, not_found, renderer))
+    _write(out / "404.html", _render_404(env, sidebar, not_found, renderer))
     _write(out / ".nojekyll", "")
     if cfg.site_url:
         indexed = [(canonical(cfg, p.route), p.updated) for p in pages if not p.noindex]
         _write(out / "sitemap.xml", sitemap(sorted(indexed, key=lambda e: e[0])))
     if not (out / "robots.txt").exists():  # a robots.txt in public/ wins
         _write(out / "robots.txt", robots(canonical(cfg, "/sitemap.xml")))
+    if cfg.llms.get("enabled"):
+
+        def absolute(p: Page) -> str:
+            return canonical(cfg, p.route) or p.url
+
+        _write(out / "llms.txt", llms_txt(cfg, nav, absolute))
+        in_menu = set(order)
+        rest = [p for p in pages if p not in in_menu]  # hidden pages last
+        _write(out / "llms-full.txt", llms_full_txt(cfg, order + rest, absolute))
     if with_search:
         build_index(out)
     return result
@@ -115,7 +152,62 @@ def _edit_url(cfg: Config, page: Page) -> str:
     return template.replace("{path}", quote(page.rel.as_posix())) if template else ""
 
 
-def _render_404(env: Environment, tree: Node, page: Page | None, renderer: Renderer) -> str:
+_worker_renderer: Renderer | None = None
+
+
+def _init_worker(page_urls: dict[str, str], content_dir: Path, base_path: str, root: Path) -> None:
+    global _worker_renderer
+    _worker_renderer = Renderer(page_urls, content_dir, base_path, base_env(root / "templates"))
+
+
+def _render_in_worker(job: tuple[str, Path, int]) -> Rendered:
+    assert _worker_renderer
+    return _worker_renderer.render(*job)
+
+
+def _render_markdown(
+    cfg: Config, page_urls: dict[str, str], pages: list[Page], renderer: Renderer, parallel: bool
+) -> list[Rendered]:
+    """Markdown is the slowest step and pages are independent: use all cores on big sites."""
+    jobs = [(p.body, p.rel, p.line_offset) for p in pages]
+    workers = os.cpu_count() or 1
+    if parallel and len(pages) >= PARALLEL_MIN_PAGES and workers > 1:
+        initargs = (page_urls, cfg.content_dir, cfg.base_path, cfg.root)
+        chunk = max(1, len(jobs) // (workers * 4))
+        try:
+            with ProcessPoolExecutor(workers, initializer=_init_worker, initargs=initargs) as pool:
+                return list(pool.map(_render_in_worker, jobs, chunksize=chunk))
+        except BrokenProcessPool:
+            pass  # e.g. an unguarded __main__; fall back to one process
+    return [renderer.render(*job) for job in jobs]
+
+
+class Sidebar:
+    """Renders the sidebar once; each page then gets its current link and open submenus.
+
+    Re-rendering ~1000 menu items for each of ~1000 pages was most of the build time.
+    """
+
+    def __init__(self, env: Environment, nav: list[Nav]) -> None:
+        keys, self.around = submenu_keys(nav)
+        html = render_template(env, "partials/sidebar.html.jinja", menu=build_menu(nav, keys))
+        # The macro's indentation is about half the bytes, and it is repeated on every page.
+        self.html = re.sub(r"\s+", " ", html)  # safe: the sidebar has no <pre>
+
+    def for_page(self, page: Page | None) -> Markup:
+        around = self.around.get(id(page)) if page else None
+        if around is None:  # not in the menu
+            return Markup(self.html)
+        return Markup(mark_current(self.html, page.url, around))  # type: ignore[union-attr]
+
+
+def _render_404(env: Environment, sidebar: Sidebar, page: Page | None, renderer: Renderer) -> str:
     body = renderer.render(page.body, page.rel, page.line_offset).html if page else ""
     title = page.title if page else "Page not found"
-    return render_template(env, "404.html.jinja", title=title, body=body, menu=build_menu(tree, ""))
+    return render_template(
+        env,
+        "404.html.jinja",
+        title=title,
+        body=body,
+        sidebar_html=sidebar.for_page(None),
+    )

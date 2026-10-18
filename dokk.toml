@@ -4,3 +4,24 @@ description = "A small static documentation generator: Markdown folders in, a fa
 site_url = "https://example.github.io/dokk/"  # placeholder: set to the real Pages URL
 content_dir = "docs"
 out_dir = "_site"  # not dist/: that holds Python build artifacts
+
+# Sidebar: pages, generated folders and external links. Leave out for a fully automatic menu.
+[[sidebar]]
+label = "Start"
+items = ["index.md", "getting-started/index.md"]
+
+[[sidebar]]
+autogenerate = "guides"
+
+[[sidebar]]
+autogenerate = "reference"
+
+[[sidebar]]
+label = "Links"
+items = [
+  { label = "Basecoat", link = "https://basecoatui.com" },
+  { label = "Pagefind", link = "https://pagefind.app" },
+]
+
+[llms]
+enabled = true  # writes llms.txt and llms-full.txt

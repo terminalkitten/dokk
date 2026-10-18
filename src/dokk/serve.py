@@ -27,7 +27,14 @@ class DevState:
     def rebuild(self) -> None:
         with self.lock:
             try:
-                build(self.root, drafts=True, dev=True, out_dir=self.out, search=self.search)
+                build(
+                    self.root,
+                    drafts=True,
+                    dev=True,
+                    out_dir=self.out,
+                    search=self.search,
+                    parallel=True,
+                )
                 self.error = None
                 print(f"Built (version {self.version + 1})", flush=True)
             except Exception as e:  # show any failure in the browser, keep serving

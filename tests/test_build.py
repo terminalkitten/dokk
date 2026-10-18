@@ -167,3 +167,15 @@ def test_cli_init_then_build(tmp_path: Path) -> None:
     assert main(["build", "--root", str(tmp_path)]) == 0
     assert (tmp_path / "dist" / "index.html").is_file()
     assert main(["init", "--root", str(tmp_path)]) == 1  # refuses to overwrite
+
+
+def test_parallel_markdown_matches_serial(example: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import dokk.build as build_module
+
+    def snapshot(**kw: object) -> dict[str, bytes]:
+        out = build(example, search=False, **kw).out_dir  # type: ignore[arg-type]
+        return {f: (out / f).read_bytes() for f in _files(out)}
+
+    serial = snapshot()
+    monkeypatch.setattr(build_module, "PARALLEL_MIN_PAGES", 0)
+    assert snapshot(parallel=True) == serial

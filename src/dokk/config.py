@@ -20,6 +20,8 @@ _KNOWN_KEYS = {
     "theme",
     "links",
     "search",
+    "sidebar",
+    "llms",
 }
 
 
@@ -40,6 +42,8 @@ class Config:
     theme: dict[str, Any] = field(default_factory=dict)
     links: dict[str, Any] = field(default_factory=dict)
     search: dict[str, Any] = field(default_factory=dict)
+    sidebar: list[Any] = field(default_factory=list)  # empty: generate from folders
+    llms: dict[str, Any] = field(default_factory=dict)
 
 
 def _str(data: dict[str, Any], key: str, default: str) -> str:
@@ -100,6 +104,10 @@ def load_config(root: Path, dev: bool = False) -> Config:
                 f"{CONFIG_FILE}: unknown Pygments style {theme[key]!r} for theme.{key}"
             ) from None
 
+    sidebar = data.get("sidebar", [])
+    if not isinstance(sidebar, list):
+        raise ConfigError(f"{CONFIG_FILE}: 'sidebar' must be a list ([[sidebar]] tables)")
+
     return Config(
         root=root,
         title=title,
@@ -112,4 +120,6 @@ def load_config(root: Path, dev: bool = False) -> Config:
         theme=theme,
         links=_table(data, "links"),
         search=_table(data, "search"),
+        sidebar=sidebar,
+        llms=_table(data, "llms"),
     )

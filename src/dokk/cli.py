@@ -75,7 +75,7 @@ def cmd_init(args: argparse.Namespace) -> int:
 
 
 def cmd_build(args: argparse.Namespace) -> int:
-    result = build(Path(args.root), drafts=args.drafts)
+    result = build(Path(args.root), drafts=args.drafts, parallel=True)
     for rel, hrefs in result.broken.items():
         for href in hrefs:
             print(f"warning: {rel.as_posix()}: broken link {href!r}", file=sys.stderr)

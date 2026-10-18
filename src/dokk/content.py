@@ -9,6 +9,7 @@ import yaml
 from dokk import DokkError
 
 _FRONT_MATTER = re.compile(r"\A---[ \t]*\r?\n(.*?\r?\n)?---[ \t]*(?:\r?\n|\Z)", re.DOTALL)
+_YAML_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)  # C loader is much faster
 _LEADING_H1 = re.compile(r"\A\s*#[ \t]+(.+?)[ \t#]*(?:\r?\n|\Z)")
 
 
@@ -16,7 +17,7 @@ class ContentError(DokkError):
     pass
 
 
-@dataclass
+@dataclass(eq=False)  # pages compare by identity: cheap, and two pages are never "equal"
 class Page:
     src: Path  # absolute source path
     rel: Path  # relative to content_dir, e.g. guides/intro.md
@@ -52,7 +53,7 @@ def split_front_matter(text: str, src: Path) -> tuple[dict[str, Any], str]:
     if not match:
         return {}, text
     try:
-        meta = yaml.safe_load(match.group(1) or "") or {}
+        meta = yaml.load(match.group(1) or "", Loader=_YAML_LOADER) or {}
     except yaml.YAMLError as e:
         raise ContentError(f"{src}: invalid front matter: {e}") from e
     if not isinstance(meta, dict):

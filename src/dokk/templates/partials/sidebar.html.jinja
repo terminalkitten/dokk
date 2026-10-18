@@ -1,0 +1,3 @@
+{% from 'basecoat/sidebar.html.jinja' import sidebar %}
+{# Rendered once per set of open submenus, not once per page; see build.py. #}
+{{ sidebar(id='dk-sidebar', label='Documentation', header=sidebar_header, menu=menu) }}
