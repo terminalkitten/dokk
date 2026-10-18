@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 from markupsafe import Markup
@@ -23,7 +24,10 @@ def base_env(user_templates: Path | None = None) -> Environment:
     )
 
 
-def make_env(cfg: Config, dev: bool = False) -> Environment:
+FAVICONS = ("favicon.svg", "favicon.ico", "favicon.png")
+
+
+def make_env(cfg: Config, dev: bool = False, search: bool = False) -> Environment:
     env = base_env(cfg.root / "templates")
 
     def url(route: str) -> str:
@@ -36,12 +40,16 @@ def make_env(cfg: Config, dev: bool = False) -> Environment:
         url=url,
         asset=asset,
         dev=dev,
+        search=search,
         site={
             "title": cfg.title,
             "description": cfg.description,
             "lang": cfg.lang,
             "site_url": cfg.site_url,
             "links": cfg.links,
+            "favicon": next(
+                (url(f"/{f}") for f in FAVICONS if (cfg.root / "public" / f).is_file()), ""
+            ),
         },
         # The sidebar macro emits `header` with |safe, so build it as escaped Markup.
         sidebar_header=Markup('<a class="dk-brand" href="{}">{}</a>').format(url("/"), cfg.title),
@@ -50,7 +58,7 @@ def make_env(cfg: Config, dev: bool = False) -> Environment:
 
 
 def canonical(cfg: Config, route: str) -> str:
-    return cfg.site_url.rstrip("/") + route if cfg.site_url else ""
+    return cfg.site_url.rstrip("/") + quote(route) if cfg.site_url else ""
 
 
 def render_template(env: Environment, name: str, **ctx: Any) -> str:

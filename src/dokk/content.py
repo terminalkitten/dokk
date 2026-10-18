@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass, field
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -29,7 +30,12 @@ class Page:
     toc: list[Any] = field(default_factory=list)  # filled in Phase 2
     draft: bool = False
     line_offset: int = 0  # lines before `body` in the source file
+    updated: date | None = None  # last modified (git or mtime), set by the build
     has_title: bool = True  # False when the title fell back to the file name
+
+    @property
+    def noindex(self) -> bool:
+        return self.meta.get("noindex") is True
 
     @property
     def sidebar(self) -> dict[str, Any]:

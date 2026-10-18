@@ -1,8 +1,23 @@
 {% extends 'base.html.jinja' %}
 {% block title %}{{ page.title }}{% if page.route != '/' %} · {{ site.title }}{% endif %}{% endblock %}
 {% block meta %}
-  {% if page.description %}<meta name="description" content="{{ page.description }}">{% endif %}
-  {% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}
+  {% if page.description %}
+  <meta name="description" content="{{ page.description }}">
+  {% endif %}
+  {% if page.noindex %}
+  <meta name="robots" content="noindex">
+  {% endif %}
+  {% if canonical %}
+  <link rel="canonical" href="{{ canonical }}">
+  <meta property="og:url" content="{{ canonical }}">
+  {% endif %}
+  <meta property="og:type" content="{{ 'website' if page.route == '/' else 'article' }}">
+  <meta property="og:site_name" content="{{ site.title }}">
+  <meta property="og:title" content="{{ page.title }}">
+  {% if page.description %}
+  <meta property="og:description" content="{{ page.description }}">
+  {% endif %}
+  <meta name="twitter:card" content="summary">
 {% endblock %}
 {% block main %}
   {% include 'partials/breadcrumbs.html.jinja' %}
@@ -10,6 +25,7 @@
     <h1>{{ page.title }}</h1>
     {{ page.html | safe }}
   </article>
+  {% include 'partials/page_meta.html.jinja' %}
   {% include 'partials/pager.html.jinja' %}
 {% endblock %}
 {% block aside %}

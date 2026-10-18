@@ -23,6 +23,39 @@
     wrap.append(btn);
   }
 
+  // Search: Pagefind UI is loaded on first open; "/" or Ctrl/Cmd+K opens it.
+  const dlg = document.getElementById("dk-search");
+  if (dlg) {
+    const bundle = dlg.dataset.bundle;
+    let ready;
+    const load = () =>
+      (ready ||= new Promise((ok, fail) => {
+        const css = document.createElement("link");
+        css.rel = "stylesheet";
+        css.href = bundle + "pagefind-ui.css";
+        const js = document.createElement("script");
+        js.src = bundle + "pagefind-ui.js";
+        js.onload = () => {
+          new PagefindUI({ element: "#dk-search-ui", bundlePath: bundle, baseUrl: dlg.dataset.base, showSubResults: true });
+          ok();
+        };
+        js.onerror = fail;
+        document.head.append(css, js);
+      }));
+    const open = () => {
+      if (!dlg.open) dlg.showModal();
+      load().then(() => dlg.querySelector("input")?.focus());
+    };
+    for (const b of document.querySelectorAll("[data-dk-search]")) b.addEventListener("click", open);
+    document.addEventListener("keydown", (e) => {
+      const typing = e.target.closest("input, textarea, select, [contenteditable]");
+      if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || (e.key === "/" && !typing)) {
+        e.preventDefault();
+        open();
+      }
+    });
+  }
+
   // TOC scrollspy: mark the last heading that scrolled past the top.
   const links = [...document.querySelectorAll(".dk-toc a[href^='#']")];
   const heads = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));

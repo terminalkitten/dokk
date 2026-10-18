@@ -240,3 +240,34 @@ html.dark .dk-icon-moon { display: none; }
   font-weight: 600;
 }
 .dk-prose .dk-steps > ol > li { padding-left: 1.75rem; }
+
+/* Page footer: edit link and last updated */
+.dk-page-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 2.5rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+.dk-page-meta a { color: inherit; }
+.dk-page-meta a:hover { color: var(--foreground); }
+
+/* Search (Pagefind UI in a Basecoat dialog) */
+.dk-search-button { gap: 0.5rem; color: var(--muted-foreground); }
+.dk-search-kbd { margin-left: 0.5rem; }
+@media (max-width: 640px) {
+  .dk-search-label, .dk-search-kbd { display: none; }
+}
+.dk-search > div { width: min(40rem, calc(100vw - 2rem)); max-height: min(36rem, 80vh); overflow-y: auto; }
+.dk-search {
+  --pagefind-ui-scale: 0.8;
+  --pagefind-ui-primary: var(--primary);
+  --pagefind-ui-text: var(--foreground);
+  --pagefind-ui-background: var(--background);
+  --pagefind-ui-border: var(--border);
+  --pagefind-ui-tag: var(--muted);
+  --pagefind-ui-border-radius: var(--radius);
+  --pagefind-ui-font: var(--font-sans);
+}

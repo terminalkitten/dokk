@@ -25,7 +25,7 @@ def example(tmp_path: Path) -> Path:
 
 
 def test_example_output_files(example: Path) -> None:
-    out = build(example).out_dir
+    out = build(example, search=False).out_dir
     files = _files(out)
     assert [f for f in files if not f.startswith("_dokk/")] == [
         ".nojekyll",
@@ -42,18 +42,22 @@ def test_example_output_files(example: Path) -> None:
         "index.html",
         "reference/café-ünïcode/index.html",
         "reference/index.html",
+        "robots.txt",
+        "sitemap.xml",
     ]
     for asset in ("dokk.css", "dokk.js", "pygments.css", "vendor/basecoat/basecoat.cdn.min.css"):
         assert f"_dokk/{asset}" in files
 
 
 def test_drafts_flag(example: Path) -> None:
-    out = build(example, drafts=True).out_dir
+    out = build(example, search=False, drafts=True).out_dir
     assert (out / "reference/draft/index.html").is_file()
 
 
 def test_current_page_and_open_submenu(example: Path) -> None:
-    html = (build(example).out_dir / "guides/advanced/deep/nested/index.html").read_text()
+    html = (
+        build(example, search=False).out_dir / "guides/advanced/deep/nested/index.html"
+    ).read_text()
     assert re.search(r'href="/guides/advanced/deep/nested/"\s*aria-current="page"', html)
     assert html.count('aria-current="page"') == 2  # menu item + breadcrumb
     assert len(re.findall(r"<details[^>]*\sopen", html)) == 2
@@ -82,7 +86,7 @@ def test_script_title_is_escaped_everywhere(make_site) -> None:
 def test_base_path_prefixes_every_internal_url(example: Path) -> None:
     toml = example / "dokk.toml"
     toml.write_text(toml.read_text().replace("https://example.com/", "https://example.com/repo/"))
-    out = build(example).out_dir
+    out = build(example, search=False).out_dir
     urls = set()
     for f in out.rglob("*.html"):
         urls |= set(re.findall(r'(?:href|src)="(/[^"]*)"', f.read_text()))
@@ -95,7 +99,7 @@ def test_base_path_prefixes_every_internal_url(example: Path) -> None:
 def test_every_internal_url_resolves(example: Path, site_url: str) -> None:
     toml = example / "dokk.toml"
     toml.write_text(toml.read_text().replace("https://example.com/", site_url))
-    result = build(example)
+    result = build(example, search=False)
     cfg, out = result.cfg, result.out_dir
     missing = set()
     for page in out.rglob("*.html"):
@@ -108,14 +112,14 @@ def test_every_internal_url_resolves(example: Path, site_url: str) -> None:
 
 
 def test_heading_ids_do_not_clash_with_layout(example: Path) -> None:
-    html = (build(example).out_dir / "guides/markdown/index.html").read_text()
+    html = (build(example, search=False).out_dir / "guides/markdown/index.html").read_text()
     ids = re.findall(r'\sid="([^"]+)"', html)
     assert len(ids) == len(set(ids))
 
 
 def test_build_is_deterministic(example: Path, tmp_path: Path) -> None:
     def digest() -> dict[str, str]:
-        out = build(example).out_dir
+        out = build(example, search=False).out_dir
         return {f: hashlib.sha256((out / f).read_bytes()).hexdigest() for f in _files(out)}
 
     first = digest()

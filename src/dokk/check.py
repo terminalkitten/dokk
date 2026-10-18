@@ -11,6 +11,8 @@ from dokk.routes import output_path
 
 _URL = re.compile(r'(?:href|src)="([^"]*)"')
 _ID = re.compile(r'\sid="([^"]+)"')
+_HEADING = re.compile(r"<h([1-6])[\s>]")
+_ARTICLE = re.compile(r'<article class="dk-prose">(.*?)</article>', re.DOTALL)
 
 
 @dataclass(frozen=True)
@@ -31,7 +33,7 @@ def check(root: Path) -> list[Issue]:
     """Production build into a temp dir, then crawl it for broken links, anchors and assets."""
     with tempfile.TemporaryDirectory() as tmp:
         try:
-            result = build(root, out_dir=Path(tmp) / "site")
+            result = build(root, out_dir=Path(tmp) / "site", search=False)
         except DokkError as e:  # duplicate routes, bad front matter, unknown directives...
             return [Issue("error", "", str(e))]
 
@@ -52,8 +54,10 @@ def check(root: Path) -> list[Issue]:
                 issues.append(Issue("error", source, f"broken link {href!r}"))
 
             file = result.out_dir / output_path(page.route)
+            html = file.read_text(encoding="utf-8")
+            issues += heading_issues(source, html)
             seen = set()
-            for url in map(unescape, _URL.findall(file.read_text(encoding="utf-8"))):
+            for url in map(unescape, _URL.findall(html)):
                 if url in seen or urlsplit(url).scheme or url.startswith("//"):
                     continue
                 seen.add(url)
@@ -78,3 +82,16 @@ def check(root: Path) -> list[Issue]:
         # ponytail: no orphan check; with the auto-generated menu every page is reachable
         # unless hidden on purpose. Add it with explicit sidebar config (backlog).
         return issues
+
+
+def heading_issues(source: str, html: str) -> list[Issue]:
+    """Exactly one h1 per page and no skipped heading levels, inside the article."""
+    article = _ARTICLE.search(html)
+    levels = [int(n) for n in _HEADING.findall(article.group(1))] if article else []
+    issues = []
+    if levels.count(1) != 1:
+        issues.append(Issue("warning", source, f"expected one <h1>, found {levels.count(1)}"))
+    for prev, cur in zip(levels, levels[1:], strict=False):
+        if cur > prev + 1:
+            issues.append(Issue("warning", source, f"heading level skipped: h{prev} to h{cur}"))
+    return issues

@@ -1,0 +1,10 @@
+{% if edit_url or page.updated %}
+<footer class="dk-page-meta" data-pagefind-ignore>
+  {% if edit_url %}
+  <a href="{{ edit_url }}">Edit this page</a>
+  {% endif %}
+  {% if page.updated %}
+  <span>Last updated <time datetime="{{ page.updated.isoformat() }}">{{ page.updated.day }} {{ page.updated.strftime('%b %Y') }}</time></span>
+  {% endif %}
+</footer>
+{% endif %}

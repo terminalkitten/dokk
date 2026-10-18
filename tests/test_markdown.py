@@ -141,3 +141,9 @@ def test_pygments_css_is_scoped() -> None:
         for line in css
     )
     assert any(line.startswith("html.dark .dk-prose .hl .k ") for line in css)
+    assert not any("/*" in line for line in css)
+
+
+def test_task_list_checkboxes_are_labelled(content: Path) -> None:
+    html = _renderer(content).render("- [x] done\n", Path("index.md")).html
+    assert "<label><input" in html and "done</label>" in html

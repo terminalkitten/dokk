@@ -1,4 +1,5 @@
 import posixpath
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from html import escape
@@ -66,7 +67,7 @@ def make_md() -> MarkdownIt:
         .enable(["table", "strikethrough", "replacements", "smartquotes"])
         .use(anchors_plugin, min_level=2, max_level=3, permalink=True, permalinkSymbol="#")
         .use(footnote_plugin)
-        .use(tasklists_plugin)
+        .use(tasklists_plugin, label=True)  # label: checkboxes need an accessible name
         .use(deflist_plugin)
         .use(attrs_plugin)
         .use(directive_plugin)
@@ -208,4 +209,5 @@ def pygments_css(light: str, dark: str) -> str:
     ):
         defs = HtmlFormatter(style=style).get_style_defs(scope)
         css += [line for line in defs.splitlines() if line.startswith(scope)]
-    return "\n".join(css) + "\n"
+    # Drop Pygments' per-rule "/* Token */" comments: about 40% of the file.
+    return "\n".join(re.sub(r"\s*/\*.*?\*/", "", line) for line in css) + "\n"

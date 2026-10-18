@@ -6,6 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ site.title }}{% endblock %}</title>
   {% block meta %}{% endblock %}
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+  {% if site.favicon %}
+  <link rel="icon" href="{{ site.favicon }}">
+  {% endif %}
   <script>
     /* Apply theme before first paint. Key and class match Basecoat 1.0. */
     (function () { try {
@@ -31,6 +36,7 @@
       {% block aside %}{% endblock %}
     </div>
   </div>
+  {% if search %}{% include 'partials/search.html.jinja' %}{% endif %}
   {% if dev %}{% include 'partials/dev_reload.html.jinja' %}{% endif %}
 </body>
 </html>

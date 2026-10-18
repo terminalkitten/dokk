@@ -77,14 +77,19 @@ def cmd_build(args: argparse.Namespace) -> int:
     for rel, hrefs in result.broken.items():
         for href in hrefs:
             print(f"warning: {rel.as_posix()}: broken link {href!r}", file=sys.stderr)
-    print(f"Built {result.out_dir}")
+    if result.search_missing:
+        print(
+            "warning: search is enabled but pagefind is not installed: pip install 'dokk[search]'",
+            file=sys.stderr,
+        )
+    print(f"Built {result.out_dir}" + (" (with search index)" if result.search else ""))
     return 0
 
 
 def cmd_serve(args: argparse.Namespace) -> int:
     from dokk.serve import serve
 
-    serve(Path(args.root), port=args.port)
+    serve(Path(args.root), port=args.port, search=args.search)
     return 0
 
 
@@ -117,6 +122,9 @@ def build_parser() -> argparse.ArgumentParser:
     serve_cmd = sub.add_parser("serve", help="dev server with live reload (includes drafts)")
     serve_cmd.add_argument("--root", default=".", help="site root (default: .)")
     serve_cmd.add_argument("--port", type=int, default=8000, help="port (default: 8000)")
+    serve_cmd.add_argument(
+        "--search", action="store_true", help="build the search index on every rebuild"
+    )
     serve_cmd.set_defaults(func=cmd_serve)
 
     check_cmd = sub.add_parser("check", help="find broken links, anchors and assets")

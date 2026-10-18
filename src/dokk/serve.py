@@ -16,8 +16,9 @@ _RELOAD = (Path(__file__).parent / "templates" / "partials" / "dev_reload.html.j
 
 
 class DevState:
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Path, search: bool = False) -> None:
         self.root = root
+        self.search = search
         self.out = root / DEV_DIR
         self.version = 0
         self.error: tuple[str, str] | None = None  # (message, traceback)
@@ -26,7 +27,7 @@ class DevState:
     def rebuild(self) -> None:
         with self.lock:
             try:
-                build(self.root, drafts=True, dev=True, out_dir=self.out)
+                build(self.root, drafts=True, dev=True, out_dir=self.out, search=self.search)
                 self.error = None
                 print(f"Built (version {self.version + 1})", flush=True)
             except Exception as e:  # show any failure in the browser, keep serving
@@ -94,7 +95,7 @@ def is_input(path: Path, inputs: list[Path]) -> bool:
     return any(path == p or path.is_relative_to(p) for p in inputs)
 
 
-def serve(root: Path, port: int = 8000) -> None:
+def serve(root: Path, port: int = 8000, search: bool = False) -> None:
     try:
         from watchfiles import watch
     except ImportError:
@@ -102,7 +103,7 @@ def serve(root: Path, port: int = 8000) -> None:
 
     root = root.resolve()
     load_config(root)  # fail fast on a missing or invalid dokk.toml
-    state = DevState(root)
+    state = DevState(root, search=search)
     state.rebuild()
     handler = type("Handler", (DevHandler,), {"state": state})
     try:
