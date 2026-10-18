@@ -50,6 +50,12 @@ body {
   text-decoration: none;
 }
 
+/* One brand at a time: in the open sidebar, else in the top bar. On phones the sidebar is an
+   overlay, so the top bar keeps it. 768px is Basecoat's sidebar breakpoint. */
+@media (min-width: 768px) {
+  .sidebar[aria-hidden="false"] + .dk-shell .dk-header-title { display: none; }
+}
+
 .dk-header-actions {
   display: flex;
   align-items: center;

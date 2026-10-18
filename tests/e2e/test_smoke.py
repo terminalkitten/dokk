@@ -96,6 +96,18 @@ def test_mobile_sidebar_toggle(browser, site: str) -> None:  # type: ignore[no-u
     context.close()
 
 
+def test_brand_shown_once(page, site: str) -> None:  # type: ignore[no-untyped-def]
+    page.goto(site + "/guides/markdown/")
+    page.wait_for_function("document.getElementById('dk-sidebar').dataset.sidebarInitialized")
+    top = page.locator(".dk-header-title")
+    assert not top.is_visible()  # sidebar open: the brand is in the sidebar
+    page.get_by_role("button", name="Toggle menu").click()
+    page.wait_for_function(
+        "document.getElementById('dk-sidebar').getAttribute('aria-hidden') === 'true'"
+    )
+    assert top.is_visible()  # sidebar collapsed: the brand moves to the top bar
+
+
 def test_theme_persists_across_reload(page, site: str) -> None:  # type: ignore[no-untyped-def]
     page.goto(site + "/")
     is_dark = "document.documentElement.classList.contains('dark')"
