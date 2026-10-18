@@ -57,5 +57,6 @@ python -m http.server 8002 -d examples/basic/.dokk/build
 
 ### Vendored assets
 
-Basecoat and the shadcn/ui color themes are vendored; see `VENDORED.md`. Updating them is the only
-step that needs Node: `scripts/vendor_basecoat.sh` and `scripts/vendor_shadcn_themes.sh`.
+Basecoat and the shadcn/ui color themes are vendored; see `VENDORED.md`. Update them with
+`python scripts/vendor_basecoat.py` and `python scripts/vendor_shadcn_themes.py` (standard library
+only, no Node).
