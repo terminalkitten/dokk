@@ -1,0 +1,13 @@
+{% set folder = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>' %}
+{% set file = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>' %}
+{% macro label(e) %}
+{% if not e.placeholder %}{{ (folder if e.is_dir else file) | safe }}{% endif %}<span class="dk-ft-name">{{ e.name }}</span>{% if e.comment %}<span class="dk-ft-comment">{{ e.comment }}</span>{% endif %}
+{% endmacro %}
+{% macro tree(items) %}
+<ul>
+{% for e in items %}
+<li{% if e.highlight %} class="dk-ft-highlight"{% endif %}>{% if e.children %}<details open><summary>{{ label(e) }}</summary>{{ tree(e.children) }}</details>{% else %}<span class="dk-ft-entry">{{ label(e) }}</span>{% endif %}</li>
+{% endfor %}
+</ul>
+{% endmacro %}
+<div class="dk-filetree">{{ tree(entries) }}</div>

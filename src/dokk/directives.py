@@ -1,4 +1,5 @@
-"""Directives: `:::name[Title]{key="value"}` containers compiled to static HTML.
+"""Directives compiled to static HTML: `:::name[Title]{key="value"}` containers and
+`::name[Title]{key="value"}` one-line (leaf) directives, from the generic directives syntax.
 
 All directives are parsed as one container type; `fold` then replaces each
 container (innermost first) with a single html_block holding the rendered component.
@@ -9,6 +10,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from markdown_it import MarkdownIt
+from markdown_it.rules_block import StateBlock
 from markdown_it.token import Token
 from mdit_py_plugins.container import container_plugin
 
@@ -17,9 +19,10 @@ from dokk import DokkError
 CALLOUTS = ("note", "tip", "caution", "danger")
 CHILDREN = {"tabs": "tab"}  # parent: only allowed child
 PARENTS = {child: parent for parent, child in CHILDREN.items()}
-KNOWN = {*CALLOUTS, "tabs", "tab", "cards", "card", "steps"}
+KNOWN = {*CALLOUTS, "tabs", "tab", "cards", "card", "steps", "filetree", "linkbutton"}
 
 _INFO = re.compile(r"^\s*([A-Za-z][\w-]*)(?:\[(.*?)\])?(?:\{(.*)\})?\s*$")
+_LEAF = re.compile(r"^::(?!:)(.+)$")  # exactly two colons
 _ATTR = re.compile(r'([A-Za-z_][\w-]*)\s*=\s*"([^"]*)"')
 _OPEN, _CLOSE = "container_directive_open", "container_directive_close"
 
@@ -44,16 +47,35 @@ def parse_info(info: str) -> Directive | None:
     return Directive(name, (title or "").strip(), dict(_ATTR.findall(attrs or "")))
 
 
+def _leaf_rule(state: StateBlock, start: int, end: int, silent: bool) -> bool:
+    """`::name[label]{attrs}` on its own line: a directive without a body."""
+    if state.sCount[start] - state.blkIndent >= 4:  # indented code
+        return False
+    line = state.src[state.bMarks[start] + state.tShift[start] : state.eMarks[start]]
+    match = _LEAF.match(line.rstrip())
+    if not match or parse_info(match.group(1)) is None:
+        return False
+    if silent:
+        return True
+    for kind, nesting in ((_OPEN, 1), (_CLOSE, -1)):  # an empty container, folded like any other
+        token = state.push(kind, "div", nesting)
+        token.info, token.markup, token.map = match.group(1), "::", [start, start + 1]
+    state.line = start + 1
+    return True
+
+
 def directive_plugin(md: MarkdownIt) -> None:
     container_plugin(
         md,
         "directive",
         validate=lambda params, *args: parse_info(params) is not None,
     )
+    alt = ["paragraph", "reference", "blockquote", "list"]
+    md.block.ruler.before("fence", "directive_leaf", _leaf_rule, {"alt": alt})
 
 
-# (directive, body_html, child directives with their bodies) -> html
-RenderDirective = Callable[[Directive, str, list[tuple[Directive, str]]], str]
+# (directive, body_html, child directives with their bodies, raw inner tokens) -> html
+RenderDirective = Callable[[Directive, str, list[tuple[Directive, str]], list[Token]], str]
 
 
 def fold(
@@ -115,5 +137,8 @@ def _fold_one(
         body = render_inner(inner)
     token = Token("html_block", "", 0)
     token.meta = {"directive": directive, "body": body}
-    token.content = "" if directive.name in PARENTS else render_directive(directive, body, children)
+    if directive.name in PARENTS:
+        token.content = ""
+    else:
+        token.content = render_directive(directive, body, children, inner)
     return token

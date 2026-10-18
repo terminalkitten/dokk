@@ -128,3 +128,87 @@ def test_component_template_override(tmp_path: Path) -> None:
     (user / "steps.html.jinja").write_text("<ol class='mine'>{{ body }}</ol>")
     r = Renderer({}, tmp_path, "", base_env(tmp_path / "templates"))
     assert r.render(":::steps\n1. A\n:::\n", Path("p.md")).html.startswith("<ol class='mine'>")
+
+
+FILE_TREE = """:::filetree
+- astro.config.mjs
+- **README.md** an *important* file
+- src
+  - components
+    - Header.astro
+    - …
+  - pages/
+- `Hello world.txt`
+:::
+"""
+
+
+def test_file_tree_structure() -> None:
+    from markdown_it import MarkdownIt
+
+    from dokk.filetree import file_tree
+
+    md = MarkdownIt("commonmark")
+    entries = file_tree(md.parse("- a\n- b/\n- c\n  - d\n  - ...\n"), lambda t: "")
+    assert [(e.name, e.is_dir) for e in entries] == [("a", False), ("b/", True), ("c", True)]
+    assert [e.name for e in entries[2].children] == ["d", "..."]
+    assert entries[2].children[1].placeholder
+
+
+def test_file_tree_html(renderer: Renderer) -> None:
+    html = _render(renderer, FILE_TREE)
+    assert html.startswith('<div class="dk-filetree">')
+    assert '<li class="dk-ft-highlight"><span class="dk-ft-entry">' in html
+    assert '<span class="dk-ft-comment">an <em>important</em> file</span>' in html
+    assert "<details open><summary><svg" in html and '<span class="dk-ft-name">src</span>' in html
+    assert '<span class="dk-ft-entry"><span class="dk-ft-name">…</span>' in html  # no icon
+    assert '<span class="dk-ft-name">Hello world.txt</span>' in html
+    assert '<span class="dk-ft-name">pages/</span>' in html
+
+
+def test_file_tree_needs_a_list(renderer: Renderer) -> None:
+    with pytest.raises(
+        DirectiveError, match="line 1: a file tree may only contain a bulleted list"
+    ):
+        _render(renderer, ":::filetree\nJust text.\n:::\n")
+
+
+def test_link_buttons(renderer: Renderer) -> None:
+    body = (
+        '::linkbutton[Start]{href="guide.md"}\n'
+        '::linkbutton[Astro]{href="https://astro.build" variant="secondary"}\n'
+        '::linkbutton[More]{href="/more/" variant="minimal"}\n'
+    )
+    html = _render(renderer, body)
+    assert '<a class="btn dk-linkbutton" href="/repo/guide/">Start</a>' in html
+    assert 'href="https://astro.build" data-variant="outline">Astro<svg' in html  # external icon
+    assert 'href="/repo/more/" data-variant="ghost">More</a>' in html
+    assert "<p>" not in html  # each button is its own block, not a paragraph
+
+
+@pytest.mark.parametrize(
+    ("body", "message"),
+    [
+        ('::linkbutton{href="/x/"}\n', "use ::linkbutton[Text]"),
+        ("::linkbutton[Go]\n", "use ::linkbutton[Text]"),
+        ('::linkbutton[Go]{href="/x/" variant="big"}\n', "variant must be one of"),
+        ("::bogus[x]\n", "unknown directive"),
+    ],
+)
+def test_leaf_errors(renderer: Renderer, body: str, message: str) -> None:
+    with pytest.raises(DirectiveError, match="line 1") as exc:
+        _render(renderer, body)
+    assert message in str(exc.value)
+
+
+def test_leaf_syntax_only_on_its_own_line(renderer: Renderer) -> None:
+    html = _render(
+        renderer, 'Text ::linkbutton[x]{href="/"}\n\n```\n::linkbutton[y]{href="/"}\n```\n'
+    )
+    assert "dk-linkbutton" not in html
+    assert _render(renderer, "a::b and :: and ::: alone\n").startswith("<p>")
+
+
+def test_broken_linkbutton_href_is_recorded(renderer: Renderer) -> None:
+    result = renderer.render('::linkbutton[Go]{href="missing.md"}\n', Path("page.md"))
+    assert result.broken == ["missing.md"]

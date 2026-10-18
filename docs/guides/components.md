@@ -95,4 +95,45 @@ Cards without `href` are not clickable.
 2. Run `dokk init`.
 :::
 
+## File tree
+
+A bulleted list inside `:::filetree`. A nested list or a trailing `/` makes a folder, `**bold**`
+highlights an entry, text after the name is a comment, and `…` is a placeholder. Use backticks
+for names with spaces or underscores.
+
+```md
+:::filetree
+- dokk.toml
+- **docs**
+  - index.md the home page
+  - guides/
+  - …
+- `my file.txt`
+:::
+```
+
+:::filetree
+- dokk.toml
+- **docs**
+  - index.md the home page
+  - guides/
+  - …
+- `my file.txt`
+:::
+
+## Link buttons
+
+A one-line directive (two colons). Variants: `primary` (default), `secondary` and `minimal`.
+External links get an arrow.
+
+```md
+::linkbutton[Get started]{href="../getting-started/index.md"}
+::linkbutton[Basecoat]{href="https://basecoatui.com" variant="secondary"}
+::linkbutton[Pagefind]{href="https://pagefind.app" variant="minimal"}
+```
+
+::linkbutton[Get started]{href="../getting-started/index.md"}
+::linkbutton[Basecoat]{href="https://basecoatui.com" variant="secondary"}
+::linkbutton[Pagefind]{href="https://pagefind.app" variant="minimal"}
+
 An unknown directive name fails the build with the file and line number.

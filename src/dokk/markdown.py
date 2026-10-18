@@ -20,9 +20,12 @@ from pygments.formatters import HtmlFormatter
 from pygments.lexers import TextLexer, get_lexer_by_name
 from pygments.util import ClassNotFound
 
+from dokk import DokkError
 from dokk.directives import CALLOUTS, Directive, DirectiveError, directive_plugin, fold
+from dokk.filetree import file_tree
 
 DESCRIPTION_LENGTH = 160
+LINKBUTTON_VARIANTS = ("primary", "secondary", "minimal")
 _FORMATTER = HtmlFormatter(nowrap=True)
 
 
@@ -142,7 +145,27 @@ class Renderer:
         def render_inner(inner: list[Token]) -> str:
             return self.md.renderer.render(inner, self.md.options, env)
 
-        def render_directive(d: Directive, body: str, children: list[tuple[Directive, str]]) -> str:
+        def render_inline(inline: list[Token]) -> str:
+            return self.md.renderer.renderInline(inline, self.md.options, env)
+
+        def render_directive(
+            d: Directive, body: str, children: list[tuple[Directive, str]], inner: list[Token]
+        ) -> str:
+            extra: dict[str, Any] = {}
+            if d.name == "filetree":
+                try:
+                    extra["entries"] = file_tree(inner, render_inline)
+                except DokkError as e:
+                    raise DirectiveError(f"line {d.line}: {e}") from None
+            if d.name == "linkbutton":
+                if not d.title or not d.attrs.get("href"):
+                    raise DirectiveError(f'line {d.line}: use ::linkbutton[Text]{{href="..."}}')
+                if d.attrs.get("variant", "primary") not in LINKBUTTON_VARIANTS:
+                    variants = ", ".join(LINKBUTTON_VARIANTS)
+                    raise DirectiveError(
+                        f"line {d.line}: linkbutton variant must be one of {variants}"
+                    )
+                extra["external"] = _is_external(d.attrs["href"])
             href = d.attrs.get("href")
             if href:
                 resolved = self._resolve(href, source_dir, is_link=True)
@@ -155,6 +178,7 @@ class Renderer:
                 body=Markup(body),
                 children=[(c, Markup(b)) for c, b in children],
                 id=f"dk-tabs-{next(tabs)}" if d.name == "tabs" else "",
+                **extra,
             )
 
         try:
