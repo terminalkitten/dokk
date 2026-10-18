@@ -29,10 +29,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # full history for "last updated" dates
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
-      - run: pip install dokk
+      - run: pip install "dokk[search]"
       - run: dokk check
       - run: dokk build
       - uses: actions/configure-pages@v6

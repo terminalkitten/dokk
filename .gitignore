@@ -11,6 +11,7 @@ wheels/
 
 # dokk
 .dokk/
+_site/
 
 # Local notes, not published
 CLAUDE.md

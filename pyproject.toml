@@ -17,6 +17,7 @@ dependencies = [
 serve = ["watchfiles>=1.3.0"]
 search = ["pagefind[bin]>=1.5.2"]
 dev = ["pytest", "ruff"]
+e2e = ["playwright>=1.64.0"]  # browser smoke tests; also run: playwright install chromium
 
 [project.scripts]
 dokk = "dokk.cli:main"

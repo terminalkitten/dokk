@@ -19,3 +19,14 @@ jobs:
       - run: uv pip install -e ".[dev]"
       - run: ruff check . && ruff format --check .
       - run: pytest
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: "3.13"
+      - run: uv pip install -e ".[dev,search,e2e]"
+      - run: playwright install --with-deps chromium
+      - run: pytest tests/e2e

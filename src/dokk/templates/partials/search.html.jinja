@@ -1,6 +1,10 @@
-<dialog id="dk-search" class="dialog dk-search" aria-label="Search" onclick="if (event.target === this) this.close()"
+<dialog id="dk-search" class="command-dialog dk-search" aria-label="Search" onclick="if (event.target === this) this.close()"
   data-bundle="{{ url('/pagefind/') }}" data-base="{{ url('/') }}">
-  <div>
-    <section id="dk-search-ui"></section>
+  <div class="command" data-filter="manual">
+    <header>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="dk-search-input" placeholder="Search the docs…" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" role="combobox" aria-expanded="true" aria-controls="dk-search-menu" aria-label="Search">
+    </header>
+    <div role="menu" id="dk-search-menu" aria-orientation="vertical" data-empty="Type to search."></div>
   </div>
 </dialog>

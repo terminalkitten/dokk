@@ -23,30 +23,64 @@
     wrap.append(btn);
   }
 
-  // Search: Pagefind UI is loaded on first open; "/" or Ctrl/Cmd+K opens it.
+  // Search: Basecoat command palette over the Pagefind JS API (loaded on first open).
   const dlg = document.getElementById("dk-search");
   if (dlg) {
-    const bundle = dlg.dataset.bundle;
-    let ready;
-    const load = () =>
-      (ready ||= new Promise((ok, fail) => {
-        const css = document.createElement("link");
-        css.rel = "stylesheet";
-        css.href = bundle + "pagefind-ui.css";
-        const js = document.createElement("script");
-        js.src = bundle + "pagefind-ui.js";
-        js.onload = () => {
-          new PagefindUI({ element: "#dk-search-ui", bundlePath: bundle, baseUrl: dlg.dataset.base, showSubResults: true });
-          ok();
-        };
-        js.onerror = fail;
-        document.head.append(css, js);
-      }));
+    const input = dlg.querySelector("input");
+    const menu = dlg.querySelector("[role=menu]");
+    let pagefind;
+    const load = async () => {
+      if (!pagefind) {
+        pagefind = await import(dlg.dataset.bundle + "pagefind.js");
+        await pagefind.options({ baseUrl: dlg.dataset.base });
+      }
+      return pagefind;
+    };
+    // Wrap query words found in plain text in <mark>, building nodes (no innerHTML).
+    const highlight = (el, text, query) => {
+      const words = query.split(/\s+/).filter(Boolean).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+      const parts = words.length ? text.split(new RegExp(`(${words.join("|")})`, "gi")) : [text];
+      el.append(...parts.map((p, i) => (i % 2 ? Object.assign(document.createElement("mark"), { textContent: p }) : p)));
+    };
+    const render = (items, query) => {
+      menu.dataset.empty = query ? "No results found." : "Type to search.";
+      if (!items.length) {
+        menu.replaceChildren();
+      } else {
+        const group = document.createElement("div");
+        group.setAttribute("role", "group");
+        group.setAttribute("aria-labelledby", "dk-search-heading");
+        group.innerHTML = '<span role="heading" id="dk-search-heading">Results</span>';
+        for (const r of items) {
+          const a = document.createElement("a");
+          a.setAttribute("role", "menuitem");
+          a.href = r.url;
+          const title = document.createElement("strong");
+          highlight(title, r.meta.title || r.url, query);
+          const excerpt = document.createElement("span");
+          excerpt.innerHTML = r.excerpt; // Pagefind escapes the text; only <mark> is HTML
+          a.append(title, excerpt);
+          group.append(a);
+        }
+        menu.replaceChildren(group);
+      }
+      dlg.querySelector(".command").refresh?.();
+    };
+    input.addEventListener("input", async () => {
+      const query = input.value.trim();
+      const search = await (await load()).debouncedSearch(query, {}, 150);
+      if (search === null) return; // superseded by a newer keystroke
+      render(query ? await Promise.all(search.results.slice(0, 8).map((r) => r.data())) : [], query);
+    });
     const open = () => {
       if (!dlg.open) dlg.showModal();
-      load().then(() => dlg.querySelector("input")?.focus());
+      input.focus();
+      load();
     };
     for (const b of document.querySelectorAll("[data-dk-search]")) b.addEventListener("click", open);
+    if (!/Mac|iPhone|iPad/.test(navigator.platform)) {
+      for (const k of document.querySelectorAll(".dk-search-kbd")) k.textContent = "Ctrl K";
+    }
     document.addEventListener("keydown", (e) => {
       const typing = e.target.closest("input, textarea, select, [contenteditable]");
       if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || (e.key === "/" && !typing)) {

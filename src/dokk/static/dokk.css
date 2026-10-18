@@ -209,7 +209,7 @@ html.dark .dk-icon-moon { display: none; }
 
 /* Cards (Basecoat .card) */
 .dk-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 1rem; margin: 0 0 1.25rem; }
-.dk-card { position: relative; }
+.dk-card { position: relative; gap: 0.5rem; }
 .dk-card:has(.dk-card-link):hover { background: var(--accent); }
 .dk-prose .dk-card-link { color: inherit; text-decoration: none; }
 .dk-card-link::after { content: ""; position: absolute; inset: 0; } /* whole card is clickable */
@@ -254,20 +254,34 @@ html.dark .dk-icon-moon { display: none; }
 .dk-page-meta a { color: inherit; }
 .dk-page-meta a:hover { color: var(--foreground); }
 
-/* Search (Pagefind UI in a Basecoat dialog) */
-.dk-search-button { gap: 0.5rem; color: var(--muted-foreground); }
-.dk-search-kbd { margin-left: 0.5rem; }
+/* Search (Basecoat command palette) */
+/* Header button styled as a search field */
+.dk-search-button {
+  width: 16rem;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding-inline: 0.75rem 0.375rem;
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+.dk-search-kbd { margin-left: auto; }
 @media (max-width: 640px) {
+  .dk-search-button { width: auto; padding-inline: 0.625rem; }
   .dk-search-label, .dk-search-kbd { display: none; }
 }
-.dk-search > div { width: min(40rem, calc(100vw - 2rem)); max-height: min(36rem, 80vh); overflow-y: auto; }
-.dk-search {
-  --pagefind-ui-scale: 0.8;
-  --pagefind-ui-primary: var(--primary);
-  --pagefind-ui-text: var(--foreground);
-  --pagefind-ui-background: var(--background);
-  --pagefind-ui-border: var(--border);
-  --pagefind-ui-tag: var(--muted);
-  --pagefind-ui-border-radius: var(--radius);
-  --pagefind-ui-font: var(--font-sans);
+.dk-search .command { width: min(40rem, calc(100vw - 2rem)); }
+.dk-search [role="menu"] { max-height: min(28rem, 60vh); }
+.dk-search [role="menuitem"] { display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem; padding-block: 0.625rem; }
+.dk-search [role="menuitem"] strong { font-weight: 500; color: var(--foreground); }
+.dk-search [role="menuitem"] > span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
 }
+.dk-search mark { background: oklch(0.93 0.12 95); color: inherit; border-radius: 2px; }
+html.dark .dk-search mark { background: oklch(0.45 0.1 95); }
