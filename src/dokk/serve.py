@@ -128,12 +128,15 @@ def serve(root: Path, port: int = 8000, search: bool = False) -> None:
     def watcher() -> None:
         # ponytail: full rebuild on any change; fine at this scale (PLAN.md phase 4).
         # Watch the root, not the inputs, so folders created later (templates/) are seen.
+        inputs = watch_paths(root)
+
         def accept(_change: object, path: str) -> bool:
-            return is_input(Path(path), watch_paths(root))
+            return is_input(Path(path), inputs)
 
         for changes in watch(root, watch_filter=accept, stop_event=stop):
             print(f"Changed: {', '.join(sorted(Path(p).name for _, p in changes))}", flush=True)
             state.rebuild()
+            inputs = watch_paths(root)  # dokk.toml may have moved content_dir
 
     threading.Thread(target=watcher, daemon=True).start()
     print(f"Serving on http://127.0.0.1:{port}/ (Ctrl+C to stop)", flush=True)

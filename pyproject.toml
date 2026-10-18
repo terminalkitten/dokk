@@ -1,6 +1,6 @@
 [project]
 name = "dokk"
-version = "0.0.1"
+dynamic = ["version"]  # from src/dokk/__init__.py
 description = "Small static documentation generator"
 readme = "README.md"
 license = "MIT"
@@ -25,6 +25,9 @@ dokk = "dokk.cli:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/dokk/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dokk"]

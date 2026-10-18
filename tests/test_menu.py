@@ -62,8 +62,8 @@ def test_submenu_keys() -> None:
     keys, around = submenu_keys(nav)
     by_title = {p.title: p for p in pages}
     assert build_menu(nav, keys)[1]["items"][2]["attrs"] == {"data-sub": "1"}
-    assert around[id(by_title["B"])] == ("1",)
-    assert around[id(by_title["About"])] == ()
+    assert around[by_title["B"]] == ("1",)
+    assert around[by_title["About"]] == ()
 
 
 def test_mark_current_opens_submenus() -> None:

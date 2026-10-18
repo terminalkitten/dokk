@@ -2,11 +2,14 @@ import re
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
 
 from dokk import DokkError
+
+if TYPE_CHECKING:
+    from dokk.markdown import TocItem
 
 _FRONT_MATTER = re.compile(r"\A---[ \t]*\r?\n(.*?\r?\n)?---[ \t]*(?:\r?\n|\Z)", re.DOTALL)
 _YAML_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)  # C loader is much faster
@@ -28,7 +31,7 @@ class Page:
     route: str = ""  # "/guides/intro/" (no base_path)
     url: str = ""  # "/repo/guides/intro/" (with base_path)
     html: str = ""
-    toc: list[Any] = field(default_factory=list)  # filled in Phase 2
+    toc: list["TocItem"] = field(default_factory=list)  # h2/h3 headings, set by the build
     draft: bool = False
     line_offset: int = 0  # lines before `body` in the source file
     updated: date | None = None  # last modified (git or mtime), set by the build

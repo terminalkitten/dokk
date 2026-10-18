@@ -17,7 +17,7 @@ class NavError(DokkError):
     pass
 
 
-@dataclass(eq=False)
+@dataclass(eq=False)  # compared and hashed by identity, like Page
 class Nav:
     """One sidebar entry: a page, an external link, or a labelled list of entries."""
 
@@ -73,9 +73,10 @@ def config_nav(
     def folder(path: str) -> Node:
         node = root
         for part in Path(path).parts:
-            node = next((c for c in node.children if c.is_dir and c.name == part), None)  # type: ignore[assignment]
-            if node is None:
+            child = next((c for c in node.children if c.is_dir and c.name == part), None)
+            if child is None:
                 raise NavError(f"dokk.toml: sidebar: folder {path!r} not found")
+            node = child
         return node
 
     def entry(e: Any) -> Nav | None:
@@ -108,31 +109,31 @@ def config_nav(
 
 def ordered_pages(nav: list[Nav]) -> list[Page]:
     """Pages in menu order (first occurrence), for prev/next links."""
-    seen: dict[int, Page] = {}
+    seen: dict[Page, None] = {}  # an ordered set
 
     def walk(items: list[Nav]) -> None:
         for n in items:
-            if n.page and id(n.page) not in seen:
-                seen[id(n.page)] = n.page
+            if n.page:
+                seen.setdefault(n.page)
             walk(n.children or [])
 
     walk(nav)
-    return list(seen.values())
+    return list(seen)
 
 
-def submenu_keys(nav: list[Nav]) -> tuple[dict[int, str], dict[int, tuple[str, ...]]]:
-    """Stable marker per submenu, and id(page) -> markers of the submenus around it."""
-    keys: dict[int, str] = {}
-    around: dict[int, tuple[str, ...]] = {}
+def submenu_keys(nav: list[Nav]) -> tuple[dict[Nav, str], dict[Page, tuple[str, ...]]]:
+    """Stable marker per submenu, and page -> markers of the submenus around it."""
+    keys: dict[Nav, str] = {}
+    around: dict[Page, tuple[str, ...]] = {}
 
     def walk(items: list[Nav], parents: tuple[str, ...], top: bool) -> None:
         for n in items:
             if n.page:
-                around.setdefault(id(n.page), parents)
+                around.setdefault(n.page, parents)
             if n.children is not None:
                 if not top:  # top-level lists are groups, not submenus
-                    keys[id(n)] = str(len(keys) + 1)
-                walk(n.children, parents if top else (*parents, keys[id(n)]), False)
+                    keys[n] = str(len(keys) + 1)
+                walk(n.children, parents if top else (*parents, keys[n]), False)
 
     walk(nav, (), True)
     return keys, around
@@ -152,7 +153,7 @@ def badge_html(page: Page) -> Markup:
         raise NavError(f"{page.rel.as_posix()}: sidebar.{e}") from None
 
 
-def _menu_items(items: list[Nav], keys: dict[int, str]) -> list[dict[str, Any]]:
+def _menu_items(items: list[Nav], keys: dict[Nav, str]) -> list[dict[str, Any]]:
     # The Basecoat macro emits item and submenu labels with |safe, so escape here.
     out: list[dict[str, Any]] = []
     for n in items:
@@ -161,7 +162,7 @@ def _menu_items(items: list[Nav], keys: dict[int, str]) -> list[dict[str, Any]]:
                 {
                     "type": "submenu",
                     "label": escape(n.label),
-                    "attrs": {"data-sub": keys.get(id(n), "")},
+                    "attrs": {"data-sub": keys.get(n, "")},
                     "items": _menu_items(n.children, keys),
                 }
             )
@@ -173,7 +174,7 @@ def _menu_items(items: list[Nav], keys: dict[int, str]) -> list[dict[str, Any]]:
     return out
 
 
-def build_menu(nav: list[Nav], keys: dict[int, str] | None = None) -> list[dict[str, Any]]:
+def build_menu(nav: list[Nav], keys: dict[Nav, str] | None = None) -> list[dict[str, Any]]:
     """Basecoat sidebar menu. Top-level lists are groups; loose top-level leaves share one.
 
     Submenus get a `data-sub` marker from `keys`; `mark_current` opens them per page.
@@ -208,10 +209,10 @@ class Pager:
 
     def __init__(self, order: list[Page]) -> None:
         self.order = order
-        self.index = {id(p): i for i, p in enumerate(order)}
+        self.index = {p: i for i, p in enumerate(order)}
 
     def __call__(self, page: Page) -> tuple[Page | None, Page | None]:
-        i = self.index.get(id(page))
+        i = self.index.get(page)
         if i is None:
             return None, None
         o = self.order

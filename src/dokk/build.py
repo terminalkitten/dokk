@@ -73,12 +73,7 @@ def build(
     pages = [p for p in pages if p is not not_found]
     assign_routes(pages, cfg.base_path)
 
-    tree = build_tree(pages)
-    if cfg.sidebar:
-        by_rel = {p.rel.as_posix(): p for p in pages}
-        nav = config_nav(cfg.sidebar, tree, by_rel, cfg.content_dir, cfg.base_path)
-    else:
-        nav = auto_nav(tree)
+    nav = _nav(cfg, pages)
     order = ordered_pages(nav)
     pager = Pager(order)
     index_pages = {p.rel.parent: p for p in pages if p.rel.stem == "index"}
@@ -97,17 +92,7 @@ def build(
     copy_page_assets(cfg.content_dir, out)
     copy_public(cfg.root, out)
     writer = SiteWriter(env, out)
-    writer.text(
-        f"{ASSETS_DIR}/pygments.css", pygments_css(cfg.theme["code_light"], cfg.theme["code_dark"])
-    )
-    base, color = cfg.theme["base"], cfg.theme["color"]
-    writer.render(
-        f"{ASSETS_DIR}/theme.css",
-        "files/theme.css.jinja",
-        base=base,
-        color=color,
-        vars=theme_vars(base, color),
-    )
+    _write_theme(writer, cfg)
 
     sidebar = Sidebar(env, nav)
     all_rendered = _render_markdown(cfg, page_urls, pages, renderer, parallel, dev, with_search)
@@ -142,11 +127,44 @@ def build(
         else "",
         sidebar_html=sidebar.for_page(None),
     )
+    _write_site_files(writer, cfg, pages, nav, order)
+    if with_search:
+        build_index(out)
+    return result
+
+
+def _nav(cfg: Config, pages: list[Page]) -> list[Nav]:
+    """The sidebar: from [[sidebar]] in dokk.toml, else generated from the folders."""
+    tree = build_tree(pages)
+    if not cfg.sidebar:
+        return auto_nav(tree)
+    by_rel = {p.rel.as_posix(): p for p in pages}
+    return config_nav(cfg.sidebar, tree, by_rel, cfg.content_dir, cfg.base_path)
+
+
+def _write_theme(writer: SiteWriter, cfg: Config) -> None:
+    """Code highlighting and color tokens; the style pack itself is a static file."""
+    theme = cfg.theme
+    writer.text(f"{ASSETS_DIR}/pygments.css", pygments_css(theme["code_light"], theme["code_dark"]))
+    base, color = theme["base"], theme["color"]
+    writer.render(
+        f"{ASSETS_DIR}/theme.css",
+        "files/theme.css.jinja",
+        base=base,
+        color=color,
+        vars=theme_vars(base, color),
+    )
+
+
+def _write_site_files(
+    writer: SiteWriter, cfg: Config, pages: list[Page], nav: list[Nav], order: list[Page]
+) -> None:
+    """Files for hosts, crawlers and AI tools: .nojekyll, sitemap, robots, llms."""
     writer.text(".nojekyll", "")
     if cfg.site_url:
         indexed = sorted((canonical(cfg, p.route), p.updated) for p in pages if not p.noindex)
         writer.render("sitemap.xml", "files/sitemap.xml.jinja", entries=indexed)
-    if not (out / "robots.txt").exists():  # a robots.txt in public/ wins
+    if not (writer.root / "robots.txt").exists():  # a robots.txt in public/ wins
         writer.render(
             "robots.txt", "files/robots.txt.jinja", sitemap_url=canonical(cfg, "/sitemap.xml")
         )
@@ -161,9 +179,6 @@ def build(
         in_menu = set(order)
         full = [p for p in order + [p for p in pages if p not in in_menu] if not p.noindex]
         writer.render("llms-full.txt", "files/llms-full.txt.jinja", pages=full, absolute=absolute)
-    if with_search:
-        build_index(out)
-    return result
 
 
 def _ask_url(cfg: Config, page: Page) -> str:
@@ -227,7 +242,7 @@ class Sidebar:
         self.html = re.sub(r"\s+", " ", html)  # safe: the sidebar has no <pre>
 
     def for_page(self, page: Page | None) -> Markup:
-        around = self.around.get(id(page)) if page else None
-        if around is None:  # not in the menu
+        around = self.around.get(page) if page else None
+        if page is None or around is None:  # not in the menu
             return Markup(self.html)
-        return Markup(mark_current(self.html, page.url, around))  # type: ignore[union-attr]
+        return Markup(mark_current(self.html, page.url, around))

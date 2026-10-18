@@ -1,3 +1,4 @@
+import itertools
 import posixpath
 import re
 from collections.abc import Sequence
@@ -171,7 +172,7 @@ class Renderer:
                 result.description = _truncate(_plain_text(tokens[i + 1]))
             if tok.type == "inline":
                 self._rewrite(tok.children or [], source_dir, result.broken)
-        tabs = iter(range(1, 10**6))  # explicit, per-page tab ids keep builds deterministic
+        tabs = itertools.count(1)  # explicit, per-page tab ids keep builds deterministic
 
         def render_inner(inner: list[Token]) -> str:
             return self.md.renderer.render(inner, self.md.options, env)
