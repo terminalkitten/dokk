@@ -1,6 +1,6 @@
 # dokk's own documentation, built with dokk.
 title = "dokk"
-description = "A tiny static docs generator in pure Python: Markdown folders in, a fast static site out."
+description = "A tiny static docs generator in Python."
 site_url = "https://terminalkitten.github.io/dokk/"
 content_dir = "docs"
 

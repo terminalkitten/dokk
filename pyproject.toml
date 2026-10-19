@@ -1,7 +1,7 @@
 [project]
 name = "dokk"
 dynamic = ["version"]
-description = "A tiny static docs generator in pure Python"
+description = "A tiny static docs generator in Python"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

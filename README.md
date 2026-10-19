@@ -10,8 +10,9 @@
 <h1 align="center">dokk</h1>
 
 <p align="center">
-  <strong>A tiny static docs generator in pure Python.</strong><br>
-  Folders of Markdown in, a fast static docs site out. No Node.
+  <strong>A tiny static docs generator in Python.</strong><br>
+  For library and tool authors who want good-looking docs without a theme to assemble:<br>
+  <code>pip install</code>, write Markdown, publish to GitHub Pages. Search, dark mode and components included.
 </p>
 
 <p align="center">
@@ -40,8 +41,20 @@ dokk init --root my-docs
 dokk serve --root my-docs     # http://127.0.0.1:8002/
 ```
 
+Open http://127.0.0.1:8002/, edit `my-docs/docs/index.md` and the page reloads. Add more `.md`
+files and folders and they show up in the sidebar.
+
 `dokk build` writes plain HTML to `.dokk/build/`, ready for GitHub Pages or any static host.
 `dokk init` also creates a workflow that publishes it on every push.
+
+## Why dokk
+
+- **One install, nothing to assemble.** Search, dark mode, a sidebar, code highlighting and
+  components work out of the box; no theme or plugins to pick.
+- **Plain Markdown.** Your docs stay readable on GitHub and in any editor; components are short
+  `:::note` blocks, not HTML.
+- **Fast.** A thousand pages build in about a second and a half; `dokk serve` rebuilds on every save.
+- **Static and private.** Plain HTML with every asset bundled: no CDN, no tracking, no server.
 
 ## What you get
 
@@ -107,5 +120,4 @@ Linux, macOS and Windows on every push.
 ### Vendored assets
 
 Basecoat and the shadcn/ui color themes are vendored; see `VENDORED.md`. Update them with
-`python scripts/vendor_basecoat.py` and `python scripts/vendor_shadcn_themes.py` (standard library
-only, no Node).
+`python scripts/vendor_basecoat.py` and `python scripts/vendor_shadcn_themes.py`.

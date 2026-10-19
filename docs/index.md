@@ -1,13 +1,13 @@
 ---
 title: dokk
-description: A tiny static docs generator in pure Python. Markdown folders in, a fast static site out.
+description: A tiny static docs generator in Python. Markdown folders in, a fast static site out.
 sidebar:
   label: Introduction
 ---
 
 dokk turns a folder of Markdown files into a documentation site with a sidebar menu, search, dark mode and
 code highlighting. Everything is rendered at build time, so the output is plain HTML that works on GitHub
-Pages or any static host. No Node required.
+Pages or any static host.
 
 ::::cards
 :::card[Get started]{href="getting-started/index.md"}
