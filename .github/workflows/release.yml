@@ -2,7 +2,7 @@
 # bump. Builds the wheel and sdist and tests the wheel on Linux (ci.yml covers macOS and Windows
 # on every push). The publish job then waits for a required reviewer to approve the `pypi`
 # environment (Settings > Environments); once approved it publishes to PyPI and creates the
-# GitHub release with the files attached.
+# GitHub release with the files attached (or publishes a drafted one).
 name: release
 
 on:
@@ -75,5 +75,11 @@ jobs:
         run: |
           # a1 / b2 / rc1 / .dev versions are marked as pre-release
           pre=$([[ "$TAG" =~ (a|b|rc|dev)[0-9]*$ ]] && echo --prerelease || true)
-          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" \
-            --verify-tag --generate-notes --title "$TAG" $pre
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            # A drafted release (with hand-written notes) gets the files and is published.
+            gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --draft=false $pre
+          else
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" \
+              --verify-tag --generate-notes --title "$TAG" $pre
+          fi
