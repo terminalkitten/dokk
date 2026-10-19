@@ -1,11 +1,12 @@
 {# Basecoat docs-style page actions: copy as Markdown (+ menu), previous/next. #}
 {% from 'basecoat/dropdown-menu.html.jinja' import dropdown_menu %}
+{% from 'partials/logos.html.jinja' import logo %}
 {% set icon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' %}
 {% set items = [{'label': 'View as Markdown', 'url': md_url, 'attrs': {'target': '_blank', 'rel': 'noopener'},
   'icon': icon ~ '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>'}] %}
 {% if ask_url %}
-{% set _ = items.append({'label': 'Open in ChatGPT', 'url': 'https://chatgpt.com/?q=' ~ ask_url, 'attrs': {'target': '_blank', 'rel': 'noopener'}, 'icon': icon ~ '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>'}) %}
-{% set _ = items.append({'label': 'Open in Claude', 'url': 'https://claude.ai/new?q=' ~ ask_url, 'attrs': {'target': '_blank', 'rel': 'noopener'}, 'icon': icon ~ '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>'}) %}
+{% set _ = items.append({'label': 'Open in ChatGPT', 'url': 'https://chatgpt.com/?q=' ~ ask_url, 'attrs': {'target': '_blank', 'rel': 'noopener'}, 'icon': logo('openai')}) %}
+{% set _ = items.append({'label': 'Open in Claude', 'url': 'https://claude.ai/new?q=' ~ ask_url, 'attrs': {'target': '_blank', 'rel': 'noopener'}, 'icon': logo('claude')}) %}
 {% endif %}
 <div class="dk-page-actions" data-pagefind-ignore>
   <div role="group" class="button-group">
