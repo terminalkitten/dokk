@@ -5,8 +5,13 @@ sidebar:
   order: 2
 ---
 
+:::note[Example page]
+The project, data and links on this page are made up, to show what dokk's components can do. It
+does not document dokk itself.
+:::
+
 **relay** runs a model in a loop: it calls tools until the task is done. This page documents the
-tools of a coding agent built with it, and shows one run. :badge[Example]{variant="secondary"}
+tools of a coding agent built with it, and shows one run.
 
 ## Project layout
 

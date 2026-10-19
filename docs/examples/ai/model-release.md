@@ -5,8 +5,12 @@ sidebar:
   order: 3
 ---
 
-**Acme Large 2** is out today, with a bigger context window and better tool use. The model, the
-numbers and the links on this page are made up. :badge[Example]{variant="secondary"}
+:::note[Example page]
+The project, data and links on this page are made up, to show what dokk's components can do. It
+does not document dokk itself.
+:::
+
+**Acme Large 2** is out today, with a bigger context window and better tool use.
 
 :::model[Acme Large 2]{provider="Acme AI" model="acme-large-2" input="3" output="15" cached="0.30" context="200K" max_output="64K" cutoff="2026-03" released="2026-10" features="text vision tools reasoning json caching"}
 Our most capable model, for **complex** coding, analysis and long documents.

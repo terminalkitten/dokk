@@ -5,8 +5,12 @@ sidebar:
   order: 4
 ---
 
+:::note[Example page]
+The project, data and links on this page are made up, to show what dokk's components can do. It
+does not document dokk itself.
+:::
+
 **Ledgerly** is a small bookkeeping app for teams. This guide runs it on your own server.
-:badge[Example]{variant="secondary"}
 
 :::note
 You need a server with 1 GB of memory, and PostgreSQL 15 or newer. SQLite works for trying it

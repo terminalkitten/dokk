@@ -5,8 +5,13 @@ sidebar:
   order: 5
 ---
 
+:::note[Example page]
+The project, data and links on this page are made up, to show what dokk's components can do. It
+does not document dokk itself.
+:::
+
 Every release of Ledgerly, newest first. We follow [semantic versioning](https://semver.org):
-upgrade within a major version without changes. :badge[Example]{variant="secondary"}
+upgrade within a major version without changes.
 
 ## 3.1.0 :badge[Latest] { #v3-1-0 }
 

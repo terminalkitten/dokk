@@ -5,8 +5,13 @@ sidebar:
   order: 1
 ---
 
+:::note[Example page]
+The project, data and links on this page are made up, to show what dokk's components can do. It
+does not document dokk itself.
+:::
+
 **quill** is a small Python client that talks to several model providers through one API. This
-page is its quickstart. :badge[Example]{variant="secondary"}
+page is its quickstart.
 
 ## Install
 

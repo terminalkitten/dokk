@@ -5,9 +5,14 @@ sidebar:
   order: 4
 ---
 
+:::note[Example page]
+The project, data and links on this page are made up, to show what dokk's components can do. It
+does not document dokk itself.
+:::
+
 In this tutorial you build a small app that answers questions about your own Markdown files:
 it finds the relevant passages and asks a model to answer from them only. This is
-**retrieval-augmented generation**, RAG for short. :badge[Example]{variant="secondary"}
+**retrieval-augmented generation**, RAG for short.
 
 ## What you need
 

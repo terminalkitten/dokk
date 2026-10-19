@@ -5,8 +5,13 @@ sidebar:
   order: 2
 ---
 
+:::note[Example page]
+The project, data and links on this page are made up, to show what dokk's components can do. It
+does not document dokk itself.
+:::
+
 **tidy** sorts the files in a folder into subfolders by type and date. This page is its
-documentation. :badge[Example]{variant="secondary"}
+documentation.
 
 ## Install
 

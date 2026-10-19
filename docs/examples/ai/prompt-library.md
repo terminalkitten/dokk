@@ -5,8 +5,13 @@ sidebar:
   order: 5
 ---
 
+:::note[Example page]
+The project, data and links on this page are made up, to show what dokk's components can do. It
+does not document dokk itself.
+:::
+
 A shared page of prompts the team uses every week. Fill in the fields, then copy the prompt or
-open it in Claude or ChatGPT. :badge[Example]{variant="secondary"}
+open it in Claude or ChatGPT.
 
 ## Code
 

@@ -5,8 +5,13 @@ sidebar:
   order: 6
 ---
 
+:::note[Example page]
+The project, data and links on this page are made up, to show what dokk's components can do. It
+does not document dokk itself.
+:::
+
 Answers to the questions people ask most about Ledgerly. Not here? Ask on the
-[forum](https://example.com/forum). :badge[Example]{variant="secondary"}
+[forum](https://example.com/forum).
 
 ## Accounts
 
