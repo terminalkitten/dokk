@@ -21,10 +21,10 @@ items = ["index.md", "getting-started/index.md"]
 autogenerate = "guides"
 
 [[sidebar]]
-autogenerate = "examples"
+autogenerate = "reference"
 
 [[sidebar]]
-autogenerate = "reference"
+autogenerate = "examples"
 
 [[sidebar]]
 label = "Links"
