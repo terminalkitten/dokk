@@ -18,3 +18,7 @@ PLAN.md
 
 # Benchmark: scripts, downloaded docs and results, local only
 benchmark/
+
+# Blog post drafts and their images, not part of the project
+BLOG.md
+blog/
