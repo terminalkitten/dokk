@@ -2,11 +2,13 @@
   /* dokk serve: reload when the build version changes. */
   (function () {
     var seen = null;
-    setInterval(function () {
+    function check() {
       fetch('/__dokk/version', { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) {
         if (seen !== null && v !== seen) location.reload();
         seen = v;
       }).catch(function () {});
-    }, 500);
+    }
+    check(); // right away
+    setInterval(check, 500);
   })();
 </script>
