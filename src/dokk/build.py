@@ -14,7 +14,7 @@ from dokk.assets import ASSETS_DIR, copy_page_assets, copy_public, copy_static
 from dokk.config import Config, load_config
 from dokk.content import Page, scan
 from dokk.llms import llms_sections
-from dokk.markdown import Rendered, Renderer, pygments_css
+from dokk.markdown import Rendered, Renderer, pygments_css, render_title
 from dokk.menu import (
     Nav,
     Pager,
@@ -69,6 +69,9 @@ def build(
     want_search = bool(cfg.search.get("enabled", True)) if search is None else search
     with_search = want_search and search_available()
     pages = scan(cfg.content_dir, drafts)
+    for page in pages:  # titles are Markdown: plain text everywhere, formatted in the h1
+        page.title_source = page.title
+        page.title_html, page.title = render_title(page.title)
     not_found = next((p for p in pages if p.rel == NOT_FOUND), None)
     pages = [p for p in pages if p is not not_found]
     assign_routes(pages, cfg.base_path)
@@ -121,7 +124,7 @@ def build(
     writer.render(
         "404.html",
         "404.html.jinja",
-        title=not_found.title if not_found else "Page not found",
+        title=not_found.title_html if not_found else "Page not found",
         body=renderer.render(not_found.body, not_found.rel, not_found.line_offset).html
         if not_found
         else "",

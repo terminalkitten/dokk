@@ -26,7 +26,9 @@ class Page:
     rel: Path  # relative to content_dir, e.g. guides/intro.md
     meta: dict[str, Any]  # parsed front matter
     body: str  # Markdown without front matter (and without a title H1)
-    title: str = ""
+    title: str = ""  # plain text: sidebar, <title>, breadcrumbs, search
+    title_html: str = ""  # the title's inline Markdown rendered, for the page's h1
+    title_source: str = ""  # the title as written, for Markdown outputs (page.md, llms)
     description: str = ""
     route: str = ""  # "/guides/intro/" (no base_path)
     url: str = ""  # "/repo/guides/intro/" (with base_path)

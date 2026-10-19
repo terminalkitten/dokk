@@ -134,6 +134,16 @@ def _plain_text(inline: Token) -> str:
     return "".join(parts).strip()
 
 
+_TITLE_MD = MarkdownIt("commonmark", {"html": False})  # titles: inline Markdown, HTML escaped
+
+
+def render_title(source: str) -> tuple[Markup, str]:
+    """A title in Markdown: (HTML for the h1, plain text for everything else)."""
+    inline = _TITLE_MD.parseInline(source)[0]
+    html = _TITLE_MD.renderer.render(inline.children or [], _TITLE_MD.options, {})
+    return Markup(html.strip()), _plain_text(inline)
+
+
 def _truncate(text: str, limit: int = DESCRIPTION_LENGTH) -> str:
     text = " ".join(text.split())
     if len(text) <= limit:

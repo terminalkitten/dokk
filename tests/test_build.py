@@ -325,3 +325,13 @@ def test_custom_component_from_site_templates(make_site) -> None:
     (root / "docs" / "index.md").write_text("::nope\n", encoding="utf-8")
     with pytest.raises(DokkError, match="unknown directive ':::nope'"):
         build(root)
+
+
+def test_markdown_in_page_titles(make_site) -> None:
+    out = build(make_site({"index.md": "# Using `uv` & <x>\n\nBody\n"})).out_dir
+    html = (out / "index.html").read_text(encoding="utf-8")
+    assert "<h1>Using <code>uv</code> &amp; &lt;x&gt;</h1>" in html  # formatted, still escaped
+    assert "<title>Using uv &amp; &lt;x&gt;</title>" in html  # plain text elsewhere
+    assert "`" not in html.split("<h1>")[0]  # no backticks in <head> or the sidebar
+    md = (out / "index.md").read_text(encoding="utf-8")
+    assert md.startswith("# Using `uv` & <x>\n")  # the Markdown copy keeps the source

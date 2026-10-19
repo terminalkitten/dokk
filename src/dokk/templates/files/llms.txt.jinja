@@ -9,7 +9,7 @@
 ## {{ label }}
 
 {% for p in pages %}
-- [{{ p.title }}]({{ absolute(p) }}){% if p.description %}: {{ p.description }}{% endif %}
+- [{{ p.title_source }}]({{ absolute(p) }}){% if p.description %}: {{ p.description }}{% endif %}
 
 {% endfor %}
 {% endfor %}
