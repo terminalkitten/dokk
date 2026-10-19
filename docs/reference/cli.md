@@ -51,6 +51,9 @@ dokk serve --port 8001 --search
 `--search`
 : Build the search index on every rebuild. Off by default, because indexing makes rebuilds slower.
 
+`-v`, `--verbose`
+: Log each step of every rebuild and how long it took, as `dokk build -v` does.
+
 `--root PATH`
 : The site folder. Default: the current folder.
 
@@ -91,9 +94,22 @@ dokk build --drafts
 ```
 
 `--drafts`
+
 : Include pages with `draft: true`.
 
+`-v`, `--verbose`
+
+: Log each build step when it starts and how long it took, to find what makes a build slow:
+
+  ```text
+  19:36:12.582 markdown (44 pages) ...
+  19:36:13.000 markdown (44 pages): 418 ms
+  19:36:13.000 write pages ...
+  19:36:13.152 write pages: 152 ms
+  ```
+
 `--root PATH`
+
 : The site folder. Default: the current folder.
 
 Builds are deterministic: the same input gives byte-identical output. When `site_url` has no path,
