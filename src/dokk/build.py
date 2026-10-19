@@ -1,8 +1,12 @@
+import logging
 import os
 import re
 import shutil
+import time
+from collections.abc import Generator
 from concurrent.futures import ProcessPoolExecutor
 from concurrent.futures.process import BrokenProcessPool
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import quote
@@ -34,6 +38,7 @@ from dokk.themes import theme_vars
 from dokk.tree import build_tree
 from dokk.writer import SiteWriter
 
+log = logging.getLogger("dokk")
 NOT_FOUND = Path("404.md")
 # ponytail: below this, starting worker processes costs more than it saves.
 PARALLEL_MIN_PAGES = 200
@@ -65,75 +70,93 @@ def build(
     `parallel` renders Markdown in worker processes on big sites; the caller's main
     module must be import-safe (an `if __name__ == "__main__"` guard), as the CLI is.
     """
-    cfg = load_config(root, dev=dev)
-    want_search = bool(cfg.search.get("enabled", True)) if search is None else search
-    with_search = want_search and search_available()
-    pages = scan(cfg.content_dir, drafts)
-    for page in pages:  # titles are Markdown: plain text everywhere, formatted in the h1
-        page.title_source = page.title
-        page.title_html, page.title = render_title(page.title)
-    not_found = next((p for p in pages if p.rel == NOT_FOUND), None)
-    pages = [p for p in pages if p is not not_found]
-    assign_routes(pages, cfg.base_path)
-
-    nav = _nav(cfg, pages)
-    order = ordered_pages(nav)
-    pager = Pager(order)
-    index_pages = {p.rel.parent: p for p in pages if p.rel.stem == "index"}
-    env = make_env(cfg, dev=dev, search=with_search)
-    page_urls = {p.rel.as_posix(): p.url for p in pages}
-    renderer = Renderer(page_urls, cfg.content_dir, cfg.base_path, env)
+    started = time.perf_counter()
+    with step("config"):
+        cfg = load_config(root, dev=dev)
+        want_search = bool(cfg.search.get("enabled", True)) if search is None else search
+        with_search = want_search and search_available()
+    with step("scan pages"):
+        pages = scan(cfg.content_dir, drafts)
+        for page in pages:  # titles are Markdown: plain text everywhere, formatted in the h1
+            page.title_source = page.title
+            page.title_html, page.title = render_title(page.title)
+        not_found = next((p for p in pages if p.rel == NOT_FOUND), None)
+        pages = [p for p in pages if p is not not_found]
+        updated = last_modified(cfg.content_dir, pages)
+    with step("routes and sidebar"):
+        assign_routes(pages, cfg.base_path)
+        nav = _nav(cfg, pages)
+        order = ordered_pages(nav)
+        pager = Pager(order)
+        index_pages = {p.rel.parent: p for p in pages if p.rel.stem == "index"}
+        env = make_env(cfg, dev=dev, search=with_search)
+        page_urls = {p.rel.as_posix(): p.url for p in pages}
+        renderer = Renderer(page_urls, cfg.content_dir, cfg.base_path, env)
+        sidebar = Sidebar(env, nav)
 
     out = out_dir or cfg.out_dir
     result = BuildResult(
         cfg, out, pages, order, search=with_search, search_missing=want_search and not with_search
     )
-    updated = last_modified(cfg.content_dir, pages)
-    if out.exists():
-        shutil.rmtree(out)
-    copy_static(out, cfg.theme["style"])
-    copy_page_assets(cfg.content_dir, out)
-    copy_public(cfg.root, out)
-    writer = SiteWriter(env, out)
-    _write_theme(writer, cfg)
+    with step("static files and theme"):
+        if out.exists():
+            shutil.rmtree(out)
+        copy_static(out, cfg.theme["style"])
+        copy_page_assets(cfg.content_dir, out)
+        copy_public(cfg.root, out)
+        writer = SiteWriter(env, out)
+        _write_theme(writer, cfg)
 
-    sidebar = Sidebar(env, nav)
-    all_rendered = _render_markdown(cfg, page_urls, pages, renderer, parallel, dev, with_search)
-    for page, rendered in zip(pages, all_rendered, strict=True):
-        page.html, page.toc = rendered.html, rendered.toc
-        page.description = page.description or rendered.description
-        page.updated = updated[page.rel]
-        if rendered.broken:
-            result.broken[page.rel] = rendered.broken
-        prev, next_ = pager(page)
+    with step(f"markdown ({len(pages)} pages)"):
+        all_rendered = _render_markdown(cfg, page_urls, pages, renderer, parallel, dev, with_search)
+    with step("write pages"):
+        for page, rendered in zip(pages, all_rendered, strict=True):
+            page.html, page.toc = rendered.html, rendered.toc
+            page.description = page.description or rendered.description
+            page.updated = updated[page.rel]
+            if rendered.broken:
+                result.broken[page.rel] = rendered.broken
+            prev, next_ = pager(page)
+            writer.render(
+                output_path(page.route),
+                "page.html.jinja",
+                page=page,
+                sidebar_html=sidebar.for_page(page),
+                crumbs=breadcrumbs(page, index_pages),
+                prev=prev,
+                next=next_,
+                canonical=canonical(cfg, page.route),
+                edit_url=_edit_url(cfg, page),
+                md_url=url_for(cfg.base_path, "/" + markdown_path(page.route)),
+                ask_url=_ask_url(cfg, page),
+            )
+            writer.render(markdown_path(page.route), "files/page.md.jinja", page=page)
+
+    with step("404, sitemap, robots and llms"):
         writer.render(
-            output_path(page.route),
-            "page.html.jinja",
-            page=page,
-            sidebar_html=sidebar.for_page(page),
-            crumbs=breadcrumbs(page, index_pages),
-            prev=prev,
-            next=next_,
-            canonical=canonical(cfg, page.route),
-            edit_url=_edit_url(cfg, page),
-            md_url=url_for(cfg.base_path, "/" + markdown_path(page.route)),
-            ask_url=_ask_url(cfg, page),
+            "404.html",
+            "404.html.jinja",
+            title=not_found.title_html if not_found else "Page not found",
+            body=renderer.render(not_found.body, not_found.rel, not_found.line_offset).html
+            if not_found
+            else "",
+            sidebar_html=sidebar.for_page(None),
         )
-        writer.render(markdown_path(page.route), "files/page.md.jinja", page=page)
-
-    writer.render(
-        "404.html",
-        "404.html.jinja",
-        title=not_found.title_html if not_found else "Page not found",
-        body=renderer.render(not_found.body, not_found.rel, not_found.line_offset).html
-        if not_found
-        else "",
-        sidebar_html=sidebar.for_page(None),
-    )
-    _write_site_files(writer, cfg, pages, nav, order)
+        _write_site_files(writer, cfg, pages, nav, order)
     if with_search:
-        build_index(out)
+        with step("search index"):
+            build_index(out)
+    log.debug("built in %.0f ms", (time.perf_counter() - started) * 1000)
     return result
+
+
+@contextmanager
+def step(name: str) -> Generator[None]:
+    """Log a build step and its duration (shown with --verbose)."""
+    log.debug("%s ...", name)
+    started = time.perf_counter()
+    yield
+    log.debug("%s: %.0f ms", name, (time.perf_counter() - started) * 1000)
 
 
 def _nav(cfg: Config, pages: list[Page]) -> list[Nav]:

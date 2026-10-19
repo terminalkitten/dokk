@@ -361,3 +361,11 @@ def test_markdown_in_page_titles(make_site) -> None:
     assert "`" not in html.split("<h1>")[0]  # no backticks in <head> or the sidebar
     md = (out / "index.md").read_text(encoding="utf-8")
     assert md.startswith("# Using `uv` & <x>\n")  # the Markdown copy keeps the source
+
+
+def test_verbose_logs_each_step_with_its_duration(example: Path, capsys) -> None:
+    assert main(["build", "-v", "--root", str(example)]) == 0
+    err = capsys.readouterr().err
+    for name in ("config", "scan pages", "markdown (", "write pages", "built in"):
+        assert name in err, name
+    assert re.search(r"write pages: \d+ ms", err)

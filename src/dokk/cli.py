@@ -1,4 +1,5 @@
 import argparse
+import logging
 import sys
 from pathlib import Path
 
@@ -67,17 +68,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"dokk {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
+    # -v on the commands that build: each build step and how long it took
+    verbose = argparse.ArgumentParser(add_help=False)
+    verbose.add_argument(
+        "-v", "--verbose", action="store_true", help="log each build step and its duration"
+    )
 
     init = sub.add_parser("init", help="scaffold a new site")
     init.add_argument("--root", default=".", help="target directory (default: .)")
     init.set_defaults(func=cmd_init)
 
-    build_cmd = sub.add_parser("build", help="build the site")
+    build_cmd = sub.add_parser("build", help="build the site", parents=[verbose])
     build_cmd.add_argument("--root", default=".", help="site root (default: .)")
     build_cmd.add_argument("--drafts", action="store_true", help="include draft pages")
     build_cmd.set_defaults(func=cmd_build)
 
-    serve_cmd = sub.add_parser("serve", help="dev server with live reload (includes drafts)")
+    serve_cmd = sub.add_parser(
+        "serve", help="dev server with live reload (includes drafts)", parents=[verbose]
+    )
     serve_cmd.add_argument("--root", default=".", help="site root (default: .)")
     serve_cmd.add_argument("--port", type=int, default=8002, help="port (default: 8002)")
     serve_cmd.add_argument(
@@ -93,6 +101,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if getattr(args, "verbose", False):
+        logger = logging.getLogger("dokk")
+        if not logger.handlers:
+            handler = logging.StreamHandler()  # stderr
+            fmt = logging.Formatter("%(asctime)s.%(msecs)03d %(message)s", "%H:%M:%S")
+            handler.setFormatter(fmt)
+            logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
     try:
         return args.func(args)
     except DokkError as e:
