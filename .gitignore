@@ -15,3 +15,6 @@ wheels/
 # Local notes, not published
 CLAUDE.md
 PLAN.md
+
+# Benchmark: scripts, downloaded docs and results, local only
+benchmark/
