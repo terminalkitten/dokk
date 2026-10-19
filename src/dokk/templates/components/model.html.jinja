@@ -9,7 +9,7 @@
   ('database', 'Cached input', price(a.cached) ~ ' / 1M' if a.get('cached') else ''),
   ('layers', 'Context', a.get('context')),
   ('text-cursor-input', 'Max output', a.get('max_output')),
-  ('calendar', 'Knowledge cutoff', a.get('cutoff')),
+  ('calendar', 'Cutoff', a.get('cutoff')),
   ('sparkles', 'Released', a.get('released')),
   ('scale', 'License', a.get('license')),
 ] | selectattr(2) | list %}

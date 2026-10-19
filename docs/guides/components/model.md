@@ -40,7 +40,7 @@ Without a description, as one line:
 : The context window and the most tokens in one answer, such as `200K` or `1M`.
 
 `cutoff`, `released`, `license`
-: The knowledge cutoff, the release date and the license, as text.
+: The knowledge cutoff (shown as Cutoff), the release date and the license, as text.
 
 `features`
 : Words separated by spaces, shown as badges. These get an icon: `text`, `vision`, `image`,
