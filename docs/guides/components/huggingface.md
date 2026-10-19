@@ -6,7 +6,8 @@ sidebar:
 ---
 
 `::huggingface[owner/name]` links a repository on the [Hugging Face Hub](https://huggingface.co).
-The whole card is a link. `type` is `model` (the default), `dataset` or `space`.
+The whole card is a link, with the Hugging Face [logo](model.md#logos). `type` is `model` (the
+default), `dataset` or `space`.
 
 ```md
 ::huggingface[meta-llama/Llama-3.1-8B-Instruct]{task="text-generation" params="8B" license="llama3.1"}

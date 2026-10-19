@@ -17,6 +17,7 @@ folder replaces the built-in file with the same path.
 | `partials/header.html.jinja` | top bar: menu button, title, search, theme toggle |
 | `partials/footer.html.jinja` | site footer: `[footer] text` and the "Built with dokk" credit |
 | `partials/breadcrumbs.html.jinja`, `toc.html.jinja`, `pager.html.jinja`, `page_meta.html.jinja` | page parts |
+| `partials/logos.html.jinja` | vendor logos for `icon="..."` on model cards; add your own |
 | `components/callout.html.jinja`, `tabs`, `card`, `cards`, `steps` | directive components |
 
 For example, to replace the pager, create `templates/partials/pager.html.jinja`.

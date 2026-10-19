@@ -47,9 +47,34 @@ Without a description, as one line:
   `audio`, `video`, `tools`, `reasoning`, `code`, `json`, `search`, `streaming`, `files` and
   `caching`. Other words are shown without one.
 
+`icon`
+: A vendor logo instead of the robot icon, see [Logos](#logos) below.
+
 `src`, `href`
 : A logo image instead of the robot icon, and a link to the model's docs. Both are relative to
   the page, like Markdown links.
+
+## Logos
+
+`icon="name"` shows a vendor logo that comes with dokk:
+
+`anthropic`, `claude`, `deepseek`, `github`, `googlegemini`, `huggingface`, `meta`, `mistralai`, `ollama`, `openai`, `perplexity`.
+
+```md
+::model[Claude]{provider="Anthropic" icon="claude" features="text vision tools reasoning"}
+```
+
+::model[Claude]{provider="Anthropic" icon="claude" features="text vision tools reasoning"}
+
+::model[GPT]{provider="OpenAI" icon="openai" features="text vision tools"}
+
+The logos are inline SVG in `partials/logos.html.jinja`, so a page only carries the ones it shows,
+and they take the text color in light and dark mode. An unknown name fails the build with the
+list above. They come from [Simple Icons](https://simpleicons.org) (CC0) and, for OpenAI,
+[LobeHub Icons](https://lobehub.com/icons) (MIT); the logos are trademarks of their owners.
+
+Missing a vendor? Paste its 24×24 SVG paths into that file: as a pull request to dokk, or in your
+own copy at `templates/partials/logos.html.jinja`, which replaces the built-in one.
 
 :::note
 The card shows what you write: builds never fetch prices, so update them when the provider does.

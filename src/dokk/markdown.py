@@ -181,6 +181,9 @@ class Renderer:
         self.base_path = base_path
         self.env = env
         self.known = KNOWN | component_names(env)
+        # icon="name" on model cards: the logos in partials/logos.html.jinja (site overrides win).
+        logos = env.get_template("partials/logos.html.jinja").module
+        self.logos = sorted(getattr(logos, "logos"))  # noqa: B009 (a Jinja template variable)
 
     def render(self, body: str, rel: Path, line_offset: int = 0) -> Rendered:
         env: dict[str, Any] = {}
@@ -226,6 +229,11 @@ class Renderer:
             if d.name == "huggingface" and d.attrs.get("type", "model") not in HUGGINGFACE_TYPES:
                 types = ", ".join(HUGGINGFACE_TYPES)
                 raise DirectiveError(f"line {d.line}: huggingface type must be one of {types}")
+            if d.name == "model" and d.attrs.get("icon", self.logos[0]) not in self.logos:
+                raise DirectiveError(
+                    f'line {d.line}: unknown icon "{d.attrs["icon"]}"; '
+                    f"choose from {', '.join(self.logos)}"
+                )
             if d.name == "prompt":  # copied as written, Markdown and all
                 extra["source"] = _source(lines, inner)
             if d.name == "linkbutton":

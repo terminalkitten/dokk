@@ -299,6 +299,7 @@ html.dark .dk-callout[data-callout="caution"] {
   border-radius: var(--radius); background: var(--muted); color: var(--primary); font-size: 1.25rem;
 }
 .dk-model-avatar img { width: 1.5rem; height: 1.5rem; object-fit: contain; }
+.dk-model-avatar .dk-vendor-logo { color: var(--foreground); } /* vendor logos: partials/logos.html.jinja */
 .dk-prompt-icon { width: 2rem; height: 2rem; font-size: 1rem; }
 .dk-prose .dk-model-stats {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: 0.75rem 1.5rem;
@@ -317,7 +318,8 @@ html.dark .dk-callout[data-callout="caution"] {
 .dk-model > footer, .dk-prompt > footer, .dk-hf > footer { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .dk-model > footer .badge { gap: 0.25rem; }
 .dk-prose .dk-model-link { margin-left: auto; text-decoration: none; }
-.dk-hf-logo { font-size: 2rem; line-height: 1; }
+.dk-hf-logo { display: grid; place-items: center; flex-shrink: 0; width: 2.5rem; height: 2.5rem;
+  border-radius: var(--radius); background: var(--muted); font-size: 1.5rem; }
 .dk-prose a.dk-hf-link { color: inherit; text-decoration: none; }
 .dk-hf-link::after { content: ""; position: absolute; inset: 0; } /* whole card is clickable */
 .dk-hf { position: relative; }

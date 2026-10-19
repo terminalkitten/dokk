@@ -352,3 +352,13 @@ def test_prompt(renderer: Renderer) -> None:
     html = _render(renderer, ':::prompt{open="false"}\nHi\n:::\n')
     assert "data-dk-prompt-open" not in html
     assert '<strong class="card-title">Prompt</strong>' in html
+
+
+def test_model_and_huggingface_logos(renderer: Renderer) -> None:
+    html = _render(renderer, '::model[Claude]{icon="claude"}\n\n::huggingface[a/b]\n')
+    logo = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" '
+    assert f'<span class="dk-model-avatar">{logo}fill="currentColor" class="dk-vendor-logo"' in html
+    assert f'<span class="dk-hf-logo">{logo}' in html
+    assert html.count('class="dk-vendor-logo"') == 2  # only the logos the page uses
+    with pytest.raises(DirectiveError, match='unknown icon "acme"; choose from anthropic, '):
+        _render(renderer, '::model[X]{icon="acme"}\n')

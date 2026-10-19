@@ -1,6 +1,8 @@
 {# :::model[Claude Opus 5.5]{provider="Anthropic" model="claude-opus-5-5" input="5" output="25" context="1M" ...}
-   Every attribute is optional; prices are USD per million tokens. See the Model card docs page. #}
+   Every attribute is optional; prices are USD per million tokens. icon= is a vendor logo from
+   partials/logos.html.jinja, src= an image. See the Model card docs page. #}
 {% from "partials/icons.html.jinja" import icon %}
+{% from "partials/logos.html.jinja" import logo %}
 {% set a = directive.attrs %}
 {% macro price(value) %}{{ value if value[:1] in "$€£" or not value[:1].isdigit() else "$" ~ value }}{% endmacro %}
 {% set stats = [
@@ -20,7 +22,7 @@
 } %}
 <article class="card dk-model" id="{{ id }}">
   <header>
-    <span class="dk-model-avatar">{% if a.get('src') %}<img src="{{ a.src }}" alt="" loading="lazy">{% else %}{{ icon('bot') }}{% endif %}</span>
+    <span class="dk-model-avatar">{% if a.get('icon') %}{{ logo(a.icon) }}{% elif a.get('src') %}<img src="{{ a.src }}" alt="" loading="lazy">{% else %}{{ icon('bot') }}{% endif %}</span>
     <div>
       <strong class="card-title">{{ directive.title }}</strong>
       {% if a.get('provider') or a.get('model') %}

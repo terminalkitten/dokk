@@ -185,6 +185,18 @@ def test_user_template_overrides_builtin(make_site) -> None:
     assert "CUSTOM PAGER" in (build(root).out_dir / "index.html").read_text(encoding="utf-8")
 
 
+def test_site_logos_replace_the_builtin_ones(make_site) -> None:
+    root = make_site({"index.md": '::model[Acme L]{icon="acme"}\n'})
+    (root / "templates" / "partials").mkdir(parents=True)
+    (root / "templates" / "partials" / "logos.html.jinja").write_text(
+        "{% set logos = {'acme': '<path id=\"acme\"/>', 'huggingface': ''} %}"
+        "{% macro logo(name) %}<svg>{{ logos[name] | safe }}</svg>{% endmacro %}",
+        encoding="utf-8",
+    )
+    html = (build(root).out_dir / "index.html").read_text(encoding="utf-8")
+    assert '<span class="dk-model-avatar"><svg><path id="acme"/></svg></span>' in html
+
+
 def test_head_partial_adds_tags_to_every_page(make_site) -> None:
     root = make_site({"index.md": "Home", "guide.md": "# Guide"})
     (root / "templates" / "partials").mkdir(parents=True)

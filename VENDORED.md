@@ -23,3 +23,16 @@ place and print the values to record here.
 - Commit: `d2fba50ee5b9113008b5bb908563527b7efd2f27` (2026-10-16)
 - Updated with: `python scripts/vendor_shadcn_themes.py [commit]`
 - Converted to `src/dokk/data/shadcn-themes.json`: 7 base colors, 17 accent colors, light and dark
+
+## Icons and logos
+
+Inline SVG pasted into templates, as Basecoat recommends; nothing is downloaded at build time.
+
+- `src/dokk/templates/partials/icons.html.jinja` and the component templates: [Lucide](https://lucide.dev)
+  `lucide-static@1.59.0` (ISC, see `src/dokk/data/LUCIDE-LICENSE`)
+- `src/dokk/templates/partials/logos.html.jinja`: vendor logos from [Simple Icons](https://simpleicons.org)
+  `simple-icons@16.35.0` (CC0, see `src/dokk/data/SIMPLE-ICONS-LICENSE`), except `openai` from
+  [LobeHub Icons](https://lobehub.com/icons) `@lobehub/icons-static-svg@1.95.1` (MIT, see
+  `src/dokk/data/LOBEHUB-ICONS-LICENSE`). The logos are trademarks of their owners.
+- To add one: copy the paths inside the icon's `<svg>` from
+  `https://cdn.jsdelivr.net/npm/<package>/icons/<name>.svg` into the dict (24×24 viewBox).
