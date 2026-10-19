@@ -39,13 +39,7 @@ def check(root: Path) -> list[Issue]:
 
         issues: list[Issue] = []
         prefix = result.cfg.base_path + "/"
-        ids: dict[Path, set[str]] = {}
-
-        def ids_of(file: Path) -> set[str]:
-            if file not in ids:
-                ids[file] = set(_ID.findall(file.read_text(encoding="utf-8")))
-            return ids[file]
-
+        ids: dict[Path, set[str]] = {}  # per page, read once
         for page in result.pages:
             source = page.rel.as_posix()
             if not page.has_title:
@@ -76,7 +70,7 @@ def check(root: Path) -> list[Issue]:
                 if (
                     fragment
                     and target.suffix == ".html"
-                    and unquote(fragment) not in ids_of(target)
+                    and unquote(fragment) not in get_ids(target, ids)
                 ):
                     issues.append(Issue("error", source, f"missing anchor: {url}"))
         if result.cfg.sidebar:  # the automatic menu always lists every non-hidden page
@@ -86,6 +80,13 @@ def check(root: Path) -> list[Issue]:
                     msg = "not in the sidebar (add it, or set sidebar.hidden: true)"
                     issues.append(Issue("warning", page.rel.as_posix(), msg))
         return issues
+
+
+def get_ids(file: Path, cache: dict[Path, set[str]]) -> set[str]:
+    """The element ids in an HTML file."""
+    if file not in cache:
+        cache[file] = set(_ID.findall(file.read_text(encoding="utf-8")))
+    return cache[file]
 
 
 def heading_issues(source: str, html: str) -> list[Issue]:

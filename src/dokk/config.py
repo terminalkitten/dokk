@@ -40,7 +40,7 @@ class Config:
     description: str = ""
     site_url: str = ""
     content_dir: Path = Path("docs")
-    out_dir: Path = Path(".dokk/build")
+    out_dir: Path = Path(DEFAULT_OUT_DIR)
     lang: str = "en"
     base_path: str = ""
     theme: dict[str, Any] = field(default_factory=dict)

@@ -1,11 +1,3 @@
-"""Basecoat style packs and shadcn/ui color themes, the way Basecoat's docs describe theming:
-one standalone style bundle, then shadcn-compatible color tokens loaded after it.
-
-Color data is vendored from shadcn/ui (MIT): data/shadcn-themes.json, see VENDORED.md.
-Base colors define every token; accent colors override primary, secondary, charts and the
-sidebar accent, each with their own light and dark values.
-"""
-
 import json
 from pathlib import Path
 

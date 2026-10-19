@@ -170,6 +170,58 @@ def _is_external(href: str) -> bool:
     return bool(parts.scheme or parts.netloc)
 
 
+# How a directive with required parts is written, and the attribute it needs (if any).
+_USAGE = {
+    "image": ('::image[Alt text]{src="..."}', "src"),
+    "linkbutton": ('::linkbutton[Text]{href="..."}', "href"),
+    "model": ("::model[Name]", ""),
+    "huggingface": ("::huggingface[Name]", ""),
+}
+# (directive, attribute): its default and the values it may have.
+_CHOICES = {
+    ("huggingface", "type"): ("model", HUGGINGFACE_TYPES),
+    ("linkbutton", "variant"): ("primary", LINKBUTTON_VARIANTS),
+    ("step", "status"): ("done", STEP_STATUSES),
+}
+_ICONS = ("model", "assistant", "step")  # icon= is a Lucide icon on a step, else a vendor logo
+
+
+def check_directive(d: Directive, icons: list[str], logos: list[str]) -> None:
+    """Required parts, attribute values and icon names of a built-in directive."""
+    if d.name in _USAGE:
+        usage, attr = _USAGE[d.name]
+        if not d.title or (attr and not d.attrs.get(attr)):
+            raise DirectiveError(f"line {d.line}: use {usage}")
+    for (name, attr), (default, allowed) in _CHOICES.items():
+        if d.name == name and d.attrs.get(attr, default) not in allowed:
+            raise DirectiveError(
+                f"line {d.line}: {name} {attr} must be one of {', '.join(allowed)}"
+            )
+    icon, choices = d.attrs.get("icon"), icons if d.name == "step" else logos
+    if d.name in _ICONS and icon and icon not in choices:
+        raise DirectiveError(
+            f'line {d.line}: unknown icon "{icon}"; choose from {", ".join(choices)}'
+        )
+
+
+def _highlight(code: str, lang: str) -> str:
+    return highlight_code(code, lang, "")
+
+
+@dataclass
+class _PageState:
+    """What one render() collects and its directives share."""
+
+    env: dict[str, Any]  # markdown-it's env: footnotes and references
+    lines: list[str]  # the body's lines, for directives that use their source as written
+    source_dir: PurePosixPath
+    result: Rendered
+    # Explicit per-page ids (dk-tabs-1, dk-image-2, ...) keep builds deterministic.
+    counters: defaultdict[str, Iterator[int]] = field(
+        default_factory=lambda: defaultdict(lambda: itertools.count(1))
+    )
+
+
 class Renderer:
     """Renders page bodies; rewrites relative links and assets to root-absolute URLs.
 
@@ -186,6 +238,7 @@ class Renderer:
         env: Environment,
     ) -> None:
         self.md = make_md()
+        self.html = cast(RendererHTML, self.md.renderer)  # MarkdownIt's default renderer
         self.page_urls = page_urls
         self.content_dir = content_dir
         self.base_path = base_path
@@ -197,27 +250,32 @@ class Renderer:
         icons = env.get_template("partials/icons.html.jinja").module
         self.icons = sorted(getattr(icons, "paths"))  # noqa: B009, for :::step{icon="..."}
 
-    def _check_icon(self, d: Directive) -> None:
-        """icon= is a vendor logo on models and assistants, a Lucide icon on trace steps."""
-        choices = self.icons if d.name == "step" else self.logos
-        name = d.attrs.get("icon")
-        if d.name in ("model", "assistant", "step") and name and name not in choices:
-            raise DirectiveError(
-                f'line {d.line}: unknown icon "{name}"; choose from {", ".join(choices)}'
-            )
-        if d.name == "step" and d.attrs.get("status", "done") not in STEP_STATUSES:
-            raise DirectiveError(
-                f"line {d.line}: step status must be one of {', '.join(STEP_STATUSES)}"
-            )
-
     def render(self, body: str, rel: Path, line_offset: int = 0) -> Rendered:
         env: dict[str, Any] = {}
         try:
             tokens = self.md.parse(body, env)
         except DirectiveError as e:  # raised by inline directives such as :badge
             raise DirectiveError(f"{rel}: {e}") from None
-        result = Rendered(html="")
-        source_dir = PurePosixPath(rel.as_posix()).parent
+        page = _PageState(
+            env, body.splitlines(), PurePosixPath(rel.as_posix()).parent, Rendered(html="")
+        )
+        self._collect(tokens, page)
+        try:
+            tokens = fold(
+                tokens,
+                functools.partial(self._render_tokens, page),
+                functools.partial(self._render_directive, page),
+                line_offset,
+                self.known,
+            )
+        except DirectiveError as e:
+            raise DirectiveError(f"{rel}: {e}") from None
+        page.result.html = self._render_tokens(page, tokens)
+        return page.result
+
+    def _collect(self, tokens: list[Token], page: _PageState) -> None:
+        """The table of contents and description; rewrites links and images in place."""
+        result = page.result
         for i, tok in enumerate(tokens):
             if tok.type == "heading_open" and tok.tag in ("h2", "h3") and tok.attrGet("id"):
                 text = _plain_text(tokens[i + 1])
@@ -225,75 +283,52 @@ class Renderer:
             elif tok.type == "paragraph_open" and not result.description:
                 result.description = _truncate(_plain_text(tokens[i + 1]))
             if tok.type == "inline":
-                self._rewrite(tok.children or [], source_dir, result.broken)
-        # Explicit per-page ids (dk-tabs-1, dk-image-2, ...) keep builds deterministic.
-        counters: dict[str, Iterator[int]] = defaultdict(lambda: itertools.count(1))
+                self._rewrite(tok.children or [], page.source_dir, result.broken)
 
-        renderer = cast(RendererHTML, self.md.renderer)  # MarkdownIt's default renderer
-        lines = body.splitlines()
+    def _render_tokens(self, page: _PageState, tokens: list[Token]) -> str:
+        return self.html.render(tokens, self.md.options, page.env)
 
-        def render_inner(inner: list[Token]) -> str:
-            return renderer.render(inner, self.md.options, env)
+    def _render_inline(self, page: _PageState, tokens: list[Token]) -> str:
+        return self.html.renderInline(tokens, self.md.options, page.env)
 
-        def render_inline(inline: list[Token]) -> str:
-            return renderer.renderInline(inline, self.md.options, env)
-
-        def render_directive(
-            d: Directive, body: str, children: list[tuple[Directive, str]], inner: list[Token]
-        ) -> str:
-            extra: dict[str, Any] = {}
-            if d.name == "filetree":
-                try:
-                    extra["entries"] = file_tree(inner, render_inline)
-                except DokkError as e:
-                    raise DirectiveError(f"line {d.line}: {e}") from None
-            if d.name == "image" and (not d.title or not d.attrs.get("src")):
-                raise DirectiveError(f'line {d.line}: use ::image[Alt text]{{src="..."}}')
-            if d.name in ("model", "huggingface") and not d.title:
-                raise DirectiveError(f"line {d.line}: use ::{d.name}[Name]")
-            if d.name == "huggingface" and d.attrs.get("type", "model") not in HUGGINGFACE_TYPES:
-                types = ", ".join(HUGGINGFACE_TYPES)
-                raise DirectiveError(f"line {d.line}: huggingface type must be one of {types}")
-            for item in [d, *(c for c, _ in children)]:
-                self._check_icon(item)
-            extra |= component_data(
-                d, inner, _source(lines, inner), lambda code, lang: highlight_code(code, lang, "")
-            )
-            if fence := extra.pop("fence", None):  # a tool's schema shows below its table
-                body = render_inner([t for t in inner if t is not fence])
-            if d.name == "prompt":
-                body = mark_variables(body)
-            if d.name == "linkbutton":
-                if not d.title or not d.attrs.get("href"):
-                    raise DirectiveError(f'line {d.line}: use ::linkbutton[Text]{{href="..."}}')
-                if d.attrs.get("variant", "primary") not in LINKBUTTON_VARIANTS:
-                    variants = ", ".join(LINKBUTTON_VARIANTS)
-                    raise DirectiveError(
-                        f"line {d.line}: linkbutton variant must be one of {variants}"
-                    )
-                extra["external"] = _is_external(d.attrs["href"])
-            for attr in ("href", "src"):  # relative links and files, as in Markdown
-                value = d.attrs.get(attr)
-                if value:
-                    resolved = self._resolve(value, source_dir, is_link=attr == "href")
-                    if resolved is None:
-                        result.broken.append(value)
-                    d.attrs[attr] = resolved or value
-            name = CALLOUT_TEMPLATE if d.name in CALLOUTS else d.name
-            return self.env.get_template(f"components/{name}.html.jinja").render(
-                directive=d,
-                body=Markup(body),
-                children=[(c, Markup(b)) for c, b in children],
-                id=f"dk-{d.name}-{next(counters[d.name])}",
-                **extra,
-            )
-
-        try:
-            tokens = fold(tokens, render_inner, render_directive, line_offset, self.known)
-        except DirectiveError as e:
-            raise DirectiveError(f"{rel}: {e}") from None
-        result.html = render_inner(tokens)
-        return result
+    def _render_directive(
+        self,
+        page: _PageState,
+        d: Directive,
+        body: str,
+        children: list[tuple[Directive, str]],
+        inner: list[Token],
+    ) -> str:
+        for item in [d, *(c for c, _ in children)]:
+            check_directive(item, self.icons, self.logos)
+        extra: dict[str, Any] = {}
+        if d.name == "filetree":
+            try:
+                extra["entries"] = file_tree(inner, functools.partial(self._render_inline, page))
+            except DokkError as e:
+                raise DirectiveError(f"line {d.line}: {e}") from None
+        if d.name == "linkbutton":
+            extra["external"] = _is_external(d.attrs["href"])
+        extra |= component_data(d, inner, _source(page.lines, inner), _highlight)
+        if fence := extra.pop("fence", None):  # a tool's schema shows below its table
+            body = self._render_tokens(page, [t for t in inner if t is not fence])
+        if d.name == "prompt":
+            body = mark_variables(body)
+        for attr in ("href", "src"):  # relative links and files, as in Markdown
+            value = d.attrs.get(attr)
+            if value:
+                resolved = self._resolve(value, page.source_dir, is_link=attr == "href")
+                if resolved is None:
+                    page.result.broken.append(value)
+                d.attrs[attr] = resolved or value
+        name = CALLOUT_TEMPLATE if d.name in CALLOUTS else d.name
+        return self.env.get_template(f"components/{name}.html.jinja").render(
+            directive=d,
+            body=Markup(body),
+            children=[(c, Markup(b)) for c, b in children],
+            id=f"dk-{d.name}-{next(page.counters[d.name])}",
+            **extra,
+        )
 
     def _rewrite(self, children: list[Token], source_dir: PurePosixPath, broken: list[str]) -> None:
         for child in children:

@@ -99,16 +99,20 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def get_log_build_steps() -> None:
+    """--verbose: dokk's debug log"""
+    logger = logging.getLogger("dokk")
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(asctime)s.%(msecs)03d %(message)s", "%H:%M:%S"))
+        logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG)
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if getattr(args, "verbose", False):
-        logger = logging.getLogger("dokk")
-        if not logger.handlers:
-            handler = logging.StreamHandler()  # stderr
-            fmt = logging.Formatter("%(asctime)s.%(msecs)03d %(message)s", "%H:%M:%S")
-            handler.setFormatter(fmt)
-            logger.addHandler(handler)
-        logger.setLevel(logging.DEBUG)
+        get_log_build_steps()
     try:
         return args.func(args)
     except DokkError as e:
