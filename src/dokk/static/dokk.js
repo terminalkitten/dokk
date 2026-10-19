@@ -135,6 +135,14 @@
     lightbox.showModal();
   });
 
+  // Remember the sidebar's scroll position for the next page (restored in base.html.jinja).
+  addEventListener("pagehide", () => {
+    const list = document.querySelector("#dk-sidebar section");
+    try {
+      if (list) sessionStorage.setItem("dk-sidebar-scroll", String(list.scrollTop));
+    } catch {}
+  });
+
   // Remember whether the sidebar is collapsed (desktop only: on phones it is an overlay that
   // starts closed). base.html.jinja restores it before the first paint.
   const sidebar = document.getElementById("dk-sidebar");
@@ -190,6 +198,14 @@
     links.forEach((a, i) =>
       heads[i] === current ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current")
     );
+    // A long table of contents scrolls on its own: keep the current heading in view.
+    const toc = document.querySelector(".dk-toc");
+    const link = links[heads.indexOf(current)];
+    if (toc && link && toc.scrollHeight > toc.clientHeight) {
+      const item = link.getBoundingClientRect();
+      const box = toc.getBoundingClientRect();
+      if (item.top < box.top || item.bottom > box.bottom) toc.scrollTop += item.top - box.top - box.height / 3;
+    }
   };
   const io = new IntersectionObserver(
     (entries) => {

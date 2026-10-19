@@ -157,6 +157,32 @@ def test_image_opens_in_lightbox(page, site: str) -> None:  # type: ignore[no-un
     assert page.problems == []
 
 
+def test_sidebar_keeps_scroll_and_toc_scrolls(browser, site: str) -> None:  # type: ignore[no-untyped-def]
+    context = browser.new_context(viewport={"width": 1280, "height": 420})  # short: both scroll
+    page = context.new_page()
+    page.goto(site + "/guides/markdown/")
+    page.wait_for_function("document.getElementById('dk-sidebar').dataset.sidebarInitialized")
+    sidebar = "document.querySelector('#dk-sidebar section')"
+    assert page.evaluate(f"{sidebar}.scrollHeight > {sidebar}.clientHeight")
+    page.evaluate(f"{sidebar}.scrollTop = {sidebar}.scrollHeight")
+    before = page.evaluate(f"{sidebar}.scrollTop")
+    page.evaluate(  # click a link that is in view at the bottom of the scrolled sidebar
+        f"""[...{sidebar}.querySelectorAll('a[href^="/"]')].filter(a => a.checkVisibility()
+            && !a.getAttribute('aria-current')).pop().click()"""
+    )
+    page.wait_for_load_state("load")
+    page.wait_for_function("document.getElementById('dk-sidebar').dataset.sidebarInitialized")
+    assert abs(page.evaluate(f"{sidebar}.scrollTop") - before) <= 1  # not back at the top
+
+    page.goto(site + "/guides/markdown/")
+    toc = page.evaluate(
+        "(() => { const t = document.querySelector('.dk-toc');"
+        " return [getComputedStyle(t).overflowY, t.getBoundingClientRect().bottom] })()"
+    )
+    assert toc[0] == "auto" and toc[1] <= 420  # scrolls on its own, inside the window
+    context.close()
+
+
 def test_theme_persists_across_reload(page, site: str) -> None:  # type: ignore[no-untyped-def]
     page.goto(site + "/")
     is_dark = "document.documentElement.classList.contains('dark')"

@@ -112,6 +112,10 @@ html.dark .dk-icon-moon { display: none; }
     position: sticky;
     top: calc(var(--dk-header-height) + 2rem);
     align-self: flex-start;
+    /* A long table of contents scrolls on its own instead of running off the screen. */
+    max-height: calc(100vh - var(--dk-header-height) - 4rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 

@@ -44,6 +44,19 @@
         s.setAttribute('aria-hidden', 'true');
         s.setAttribute('inert', '');
       } catch (e) {} })();
+      /* Keep the sidebar's scroll position across pages (dokk.js saves it), and make sure the
+         current page's link is in view. */
+      (function () {
+        var list = document.querySelector('#dk-sidebar section');
+        if (!list) return;
+        try { list.scrollTop = Number(sessionStorage.getItem('dk-sidebar-scroll')) || 0; } catch (e) {}
+        var current = list.querySelector('[aria-current=page]');
+        if (!current) return;
+        var item = current.getBoundingClientRect(), box = list.getBoundingClientRect();
+        if (item.top < box.top || item.bottom > box.bottom) {
+          list.scrollTop += item.top - box.top - box.height / 3;
+        }
+      })();
     </script>
     {% include 'partials/header.html.jinja' %}
     <div class="dk-content">
