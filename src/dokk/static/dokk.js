@@ -1,22 +1,47 @@
 (() => {
-  // :::prompt: Copy, and Open in Claude/ChatGPT with the prompt as the question.
-  for (const card of document.querySelectorAll("[data-dk-prompt]")) {
-    const prompt = card.dataset.dkPrompt;
-    for (const a of card.querySelectorAll("[data-dk-prompt-open]")) {
-      a.href = a.dataset.dkPromptOpen + encodeURIComponent(prompt);
-    }
-    const copy = card.querySelector("[data-dk-prompt-copy]");
-    const label = copy.querySelector("span");
-    copy.addEventListener("click", async () => {
+  // A button with a <span> label that copies text() and says so for a moment.
+  function copyButton(btn, text) {
+    const label = btn.querySelector("span");
+    const original = label.textContent;
+    btn.addEventListener("click", async () => {
       try {
-        await navigator.clipboard.writeText(prompt);
+        await navigator.clipboard.writeText(text());
         label.textContent = "Copied";
       } catch {
         label.textContent = "Failed";
       }
-      setTimeout(() => (label.textContent = "Copy"), 1500);
+      setTimeout(() => (label.textContent = original), 1500);
     });
+  }
+
+  // :::prompt: Copy, and Open in Claude/ChatGPT with the prompt as the question.
+  for (const card of document.querySelectorAll("[data-dk-prompt]")) {
+    // {{ name }} variables: filled in from their inputs, on the page and in Copy and Open.
+    const inputs = [...card.querySelectorAll("[data-dk-prompt-var]")];
+    const value = (name) => inputs.find((i) => i.dataset.dkPromptVar === name)?.value;
+    let prompt = card.dataset.dkPrompt;
+    const update = () => {
+      prompt = card.dataset.dkPrompt.replace(/\{\{\s*([A-Za-z_][\w-]*)\s*\}\}/g, (m, name) => value(name) || m);
+      for (const mark of card.querySelectorAll(".dk-prompt-var")) {
+        mark.textContent = value(mark.dataset.var) || `{{ ${mark.dataset.var} }}`;
+        mark.toggleAttribute("data-filled", !!value(mark.dataset.var));
+      }
+      for (const a of card.querySelectorAll("[data-dk-prompt-open]")) {
+        a.href = a.dataset.dkPromptOpen + encodeURIComponent(prompt);
+      }
+    };
+    for (const i of inputs) i.addEventListener("input", update);
+    update();
+    copyButton(card.querySelector("[data-dk-prompt-copy]"), () => prompt);
     card.querySelector("footer").hidden = false;
+    const vars = card.querySelector(".dk-prompt-vars");
+    if (vars) vars.hidden = false;
+  }
+
+  // :::env and other components: a button that copies its data-dk-copy-text.
+  for (const b of document.querySelectorAll("[data-dk-copy-text]")) {
+    copyButton(b, () => b.dataset.dkCopyText);
+    b.hidden = false;
   }
 
   // Copy button on code blocks.

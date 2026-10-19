@@ -141,3 +141,11 @@ Plan a widget with:
 1. two sprockets
 2. one anvil
 :::
+
+:::prompt[Name a widget]{open="false"}
+Suggest a name for a {{ kind }} widget.
+:::
+
+:::env
+WIDGET_KEY=   # Your key.
+:::

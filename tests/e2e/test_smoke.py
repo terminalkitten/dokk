@@ -162,7 +162,7 @@ def test_prompt_copy_and_open_links(browser, site: str) -> None:  # type: ignore
     context = browser.new_context(permissions=["clipboard-read", "clipboard-write"])
     page = context.new_page()
     page.goto(site + "/guides/components/")
-    card = page.locator(".dk-prompt")
+    card = page.locator(".dk-prompt").first
     expected = "Plan a widget with:\n\n1. two sprockets\n2. one anvil"  # the Markdown as written
     card.get_by_role("button", name="Copy").click()
     card.get_by_role("button", name="Copied").wait_for()
@@ -170,6 +170,22 @@ def test_prompt_copy_and_open_links(browser, site: str) -> None:  # type: ignore
     href = card.get_by_role("link", name="Open in Claude").get_attribute("href")
     encoded = quote(expected, safe="!~*'()")  # as encodeURIComponent
     assert href == "https://claude.ai/new?q=" + encoded
+    context.close()
+
+
+def test_prompt_variables_and_copy_env(browser, site: str) -> None:  # type: ignore[no-untyped-def]
+    context = browser.new_context(permissions=["clipboard-read", "clipboard-write"])
+    page = context.new_page()
+    page.goto(site + "/guides/components/")
+    card = page.locator(".dk-prompt").nth(1)
+    card.get_by_label("kind").fill("blue")
+    assert card.locator(".dk-prompt-var").inner_text() == "blue"  # filled in on the page
+    card.get_by_role("button", name="Copy").click()
+    card.get_by_role("button", name="Copied").wait_for()
+    assert page.evaluate("navigator.clipboard.readText()") == "Suggest a name for a blue widget."
+    page.get_by_role("button", name="Copy .env").click()
+    page.get_by_role("button", name="Copied").wait_for()
+    assert page.evaluate("navigator.clipboard.readText()") == "WIDGET_KEY=   # Your key."
     context.close()
 
 

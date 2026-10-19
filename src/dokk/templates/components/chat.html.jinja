@@ -1,0 +1,6 @@
+{# ::::chat[Title] holding :::system, :::user and :::assistant turns, as in shadcn's AI Elements:
+   the person's turn is a bubble on the right, the reply plain text with its avatar. #}
+<figure class="dk-chat" id="{{ id }}">
+  {% if directive.title %}<figcaption>{{ directive.title }}</figcaption>{% endif %}
+  {{ body }}
+</figure>

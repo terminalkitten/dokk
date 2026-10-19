@@ -1,0 +1,5 @@
+{# :::user[Name]: the person's turn, a bubble on the right. #}
+<div class="dk-msg" data-role="user">
+  {% if directive.title %}<span class="dk-msg-name">{{ directive.title }}</span>{% endif %}
+  <div class="dk-msg-bubble">{{ body }}</div>
+</div>

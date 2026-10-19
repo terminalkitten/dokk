@@ -26,6 +26,7 @@ from pygments.lexers.special import TextLexer
 from pygments.util import ClassNotFound
 
 from dokk import DokkError
+from dokk.ai import component_data, mark_variables
 from dokk.directives import (
     CALLOUT_TEMPLATE,
     CALLOUTS,
@@ -41,6 +42,7 @@ from dokk.headings import heading_attrs_plugin, strip_attrs
 DESCRIPTION_LENGTH = 160
 LINKBUTTON_VARIANTS = ("primary", "secondary", "minimal")
 HUGGINGFACE_TYPES = ("model", "dataset", "space")
+STEP_STATUSES = ("done", "running", "error")
 
 
 @dataclass(frozen=True)
@@ -184,6 +186,21 @@ class Renderer:
         # icon="name" on model cards: the logos in partials/logos.html.jinja (site overrides win).
         logos = env.get_template("partials/logos.html.jinja").module
         self.logos = sorted(getattr(logos, "logos"))  # noqa: B009 (a Jinja template variable)
+        icons = env.get_template("partials/icons.html.jinja").module
+        self.icons = sorted(getattr(icons, "paths"))  # noqa: B009, for :::step{icon="..."}
+
+    def _check_icon(self, d: Directive) -> None:
+        """icon= is a vendor logo on models and assistants, a Lucide icon on trace steps."""
+        choices = self.icons if d.name == "step" else self.logos
+        name = d.attrs.get("icon")
+        if d.name in ("model", "assistant", "step") and name and name not in choices:
+            raise DirectiveError(
+                f'line {d.line}: unknown icon "{name}"; choose from {", ".join(choices)}'
+            )
+        if d.name == "step" and d.attrs.get("status", "done") not in STEP_STATUSES:
+            raise DirectiveError(
+                f"line {d.line}: step status must be one of {', '.join(STEP_STATUSES)}"
+            )
 
     def render(self, body: str, rel: Path, line_offset: int = 0) -> Rendered:
         env: dict[str, Any] = {}
@@ -229,13 +246,15 @@ class Renderer:
             if d.name == "huggingface" and d.attrs.get("type", "model") not in HUGGINGFACE_TYPES:
                 types = ", ".join(HUGGINGFACE_TYPES)
                 raise DirectiveError(f"line {d.line}: huggingface type must be one of {types}")
-            if d.name == "model" and d.attrs.get("icon", self.logos[0]) not in self.logos:
-                raise DirectiveError(
-                    f'line {d.line}: unknown icon "{d.attrs["icon"]}"; '
-                    f"choose from {', '.join(self.logos)}"
-                )
-            if d.name == "prompt":  # copied as written, Markdown and all
-                extra["source"] = _source(lines, inner)
+            for item in [d, *(c for c, _ in children)]:
+                self._check_icon(item)
+            extra |= component_data(
+                d, inner, _source(lines, inner), lambda code, lang: highlight_code(code, lang, "")
+            )
+            if fence := extra.pop("fence", None):  # a tool's schema shows below its table
+                body = render_inner([t for t in inner if t is not fence])
+            if d.name == "prompt":
+                body = mark_variables(body)
             if d.name == "linkbutton":
                 if not d.title or not d.attrs.get("href"):
                     raise DirectiveError(f'line {d.line}: use ::linkbutton[Text]{{href="..."}}')

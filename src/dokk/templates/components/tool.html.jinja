@@ -1,0 +1,36 @@
+{# :::tool[Title] with a ```json block: an OpenAI or Anthropic tool, or a JSON schema. Shows its
+   parameters as a table and the JSON, collapsed, under it. #}
+{% from "partials/icons.html.jinja" import icon %}
+<article class="card dk-tool" id="{{ id }}">
+  <header>
+    <span class="dk-prompt-icon">{{ icon('wrench') }}</span>
+    <strong class="card-title"><code>{{ tool_name or directive.title }}</code></strong>
+    <span class="badge" data-variant="outline">tool</span>
+  </header>
+  <section>
+    {% if tool_description %}<p>{{ tool_description }}</p>{% endif %}
+    {{ body }}
+    {% if params %}
+    <div class="table-container"><table class="table dk-params">
+      <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+      {% for p in params %}
+        <tr>
+          <td><code>{{ p.name }}</code>{% if p.required %} <span class="badge" data-variant="secondary">required</span>{% endif %}</td>
+          <td><code>{{ p.type or "any" }}</code></td>
+          <td>{{ p.description }}
+            {%- if p.enum %}<div class="dk-params-extra">One of {% for v in p.enum %}<code>{{ v }}</code>{{ ", " if not loop.last }}{% endfor %}</div>{% endif %}
+            {%- if p.default %}<div class="dk-params-extra">Default <code>{{ p.default }}</code></div>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% else %}
+    <p class="dk-params-extra">No parameters.</p>
+    {% endif %}
+    <details class="dk-tool-json">
+      <summary>JSON schema</summary>
+      {{ schema_html }}
+    </details>
+  </section>
+</article>

@@ -1,7 +1,9 @@
 {# :::prompt[Title]{model="..." role="system"}: a prompt with Copy and Open in Claude/ChatGPT buttons,
-   which use the Markdown as written (data-dk-prompt).
+   which use the Markdown as written (data-dk-prompt). {{ name }} in the prompt gets an input that
+   fills it in, for the page and for Copy and Open.
    The buttons need JavaScript and stay hidden without it; open="false" leaves out the Open ones. #}
 {% from "partials/icons.html.jinja" import icon %}
+{% from "partials/logos.html.jinja" import logo %}
 {% set a = directive.attrs %}
 <article class="card dk-prompt" id="{{ id }}" data-dk-prompt="{{ source }}">
   <header>
@@ -10,12 +12,21 @@
     {% if a.get('role') %}<span class="badge" data-variant="outline">{{ a.role }}</span>{% endif %}
     {% if a.get('model') %}<span class="badge" data-variant="secondary">{{ icon('bot') }}{{ a.model }}</span>{% endif %}
   </header>
-  <section><div class="dk-prompt-text">{{ body }}</div></section>
+  <section>
+    <div class="dk-prompt-text">{{ body }}</div>
+    {% if variables %}
+    <div class="dk-prompt-vars" hidden>
+      {% for v in variables %}
+      <label><span>{{ v }}</span><input class="input" type="text" data-dk-prompt-var="{{ v }}" placeholder="{{ v }}" aria-label="{{ v }}"></label>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
   <footer hidden>
     <button type="button" class="btn" data-variant="outline" data-size="sm" data-dk-prompt-copy>{{ icon('copy') }}<span>Copy</span></button>
     {% if a.get('open', 'true') != 'false' %}
-    <a class="btn" data-variant="ghost" data-size="sm" target="_blank" rel="noopener" data-dk-prompt-open="https://claude.ai/new?q=">Open in Claude{{ icon('arrow-up-right') }}</a>
-    <a class="btn" data-variant="ghost" data-size="sm" target="_blank" rel="noopener" data-dk-prompt-open="https://chatgpt.com/?q=">Open in ChatGPT{{ icon('arrow-up-right') }}</a>
+    <a class="btn" data-variant="ghost" data-size="sm" target="_blank" rel="noopener" data-dk-prompt-open="https://claude.ai/new?q=">{{ logo('claude') }}Open in Claude</a>
+    <a class="btn" data-variant="ghost" data-size="sm" target="_blank" rel="noopener" data-dk-prompt-open="https://chatgpt.com/?q=">{{ logo('openai') }}Open in ChatGPT</a>
     {% endif %}
   </footer>
 </article>

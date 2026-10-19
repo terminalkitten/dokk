@@ -1,0 +1,10 @@
+{# :::assistant[Name]{icon="claude"}: the reply, with a vendor logo or a sparkle as avatar. #}
+{% from "partials/icons.html.jinja" import icon %}
+{% from "partials/logos.html.jinja" import logo %}
+<div class="dk-msg" data-role="assistant">
+  <span class="dk-msg-avatar">{% if directive.attrs.get('icon') %}{{ logo(directive.attrs.icon) }}{% else %}{{ icon('sparkles') }}{% endif %}</span>
+  <div class="dk-msg-content">
+    {% if directive.title %}<span class="dk-msg-name">{{ directive.title }}</span>{% endif %}
+    {{ body }}
+  </div>
+</div>

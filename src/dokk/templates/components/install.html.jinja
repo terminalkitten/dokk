@@ -1,0 +1,6 @@
+{# ::install[package]{dev="true" tools="pip uv poetry"}: install commands as tabs, synced across
+   the site so a reader picks their installer once. #}
+{% from 'basecoat/tabs.html.jinja' import tabs %}
+{% set tabsets = [] %}
+{% for c in commands %}{% set _ = tabsets.append({'tab': c.name, 'panel': c.html}) %}{% endfor %}
+{{ tabs(id=id, tabsets=tabsets, main_attrs={'class': 'dk-tabs dk-install', 'data-sync': 'install'}) }}

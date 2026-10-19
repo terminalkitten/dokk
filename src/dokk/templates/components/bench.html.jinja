@@ -1,0 +1,14 @@
+{# :::bench[MMLU]{max="100" highlight="Acme Large 2"} with `Label: 88.7%` lines: a bar per line,
+   relative to max (else the best score). #}
+{% set highlight = directive.attrs.get('highlight', '') %}
+<figure class="dk-bench" id="{{ id }}">
+  {% if directive.title %}<figcaption>{{ directive.title }}</figcaption>{% endif %}
+  <dl>
+  {% for s in scores %}
+    <div{% if s.label == highlight %} data-highlight{% endif %}>
+      <dt>{{ s.label }}</dt>
+      <dd><span class="dk-bench-bar" style="width: {{ s.width }}%"></span><span class="dk-bench-value">{{ s.text }}</span></dd>
+    </div>
+  {% endfor %}
+  </dl>
+</figure>

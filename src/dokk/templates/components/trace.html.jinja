@@ -1,0 +1,20 @@
+{# ::::trace[Title] with :::step[What happened]{icon="search" status="error"} lines, as in shadcn's
+   AI Elements trace: an icon and a line per step; a step with a body opens to show it. #}
+{% from "partials/icons.html.jinja" import icon %}
+<div class="dk-trace" id="{{ id }}">
+  {% if directive.title %}<p class="dk-trace-title">{{ directive.title }}</p>{% endif %}
+  <ol>
+  {% for step, step_body in children %}
+    {% set status = step.attrs.get('status', 'done') %}
+    {% set name = step.attrs.get('icon') or {'done': 'circle-check', 'error': 'circle-x', 'running': 'loader-circle'}[status] %}
+    {% set line %}<span class="dk-step-icon">{{ icon(name) }}</span><span class="dk-step-title">{{ step.title }}</span>{% endset %}
+    <li class="dk-step" data-status="{{ status }}">
+      {% if step_body %}
+      <details><summary>{{ line }}{{ icon('chevron-right') }}</summary><div class="dk-step-body">{{ step_body }}</div></details>
+      {% else %}
+      <div class="dk-step-line">{{ line }}</div>
+      {% endif %}
+    </li>
+  {% endfor %}
+  </ol>
+</div>

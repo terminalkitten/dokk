@@ -19,12 +19,15 @@ from mdit_py_plugins.container import container_plugin
 from dokk import DokkError
 
 CALLOUTS = ("note", "tip", "caution", "danger")
-CHILDREN = {"tabs": "tab"}  # parent: only allowed child
-PARENTS = {child: parent for parent, child in CHILDREN.items()}
+# Parent: its only allowed child. The parent template gets the children as (directive, body).
+CHILDREN = {"tabs": "tab", "trace": "step", "models": "model"}
+# Children that only exist inside their parent (a ::model also stands on its own).
+PARENTS = {"tab": "tabs", "step": "trace"}
 KNOWN = {
     *CALLOUTS,
     *("tabs", "tab", "cards", "card", "steps", "filetree", "linkbutton", "details", "image"),
-    *("model", "huggingface", "prompt"),
+    *("model", "huggingface", "prompt", "models", "chat", "user", "assistant", "system"),
+    *("tool", "trace", "step", "bench", "install", "env"),
 }
 # Template used by every callout type; not a directive name of its own.
 CALLOUT_TEMPLATE = "callout"

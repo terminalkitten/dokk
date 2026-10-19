@@ -335,6 +335,91 @@ html.dark .dk-callout[data-callout="caution"] {
 .dk-prompt > footer a { text-decoration: none; }
 .dk-prompt > footer[hidden] { display: none; }
 
+.dk-prompt-vars { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 1rem; }
+.dk-prompt-vars[hidden] { display: none; }
+.dk-prompt-vars label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; }
+.dk-prompt-vars label span { font-family: var(--font-mono); color: var(--muted-foreground); }
+.dk-prompt-vars .input { width: 12rem; height: 2rem; }
+.dk-prompt-var { padding: 0 0.2em; border-radius: 0.25rem; background: color-mix(in oklab, var(--primary) 15%, transparent); color: inherit; font-family: var(--font-mono); font-size: 0.875em; }
+.dk-prompt-var[data-filled] { font-family: inherit; font-size: inherit; }
+
+/* ::::chat, after shadcn's AI Elements: the person's turn as a bubble on the right, the reply as
+   plain text next to its avatar, the system prompt as a quiet note. */
+.dk-chat { display: flex; flex-direction: column; gap: 1.25rem; margin: 0 0 1.25rem; padding: 1.25rem;
+  border: 1px solid var(--border); border-radius: var(--radius); }
+.dk-chat > figcaption { margin: -0.25rem 0 0; color: var(--muted-foreground); font-size: 0.8125rem; font-weight: 500; }
+.dk-msg { display: flex; flex-direction: column; gap: 0.25rem; }
+.dk-msg-name { color: var(--muted-foreground); font-size: 0.75rem; font-weight: 500; }
+.dk-msg[data-role="user"] { align-items: flex-end; margin-left: 15%; }
+.dk-msg-bubble { padding: 0.5rem 0.875rem; border-radius: calc(var(--radius) + 4px); background: var(--muted); }
+.dk-msg[data-role="assistant"] { flex-direction: row; gap: 0.75rem; }
+.dk-msg-avatar { display: grid; place-items: center; flex-shrink: 0; width: 1.75rem; height: 1.75rem;
+  border: 1px solid var(--border); border-radius: 999px; font-size: 0.875rem; }
+.dk-msg-avatar svg { width: 1em; height: 1em; }
+.dk-msg-content { min-width: 0; flex: 1; padding-top: 0.2rem; }
+.dk-msg-content > .dk-msg-name { display: block; margin-bottom: 0.25rem; }
+.dk-msg[data-role="system"] { padding: 0.5rem 0.875rem; border: 1px dashed var(--border); border-radius: var(--radius);
+  color: var(--muted-foreground); font-size: 0.875rem; }
+.dk-prose :is(.dk-msg-bubble, .dk-msg-content, .dk-msg[data-role="system"]) > :last-child { margin-bottom: 0; }
+.dk-prose .dk-msg :is(p, ul, ol, .dk-code) { margin-bottom: 0.75rem; }
+
+/* :::tool: a tool's parameters, then its JSON */
+.dk-tool { margin: 0 0 1.25rem; gap: 1rem; }
+.dk-tool > header { display: flex; align-items: center; gap: 0.75rem; }
+.dk-tool svg { width: 1em; height: 1em; flex-shrink: 0; }
+.dk-tool .card-title code { font-size: 0.95rem; }
+.dk-prose .dk-tool section > :last-child { margin-bottom: 0; }
+.dk-params-extra { color: var(--muted-foreground); font-size: 0.8125rem; }
+.dk-tool-json > summary { cursor: pointer; color: var(--muted-foreground); font-size: 0.8125rem; font-weight: 500; }
+.dk-tool-json[open] > summary { margin-bottom: 0.5rem; }
+
+/* ::::trace, after shadcn's AI Elements: a line per step, open the ones with details */
+.dk-trace { margin: 0 0 1.25rem; }
+.dk-prose .dk-trace-title { margin: 0 0 0.5rem; font-size: 0.875rem; font-weight: 600; }
+.dk-prose .dk-trace ol { list-style: none; margin: 0; padding: 0; }
+.dk-prose .dk-trace .dk-step { position: relative; margin: 0; padding: 0 0 0.25rem; }
+.dk-step:not(:last-child)::before { content: ""; position: absolute; left: 0.5rem; top: 1.5rem; bottom: 0; border-left: 1px solid var(--border); }
+.dk-step-line, .dk-step summary { display: flex; align-items: center; gap: 0.625rem; padding: 0.25rem 0;
+  color: var(--muted-foreground); font-size: 0.875rem; }
+.dk-step summary { cursor: pointer; list-style: none; }
+.dk-step summary::-webkit-details-marker { display: none; }
+.dk-step summary:hover, .dk-step details[open] > summary { color: var(--foreground); }
+.dk-step svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+.dk-step summary > svg:last-child { transition: transform 0.15s; }
+.dk-step details[open] > summary > svg:last-child { transform: rotate(90deg); }
+.dk-step-icon { display: grid; place-items: center; background: var(--background); }
+.dk-step[data-status="error"] .dk-step-icon, .dk-step[data-status="error"] .dk-step-title { color: var(--destructive); }
+.dk-step[data-status="running"] .dk-step-icon svg { animation: dk-spin 1s linear infinite; }
+@keyframes dk-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .dk-step[data-status="running"] .dk-step-icon svg { animation: none; } }
+.dk-step-body { margin: 0.25rem 0 0.5rem 1.625rem; font-size: 0.875rem; }
+.dk-prose .dk-step-body > :last-child { margin-bottom: 0; }
+
+/* ::::models: models side by side */
+.dk-models th[scope="row"] { color: var(--muted-foreground); font-weight: 500; white-space: nowrap; }
+.dk-models-name { display: inline-flex; align-items: center; gap: 0.5rem; }
+.dk-models-name svg { width: 1rem; height: 1rem; }
+.dk-models .badge { margin: 0.1rem 0; }
+.dk-models-none { color: var(--muted-foreground); }
+
+/* :::bench: a bar per score */
+.dk-bench { margin: 0 0 1.25rem; }
+.dk-bench > figcaption { margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 600; }
+.dk-prose .dk-bench dl { display: grid; grid-template-columns: minmax(6rem, max-content) 1fr; gap: 0.375rem 1rem; margin: 0; }
+.dk-bench dl > div { display: contents; }
+.dk-prose .dk-bench dt { margin: 0; font-size: 0.875rem; font-weight: 400; color: var(--muted-foreground); }
+.dk-prose .dk-bench dd { display: flex; align-items: center; gap: 0.5rem; margin: 0; padding: 0; border: 0; }
+.dk-bench-bar { height: 0.625rem; min-width: 2px; border-radius: 999px; background: color-mix(in oklab, var(--foreground) 25%, transparent); }
+.dk-bench-value { font-size: 0.8125rem; font-variant-numeric: tabular-nums; }
+.dk-bench [data-highlight] dt { color: var(--foreground); font-weight: 600; }
+.dk-bench [data-highlight] .dk-bench-bar { background: var(--primary); }
+.dk-bench [data-highlight] .dk-bench-value { font-weight: 600; }
+
+/* :::env: environment variables, with Copy .env */
+.dk-env { margin: 0 0 1.25rem; }
+.dk-env .table-container { margin-bottom: 0.5rem; }
+.dk-env > .btn svg { width: 1em; height: 1em; }
+
 /* Steps: numbered procedure from an ordered list */
 .dk-prose .dk-steps > ol { list-style: none; padding-left: 0; counter-reset: dk-step; }
 .dk-prose .dk-steps > ol > li {

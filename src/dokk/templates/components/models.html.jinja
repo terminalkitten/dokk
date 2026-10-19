@@ -1,0 +1,39 @@
+{# ::::models holding ::model cards: the same models side by side in one table. Rows only for
+   what at least one model has. #}
+{% from "partials/logos.html.jinja" import logo %}
+{% from "partials/icons.html.jinja" import icon %}
+{% macro price(value) %}{{ value if value[:1] in "$€£" or not value[:1].isdigit() else "$" ~ value }}{% endmacro %}
+{% set rows = [
+  ('provider', 'Provider'), ('model', 'API name'), ('input', 'Input / 1M'), ('output', 'Output / 1M'),
+  ('cached', 'Cached input / 1M'), ('context', 'Context'), ('max_output', 'Max output'),
+  ('cutoff', 'Cutoff'), ('released', 'Released'), ('license', 'License'), ('features', 'Features'),
+] %}
+<div class="table-container dk-models" id="{{ id }}">
+  <table class="table">
+    <thead><tr><th></th>
+    {% for m, _ in children %}
+      <th><span class="dk-models-name">{% if m.attrs.get('icon') %}{{ logo(m.attrs.icon) }}{% endif %}{{ m.title }}</span></th>
+    {% endfor %}
+    </tr></thead>
+    <tbody>
+    {% for key, label in rows %}
+    {% set ns = namespace(used=false) %}
+    {% for m, _ in children if m.attrs.get(key) %}{% set ns.used = true %}{% endfor %}
+    {% if ns.used %}
+      <tr><th scope="row">{{ label }}</th>
+      {% for m, _ in children %}
+        {% set v = m.attrs.get(key, '') %}
+        <td>
+        {%- if not v %}<span class="dk-models-none">—</span>
+        {%- elif key in ('input', 'output', 'cached') %}{{ price(v) }}
+        {%- elif key == 'model' %}<code>{{ v }}</code>
+        {%- elif key == 'features' %}{% for f in v.split() %}<span class="badge" data-variant="secondary">{{ f }}</span> {% endfor %}
+        {%- else %}{{ v }}{% endif -%}
+        </td>
+      {% endfor %}
+      </tr>
+    {% endif %}
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
