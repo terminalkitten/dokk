@@ -185,6 +185,19 @@ def test_user_template_overrides_builtin(make_site) -> None:
     assert "CUSTOM PAGER" in (build(root).out_dir / "index.html").read_text(encoding="utf-8")
 
 
+def test_head_partial_adds_tags_to_every_page(make_site) -> None:
+    root = make_site({"index.md": "Home", "guide.md": "# Guide"})
+    (root / "templates" / "partials").mkdir(parents=True)
+    (root / "templates" / "partials" / "head.html.jinja").write_text(
+        '<meta name="google-site-verification" content="abc">', encoding="utf-8"
+    )
+    out = build(root).out_dir
+    for page in ("index.html", "guide/index.html", "404.html"):
+        html = (out / page).read_text(encoding="utf-8")
+        meta = '<meta name="google-site-verification" content="abc">'
+        assert meta in html and html.index(meta) < html.index("</head>"), page
+
+
 def test_cli_build_and_error(make_site, capsys: pytest.CaptureFixture[str]) -> None:
     root = make_site({"a_b.md": "A", "a-b.md": "B"})
     assert main(["build", "--root", str(root)]) == 1
