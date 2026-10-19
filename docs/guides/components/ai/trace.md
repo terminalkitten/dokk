@@ -28,13 +28,16 @@ FAILED tests/test_config.py::test_defaults - KeyError: 'title'
 ::::trace[Fixing the failing test]
 :::step[Searched the code for parse_config]{icon="search"}
 :::
+
 :::step[Ran pytest]{icon="square-terminal" status="error"}
 ```text
 FAILED tests/test_config.py::test_defaults - KeyError: 'title'
 ```
 :::
+
 :::step[Edited src/config.py]{icon="file-text"}
 :::
+
 :::step[Running pytest again]{icon="square-terminal" status="running"}
 :::
 ::::

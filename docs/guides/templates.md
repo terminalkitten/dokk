@@ -8,17 +8,17 @@ sidebar:
 dokk renders pages with [Jinja](https://jinja.palletsprojects.com). A file in your site's `templates/`
 folder replaces the built-in file with the same path.
 
-| Template | What it renders |
-|---|---|
-| `base.html.jinja` | the page shell: head, sidebar, header |
-| `page.html.jinja` | a content page |
-| `404.html.jinja` | the not-found page (or write `docs/404.md`) |
-| `partials/head.html.jinja` | extra tags at the end of `<head>`, empty by default |
-| `partials/header.html.jinja` | top bar: menu button, title, search, theme toggle |
-| `partials/footer.html.jinja` | site footer: `[footer] text` and the "Built with dokk" credit |
-| `partials/breadcrumbs.html.jinja`, `toc.html.jinja`, `pager.html.jinja`, `page_meta.html.jinja` | page parts |
-| `partials/logos.html.jinja` | vendor logos for `icon="..."` on model cards; add your own |
-| `components/callout.html.jinja`, `tabs`, `card`, `cards`, `steps` | directive components |
+| Template                                                                                        | What it renders                                               |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `base.html.jinja`                                                                               | the page shell: head, sidebar, header                         |
+| `page.html.jinja`                                                                               | a content page                                                |
+| `404.html.jinja`                                                                                | the not-found page (or write `docs/404.md`)                   |
+| `partials/head.html.jinja`                                                                      | extra tags at the end of `<head>`, empty by default           |
+| `partials/header.html.jinja`                                                                    | top bar: menu button, title, search, theme toggle             |
+| `partials/footer.html.jinja`                                                                    | site footer: `[footer] text` and the "Built with dokk" credit |
+| `partials/breadcrumbs.html.jinja`, `toc.html.jinja`, `pager.html.jinja`, `page_meta.html.jinja` | page parts                                                    |
+| `partials/logos.html.jinja`                                                                     | vendor logos for `icon="..."` on model cards; add your own    |
+| `components/callout.html.jinja`, `tabs`, `card`, `cards`, `steps`                               | directive components                                          |
 
 For example, to replace the pager, create `templates/partials/pager.html.jinja`.
 

@@ -85,12 +85,15 @@ Ask the model to quote the passage it used. Wrong answers are then easy to spot.
 :::user
 When is the team offsite?
 :::
+
 :::assistant
 The offsite is on 14 November in Utrecht ("Offsite: Thu 14 Nov, Utrecht", from `notes/team.md`).
 :::
+
 :::user
 What is the wifi password there?
 :::
+
 :::assistant
 The passages do not say.
 :::

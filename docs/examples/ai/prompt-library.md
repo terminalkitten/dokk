@@ -12,6 +12,7 @@ open it in Claude or ChatGPT. :badge[Example]{variant="secondary"}
 
 :::prompt[Review a pull request]{role="user" model="any"}
 You are a careful reviewer. For the diff below:
+
 1. List bugs first, then risky changes.
 2. Quote the line for each finding.
 3. Skip style nits.

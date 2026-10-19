@@ -27,11 +27,11 @@ collapsible submenus. A typical site:
 - .dokk/ build output, ignored by git
 :::
 
-| Source file | URL |
-|---|---|
-| `docs/index.md` | `/` |
-| `docs/guides/index.md` | `/guides/` |
-| `docs/guides/intro.md` | `/guides/intro/` |
+| Source file               | URL                 |
+| ------------------------- | ------------------- |
+| `docs/index.md`           | `/`                 |
+| `docs/guides/index.md`    | `/guides/`          |
+| `docs/guides/intro.md`    | `/guides/intro/`    |
 | `docs/Getting Started.md` | `/getting-started/` |
 
 A folder's `index.md` is the first item inside it. Two files that map to the same URL fail the build.

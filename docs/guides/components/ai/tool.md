@@ -5,7 +5,7 @@ sidebar:
   order: 6
 ---
 
-`:::tool` documents a tool or function that a model can call. Paste its definition as a ```json
+`:::tool` documents a tool or function that a model can call. Paste its definition as a \`\`\`json
 block: an OpenAI tool, an Anthropic tool or a bare JSON schema. dokk shows the parameters as a
 table and keeps the JSON, collapsed, under it.
 

@@ -18,7 +18,9 @@ least one model has that value; a missing one shows a dash.
 
 ::::models
 ::model[Acme Large 2]{provider="Acme AI" input="3" output="15" context="200K" max_output="64K" features="vision tools reasoning"}
+
 ::model[Acme Small 2]{provider="Acme AI" input="0.25" output="1.25" context="200K" max_output="16K" features="tools"}
+
 ::model[Acme Open 7B]{provider="Acme AI" context="32K" license="Apache-2.0" released="2026-01"}
 ::::
 

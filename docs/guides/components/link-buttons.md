@@ -15,5 +15,7 @@ External links get an arrow.
 ```
 
 ::linkbutton[Get started]{href="../../getting-started/index.md"}
+
 ::linkbutton[Basecoat]{href="https://basecoatui.com" variant="secondary"}
+
 ::linkbutton[Pagefind]{href="https://pagefind.app" variant="minimal"}

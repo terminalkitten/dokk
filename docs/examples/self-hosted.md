@@ -37,6 +37,7 @@ volumes:
 docker compose up -d
 ```
 :::
+
 :::tab[pip]
 ::install[ledgerly]{tools="pip uv"}
 

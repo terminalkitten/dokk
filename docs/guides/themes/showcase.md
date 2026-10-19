@@ -15,13 +15,13 @@ toggle in the header to see both modes, then copy the `[theme]` table into your 
 
 The colors of the current theme, live:
 
-| Token | Swatch | Token | Swatch |
-|---|---|---|---|
-| `background` | :swatch[var(--background)] | `foreground` | :swatch[var(--foreground)] |
-| `primary` | :swatch[var(--primary)] | `primary-foreground` | :swatch[var(--primary-foreground)] |
-| `secondary` | :swatch[var(--secondary)] | `muted` | :swatch[var(--muted)] |
-| `accent` | :swatch[var(--accent)] | `border` | :swatch[var(--border)] |
-| `destructive` | :swatch[var(--destructive)] | `ring` | :swatch[var(--ring)] |
+| Token         | Swatch                      | Token                | Swatch                             |
+| ------------- | --------------------------- | -------------------- | ---------------------------------- |
+| `background`  | :swatch[var(--background)]  | `foreground`         | :swatch[var(--foreground)]         |
+| `primary`     | :swatch[var(--primary)]     | `primary-foreground` | :swatch[var(--primary-foreground)] |
+| `secondary`   | :swatch[var(--secondary)]   | `muted`              | :swatch[var(--muted)]              |
+| `accent`      | :swatch[var(--accent)]      | `border`             | :swatch[var(--border)]             |
+| `destructive` | :swatch[var(--destructive)] | `ring`               | :swatch[var(--ring)]               |
 
 Charts: :swatch[var(--chart-1)] :swatch[var(--chart-2)] :swatch[var(--chart-3)]
 :swatch[var(--chart-4)] :swatch[var(--chart-5)]
@@ -92,6 +92,7 @@ And this one breaks things.
 pip install "dokk[serve,search]"
 ```
 :::
+
 :::tab[uv]
 ```sh
 uv pip install "dokk[serve,search]"
@@ -103,6 +104,7 @@ uv pip install "dokk[serve,search]"
 :::card[Writing pages]{href="../writing.md"}
 Folders, front matter, links and images.
 :::
+
 :::card[Components]{href="../components/index.md"}
 Everything on this page, documented.
 :::
@@ -127,7 +129,9 @@ Hidden until opened. Press :kbd[Ctrl+K] to search, or :kbd[/].
 :::
 
 ::linkbutton[Get started]{href="../../getting-started/index.md"}
+
 ::linkbutton[Themes]{href="index.md" variant="secondary"}
+
 ::linkbutton[Basecoat]{href="https://basecoatui.com" variant="minimal"}
 
 Badges inline: :badge[New] :badge[Beta]{variant="secondary"} :badge[Draft]{variant="outline"}
@@ -147,18 +151,16 @@ footnote, too.[^1]
 - [x] a done task
 - [ ] an open task
 
-| Setting | Default | What it does |
-|---|---|---|
-| `style` | `vega` | shape and density |
-| `base` | `neutral` | every surface and text color |
-| `color` | none | the accent on top |
+| Setting | Default   | What it does                 |
+| ------- | --------- | ---------------------------- |
+| `style` | `vega`    | shape and density            |
+| `base`  | `neutral` | every surface and text color |
+| `color` | none      | the accent on top            |
 
 ```python title="hello.py" {2}
 def hello(name: str) -> str:
     return f"Hello, {name}!"
 ```
-
-[^1]: Footnotes collect at the end of the page.
 
 ## About this page
 
@@ -174,3 +176,5 @@ the other seven, so this picker can switch between them.
 The picker is not built into dokk: it is a [custom component](../components/custom.md) of these
 docs, a template in `templates/components/themepicker.html.jinja`.
 :::
+
+[^1]: Footnotes collect at the end of the page.

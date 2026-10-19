@@ -35,7 +35,9 @@ For latency, shorter bars are better. Our evals and their settings are in the te
 
 ::::models
 ::model[Acme Large 2]{provider="Acme AI" model="acme-large-2" input="3" output="15" context="200K" max_output="64K" features="text vision tools reasoning"}
+
 ::model[Acme Small 2]{provider="Acme AI" model="acme-small-2" input="0.25" output="1.25" context="200K" max_output="16K" features="text tools"}
+
 ::model[Acme Open 7B]{provider="Acme AI" context="32K" license="Apache-2.0" released="2026-01" features="text code"}
 ::::
 
@@ -55,9 +57,11 @@ print(reply.text)
 :::system
 Answer in one sentence.
 :::
+
 :::user
 What is new in Acme Large 2?
 :::
+
 :::assistant[Acme Large 2]
 A 200K context window, better tool use and prompt caching, at the same price as before.
 :::

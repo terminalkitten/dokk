@@ -16,16 +16,19 @@ documentation. :badge[Example]{variant="secondary"}
 brew install tidy
 ```
 :::
+
 :::tab[Linux]
 ```sh
 curl -fsSL https://example.com/tidy/install.sh | sh
 ```
 :::
+
 :::tab[Windows]
 ```powershell
 winget install tidy
 ```
 :::
+
 :::tab[Python]
 ```sh
 pipx install tidy-cli
@@ -50,21 +53,21 @@ tidy --version
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| `tidy [folder]` | Sort the files in a folder; the current one by default. |
-| `tidy undo` | Undo the last run. |
-| `tidy rules` | Show the rules tidy uses, and where they come from. |
-| `tidy watch [folder]` :badge[New] | Keep sorting new files as they arrive. |
+| Command                           | What it does                                            |
+| --------------------------------- | ------------------------------------------------------- |
+| `tidy [folder]`                   | Sort the files in a folder; the current one by default. |
+| `tidy undo`                       | Undo the last run.                                      |
+| `tidy rules`                      | Show the rules tidy uses, and where they come from.     |
+| `tidy watch [folder]` :badge[New] | Keep sorting new files as they arrive.                  |
 
 ## Options
 
-| Option | Default | What it does |
-|---|---|---|
-| `-n`, `--dry-run` | off | Show the moves without making them. |
-| `--by` | `type` | Group by `type`, `date` or `type,date`. |
-| `--keep` | none | Leave files matching a pattern, such as `--keep "*.part"`. |
-| `-q`, `--quiet` | off | Only print errors. |
+| Option            | Default | What it does                                               |
+| ----------------- | ------- | ---------------------------------------------------------- |
+| `-n`, `--dry-run` | off     | Show the moves without making them.                        |
+| `--by`            | `type`  | Group by `type`, `date` or `type,date`.                    |
+| `--keep`          | none    | Leave files matching a pattern, such as `--keep "*.part"`. |
+| `-q`, `--quiet`   | off     | Only print errors.                                         |
 
 :::tip
 Stop `tidy watch` with :kbd[Ctrl+C]. It finishes the move it is busy with first.
@@ -76,9 +79,9 @@ tidy reads `tidy.toml` from the folder it sorts, then from your config folder. A
 folder wins.
 
 :::filetree
-- ~/.config/tidy/
+- \~/.config/tidy/
   - **tidy.toml** your defaults
-- ~/Downloads/
+- \~/Downloads/
   - tidy.toml rules for this folder only
   - images/
   - documents/
@@ -102,11 +105,13 @@ Add one line to your shell's startup file, then open a new terminal:
 eval "$(tidy completion zsh)"
 ```
 :::
+
 :::tab[bash]
 ```sh
 eval "$(tidy completion bash)"
 ```
 :::
+
 :::tab[fish]
 ```sh
 tidy completion fish | source

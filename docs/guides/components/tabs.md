@@ -23,6 +23,7 @@ Each `:::tab[label]` inside `::::tabs` is one tab.
 :::tab[pip]
 `pip install dokk`
 :::
+
 :::tab[uv]
 `uv pip install dokk`
 :::
@@ -52,6 +53,7 @@ on every page.
 :::tab[pip]
 `pip install dokk`
 :::
+
 :::tab[uv]
 `uv pip install dokk`
 :::
@@ -61,6 +63,7 @@ on every page.
 :::tab[pip]
 `pip install "dokk[search]"`
 :::
+
 :::tab[uv]
 `uv pip install "dokk[search]"`
 :::

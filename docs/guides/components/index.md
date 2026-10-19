@@ -23,39 +23,51 @@ fence more colons. An unknown name fails the build with the file and line number
 :::card[Callouts]{href="callouts.md"}
 Notes, tips, cautions and warnings.
 :::
+
 :::card[Tabs]{href="tabs.md"}
 Alternatives side by side, synced across pages.
 :::
+
 :::card[Cards]{href="cards.md"}
 A grid of cards, optionally linked.
 :::
+
 :::card[Steps]{href="steps.md"}
 A numbered sequence of steps.
 :::
+
 :::card[Details]{href="details.md"}
 A collapsible block.
 :::
+
 :::card[File tree]{href="file-tree.md"}
 A folder structure from a bulleted list.
 :::
+
 :::card[Link buttons]{href="link-buttons.md"}
 Links styled as buttons.
 :::
+
 :::card[Badges, keys and colors]{href="inline.md"}
 Inline badges, keyboard keys and color swatches.
 :::
+
 :::card[Image]{href="image.md"}
 An image that opens full size when clicked.
 :::
+
 :::card[Install]{href="install.md"}
 pip, uv and poetry commands for a package, as tabs.
 :::
+
 :::card[Environment variables]{href="env.md"}
 A table of settings from `.env` lines, with Copy .env.
 :::
+
 :::card[AI components]{href="ai/index.md"}
 Model cards, chats, tools, agent traces, prompts and benchmarks.
 :::
+
 :::card[Custom components]{href="custom.md"}
 Add a template to register your own.
 :::

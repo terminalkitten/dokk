@@ -73,6 +73,7 @@ The second tool is written in OpenAI's format and the first in Anthropic's: `:::
 
 :::prompt[Coding agent]{role="system" open="false"}
 You fix failing tests in a Python repository.
+
 1. Run the tests first and read the failure.
 2. Read only the files you need.
 3. Make the smallest change that fixes it, then run the tests again.
@@ -86,6 +87,7 @@ The user asks for a fix; the agent answers after five steps.
 :::user
 `test_defaults` fails since yesterday. Can you fix it?
 :::
+
 :::assistant[relay]{icon="claude"}
 Fixed: `load_config` no longer drops the `title` key when the file has no `[site]` table. All
 42 tests pass.
@@ -100,16 +102,20 @@ What happened in between:
 FAILED tests/test_config.py::test_defaults - KeyError: 'title'
 ```
 :::
+
 :::step[Searched the code for load_config]{icon="search"}
 :::
+
 :::step[Read src/config.py]{icon="file-text"}
 :::
+
 :::step[Edited src/config.py]{icon="wrench"}
 ```diff
 -    site = data["site"]
 +    site = data.get("site", {})
 ```
 :::
+
 :::step[Ran pytest]{icon="square-terminal"}
 ```text
 42 passed in 0.81s

@@ -25,13 +25,13 @@ def slugify(text: str, *, separator: str = "-", max_length: int | None = None,
 Turn any text into a slug: accents are removed, everything that is not a letter or digit becomes
 the separator, and repeated separators collapse into one.
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `text` | `str` | required | The text to convert. |
-| `separator` | `str` | `"-"` | Put between words. |
-| `max_length` | `int \| None` | `None` | Cut the slug at a word boundary, at most this long. |
-| `lowercase` | `bool` | `True` | Lowercase the result. |
-| `stopwords` | `Iterable[str]` | `()` | Words to leave out, such as `{"a", "the"}`. |
+| Parameter    | Type            | Default  | Description                                         |
+| ------------ | --------------- | -------- | --------------------------------------------------- |
+| `text`       | `str`           | required | The text to convert.                                |
+| `separator`  | `str`           | `"-"`    | Put between words.                                  |
+| `max_length` | `int \| None`   | `None`   | Cut the slug at a word boundary, at most this long. |
+| `lowercase`  | `bool`          | `True`   | Lowercase the result.                               |
+| `stopwords`  | `Iterable[str]` | `()`     | Words to leave out, such as `{"a", "the"}`.         |
 
 **Returns** the slug, which may be empty. **Raises** `TypeError` when `text` is not a string.
 

@@ -45,6 +45,7 @@ reply = client.chat("Explain recursion in one sentence.")
 print(reply.text)
 ```
 :::
+
 :::tab[Async]
 ```python
 import asyncio
@@ -66,6 +67,7 @@ What the call sends, and what comes back:
 :::user
 Explain recursion in one sentence.
 :::
+
 :::assistant[claude-sonnet]{icon="claude"}
 Recursion is when a function solves a problem by calling itself on a smaller piece of the same
 problem, until the piece is small enough to answer directly.
@@ -79,8 +81,11 @@ provider's API name.
 
 ::::models
 ::model[claude-sonnet]{provider="Anthropic" icon="claude" context="200K" features="text vision tools streaming"}
+
 ::model[gpt-mini]{provider="OpenAI" icon="openai" context="128K" features="text vision tools json"}
+
 ::model[mistral-small]{provider="Mistral AI" icon="mistralai" context="32K" license="Apache-2.0" features="text tools"}
+
 ::model[llama-local]{provider="Ollama" icon="ollama" context="8K" input="free" output="free" features="text"}
 ::::
 
@@ -91,4 +96,5 @@ Prices and limits change often; quill's docs leave them to each provider's prici
 ## Next
 
 ::linkbutton[Agent framework example]{href="agent.md"}
+
 ::linkbutton[All components]{href="../../guides/components/index.md" variant="secondary"}

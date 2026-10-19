@@ -31,9 +31,11 @@ pip install "dokk[search]"
 :::system
 You answer questions about dokk. Be brief.
 :::
+
 :::user
 How do I add search?
 :::
+
 :::assistant[Claude]{icon="claude"}
 Install the search extra and build again:
 

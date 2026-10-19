@@ -16,6 +16,7 @@ dokk needs Python 3.11 or newer.
 pip install "dokk[serve,search]"
 ```
 :::
+
 :::tab[uv]
 ```sh
 uv pip install "dokk[serve,search]"

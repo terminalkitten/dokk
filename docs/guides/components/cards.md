@@ -19,6 +19,7 @@ Install and build your first site.
 :::card[Get started]{href="../../getting-started/index.md"}
 Install and build your first site.
 :::
+
 :::card[No link]
 Cards without `href` are not clickable.
 :::
