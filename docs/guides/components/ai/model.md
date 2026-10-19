@@ -2,7 +2,7 @@
 title: Model card
 description: An AI model with its prices, context window, limits and features.
 sidebar:
-  order: 10
+  order: 1
 ---
 
 `:::model[Name]` shows an AI model with its provider, API name, prices and limits. Every

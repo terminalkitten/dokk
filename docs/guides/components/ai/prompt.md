@@ -2,7 +2,7 @@
 title: Prompt
 description: A prompt that readers can copy, or open in Claude or ChatGPT.
 sidebar:
-  order: 12
+  order: 4
 ---
 
 `:::prompt[Title]` shows a prompt with a **Copy** button and **Open in Claude** and **Open in
@@ -24,6 +24,25 @@ You are a careful reviewer. For the diff below:
 1. List bugs first, then risky changes.
 2. Quote the line for each finding.
 3. Skip style nits.
+:::
+
+## Variables
+
+`{{ name }}` in the prompt becomes a field above the buttons. What the reader types fills it in on
+the page, and in what Copy and the Open links send.
+
+```md
+:::prompt[Explain an error]{role="user"}
+Explain this {{ language }} error and how to fix it:
+
+{{ error }}
+:::
+```
+
+:::prompt[Explain an error]{role="user"}
+Explain this {{ language }} error and how to fix it:
+
+{{ error }}
 :::
 
 ## Attributes

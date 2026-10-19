@@ -2,7 +2,7 @@
 title: Hugging Face card
 description: A model, dataset or Space on the Hugging Face Hub, linked.
 sidebar:
-  order: 11
+  order: 3
 ---
 
 `::huggingface[owner/name]` links a repository on the [Hugging Face Hub](https://huggingface.co).

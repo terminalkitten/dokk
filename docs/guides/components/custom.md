@@ -2,7 +2,7 @@
 title: Custom components
 description: Register your own directive by adding a template.
 sidebar:
-  order: 13
+  order: 20
 ---
 
 Add a template to your site's `templates/components/` folder and its file name becomes a

@@ -47,14 +47,14 @@ Inline badges, keyboard keys and color swatches.
 :::card[Image]{href="image.md"}
 An image that opens full size when clicked.
 :::
-:::card[Model card]{href="model.md"}
-An AI model with prices, context and features.
+:::card[Install]{href="install.md"}
+pip, uv and poetry commands for a package, as tabs.
 :::
-:::card[Hugging Face card]{href="huggingface.md"}
-A model, dataset or Space on the Hub.
+:::card[Environment variables]{href="env.md"}
+A table of settings from `.env` lines, with Copy .env.
 :::
-:::card[Prompt]{href="prompt.md"}
-A prompt to copy or open in Claude or ChatGPT.
+:::card[AI components]{href="ai/index.md"}
+Model cards, chats, tools, agent traces, prompts and benchmarks.
 :::
 :::card[Custom components]{href="custom.md"}
 Add a template to register your own.
