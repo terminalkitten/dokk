@@ -15,7 +15,8 @@ def build_index(out: Path) -> None:
     proc = subprocess.run(
         [sys.executable, "-m", "pagefind", "--site", str(out), "--silent"],
         capture_output=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",  # only shown in an error message
     )
     if proc.returncode:
         raise DokkError(f"pagefind failed:\n{(proc.stderr or proc.stdout).strip()}")

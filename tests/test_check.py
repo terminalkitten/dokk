@@ -58,7 +58,7 @@ def test_cli_exit_codes(make_site, capsys: pytest.CaptureFixture[str]) -> None:
     assert "error: index.md: broken link 'nope.md'" in captured.err
     assert "1 error(s), 0 warning(s)" in captured.out
 
-    (root / "docs" / "index.md").write_text("# Home\n")
+    (root / "docs" / "index.md").write_text("# Home\n", encoding="utf-8")
     assert main(["check", "--root", str(root)]) == 0
 
 

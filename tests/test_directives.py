@@ -125,7 +125,7 @@ def test_errors_cite_file_and_line(renderer: Renderer, body: str, message: str) 
 def test_component_template_override(tmp_path: Path) -> None:
     user = tmp_path / "templates" / "components"
     user.mkdir(parents=True)
-    (user / "steps.html.jinja").write_text("<ol class='mine'>{{ body }}</ol>")
+    (user / "steps.html.jinja").write_text("<ol class='mine'>{{ body }}</ol>", encoding="utf-8")
     r = Renderer({}, tmp_path, "", base_env(tmp_path / "templates"))
     assert r.render(":::steps\n1. A\n:::\n", Path("p.md")).html.startswith("<ol class='mine'>")
 

@@ -203,5 +203,5 @@ def test_config_errors(entry: Any, message: str) -> None:
 
 
 def test_config_skips_drafts(tmp_path: Path) -> None:
-    (tmp_path / "wip.md").write_text("---\ndraft: true\n---\n")
+    (tmp_path / "wip.md").write_text("---\ndraft: true\n---\n", encoding="utf-8")
     assert _config(["wip.md", "about.md"], tmp_path)[0].page.title == "About"

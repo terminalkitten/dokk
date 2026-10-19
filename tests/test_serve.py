@@ -74,13 +74,13 @@ def test_version_increments_on_rebuild(server: tuple[str, DevState]) -> None:
 def test_error_page_and_recovery(server: tuple[str, DevState]) -> None:
     base, state = server
     page = state.root / "docs" / "index.md"
-    page.write_text("---\ntitle: [oops\n---\n")
+    page.write_text("---\ntitle: [oops\n---\n", encoding="utf-8")
     state.rebuild()
     status, html = _get(base + "/")
     assert status == 500
     assert "invalid front matter" in html and "/__dokk/version" in html
 
-    page.write_text("---\ntitle: Fixed\n---\n")
+    page.write_text("---\ntitle: Fixed\n---\n", encoding="utf-8")
     state.rebuild()
     status, html = _get(base + "/")
     assert status == 200 and "Fixed" in html
@@ -96,7 +96,7 @@ def test_production_build_has_no_reload_script(make_site) -> None:
     from dokk.build import build
 
     root = make_site({"index.md": "x"})
-    assert "__dokk" not in (build(root).out_dir / "index.html").read_text()
+    assert "__dokk" not in (build(root).out_dir / "index.html").read_text(encoding="utf-8")
 
 
 def test_watched_inputs(make_site) -> None:

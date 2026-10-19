@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+env:
+  PYTHONWARNDEFAULTENCODING: "1"  # an implicit (platform) text encoding fails the tests
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}

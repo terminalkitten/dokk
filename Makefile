@@ -14,4 +14,4 @@ typecheck:
 	$(RUN) ty check
 
 test:
-	$(RUN) pytest
+	PYTHONWARNDEFAULTENCODING=1 $(RUN) pytest

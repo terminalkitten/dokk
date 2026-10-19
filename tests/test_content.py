@@ -51,9 +51,9 @@ def test_front_matter_errors(tmp_path: Path, text: str, message: str) -> None:
 
 
 def test_scan_skips_drafts(tmp_path: Path) -> None:
-    (tmp_path / "a.md").write_text("A")
-    (tmp_path / "b.md").write_text("---\ndraft: true\n---\nB")
-    (tmp_path / "c.txt").write_text("not markdown")
+    (tmp_path / "a.md").write_text("A", encoding="utf-8")
+    (tmp_path / "b.md").write_text("---\ndraft: true\n---\nB", encoding="utf-8")
+    (tmp_path / "c.txt").write_text("not markdown", encoding="utf-8")
     assert [p.rel.name for p in scan(tmp_path)] == ["a.md"]
     assert [p.rel.name for p in scan(tmp_path, drafts=True)] == ["a.md", "b.md"]
 

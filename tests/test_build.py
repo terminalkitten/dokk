@@ -77,7 +77,7 @@ def test_drafts_flag(example: Path) -> None:
 def test_current_page_and_open_submenu(example: Path) -> None:
     html = (
         build(example, search=False).out_dir / "guides/advanced/deep/nested/index.html"
-    ).read_text()
+    ).read_text(encoding="utf-8")
     assert re.search(r'href="/guides/advanced/deep/nested/"\s*aria-current="page"', html)
     assert html.count('aria-current="page"') == 2  # menu item + breadcrumb
     assert len(re.findall(r"<details[^>]*\sopen", html)) == 2
@@ -95,21 +95,26 @@ def test_script_title_is_escaped_everywhere(make_site) -> None:
     )
     out = build(root).out_dir
     for rel in ("evil/index.html", "evil/page/index.html", "evil/sub/deep/index.html"):
-        html = (out / rel).read_text()
+        html = (out / rel).read_text(encoding="utf-8")
         assert "<script>alert" not in html, rel
         assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html
-    html = (out / "evil/index.html").read_text()
+    html = (out / "evil/index.html").read_text(encoding="utf-8")
     assert '<meta name="description" content="&#34;&lt;script&gt;' in html
     assert "<title>&lt;script&gt;" in html
 
 
 def test_base_path_prefixes_every_internal_url(example: Path) -> None:
     toml = example / "dokk.toml"
-    toml.write_text(toml.read_text().replace("https://example.com/", "https://example.com/repo/"))
+    toml.write_text(
+        toml.read_text(encoding="utf-8").replace(
+            "https://example.com/", "https://example.com/repo/"
+        ),
+        encoding="utf-8",
+    )
     out = build(example, search=False).out_dir
     urls = set()
     for f in out.rglob("*.html"):
-        urls |= set(re.findall(r'(?:href|src)="(/[^"]*)"', f.read_text()))
+        urls |= set(re.findall(r'(?:href|src)="(/[^"]*)"', f.read_text(encoding="utf-8")))
     assert urls, "no internal URLs found"
     assert {u for u in urls if not u.startswith("/repo/")} == set()
     assert "/repo/_dokk/dokk.css" in urls
@@ -118,12 +123,14 @@ def test_base_path_prefixes_every_internal_url(example: Path) -> None:
 @pytest.mark.parametrize("site_url", ["https://example.com/", "https://example.com/repo/"])
 def test_every_internal_url_resolves(example: Path, site_url: str) -> None:
     toml = example / "dokk.toml"
-    toml.write_text(toml.read_text().replace("https://example.com/", site_url))
+    toml.write_text(
+        toml.read_text(encoding="utf-8").replace("https://example.com/", site_url), encoding="utf-8"
+    )
     result = build(example, search=False)
     cfg, out = result.cfg, result.out_dir
     missing = set()
     for page in out.rglob("*.html"):
-        for url in re.findall(r'(?:href|src)="(/[^"#]*)', page.read_text()):
+        for url in re.findall(r'(?:href|src)="(/[^"#]*)', page.read_text(encoding="utf-8")):
             assert url.startswith(cfg.base_path + "/"), (page, url)
             target = out / unquote(url[len(cfg.base_path) + 1 :])
             if not (target.is_file() or (target / "index.html").is_file()):
@@ -132,7 +139,9 @@ def test_every_internal_url_resolves(example: Path, site_url: str) -> None:
 
 
 def test_heading_ids_do_not_clash_with_layout(example: Path) -> None:
-    html = (build(example, search=False).out_dir / "guides/markdown/index.html").read_text()
+    html = (build(example, search=False).out_dir / "guides/markdown/index.html").read_text(
+        encoding="utf-8"
+    )
     ids = re.findall(r'\sid="([^"]+)"', html)
     assert len(ids) == len(set(ids))
 
@@ -155,14 +164,14 @@ def test_unknown_directive_fails_build_with_file_and_line(make_site, capsys) -> 
 def test_public_dir_copied_to_root(make_site) -> None:
     root = make_site({"index.md": "Home"})
     (root / "public").mkdir()
-    (root / "public" / "CNAME").write_text("docs.example.com")
-    assert (build(root).out_dir / "CNAME").read_text() == "docs.example.com"
+    (root / "public" / "CNAME").write_text("docs.example.com", encoding="utf-8")
+    assert (build(root).out_dir / "CNAME").read_text(encoding="utf-8") == "docs.example.com"
 
 
 def test_custom_404_page(make_site) -> None:
     root = make_site({"index.md": "Home", "404.md": "# Lost\n\nNothing here."})
     out = build(root).out_dir
-    html = (out / "404.html").read_text()
+    html = (out / "404.html").read_text(encoding="utf-8")
     assert "<h1>Lost</h1>" in html and "Nothing here." in html
     assert not (out / "404").exists()
 
@@ -170,8 +179,10 @@ def test_custom_404_page(make_site) -> None:
 def test_user_template_overrides_builtin(make_site) -> None:
     root = make_site({"index.md": "Home"})
     (root / "templates" / "partials").mkdir(parents=True)
-    (root / "templates" / "partials" / "pager.html.jinja").write_text("<p>CUSTOM PAGER</p>")
-    assert "CUSTOM PAGER" in (build(root).out_dir / "index.html").read_text()
+    (root / "templates" / "partials" / "pager.html.jinja").write_text(
+        "<p>CUSTOM PAGER</p>", encoding="utf-8"
+    )
+    assert "CUSTOM PAGER" in (build(root).out_dir / "index.html").read_text(encoding="utf-8")
 
 
 def test_cli_build_and_error(make_site, capsys: pytest.CaptureFixture[str]) -> None:
@@ -182,11 +193,13 @@ def test_cli_build_and_error(make_site, capsys: pytest.CaptureFixture[str]) -> N
 
 def test_cli_init_then_build(tmp_path: Path) -> None:
     assert main(["init", "--root", str(tmp_path)]) == 0
-    workflow = (tmp_path / ".github" / "workflows" / "docs.yml").read_text()
+    workflow = (tmp_path / ".github" / "workflows" / "docs.yml").read_text(encoding="utf-8")
     assert "actions/deploy-pages@v5" in workflow and "dokk check" in workflow
     assert "      url: ${{ steps.deployment.outputs.page_url }}\n    steps:" in workflow
     assert "path: .dokk/build" in workflow
-    assert (tmp_path / ".gitignore").read_text() == ".dokk/\n"  # covers the build output
+    assert (tmp_path / ".gitignore").read_text(
+        encoding="utf-8"
+    ) == ".dokk/\n"  # covers the build output
     assert main(["build", "--root", str(tmp_path)]) == 0
     assert (tmp_path / ".dokk" / "build" / "index.html").is_file()
     assert main(["init", "--root", str(tmp_path)]) == 1  # refuses to overwrite
@@ -204,7 +217,9 @@ def test_parallel_markdown_matches_serial(example: Path, monkeypatch: pytest.Mon
     override = example / "templates/components/callout.html.jinja"
     override.parent.mkdir(parents=True)
     override.write_text(
-        builtin.read_text() + "<i data-test=\"{{ url('/') }}{{ site.title }}\"></i>"
+        builtin.read_text(encoding="utf-8")
+        + "<i data-test=\"{{ url('/') }}{{ site.title }}\"></i>",
+        encoding="utf-8",
     )
     serial = snapshot()
     assert any(b"data-test=" in html for html in serial.values())
@@ -214,11 +229,16 @@ def test_parallel_markdown_matches_serial(example: Path, monkeypatch: pytest.Mon
 
 def test_page_actions_and_markdown_copy(example: Path) -> None:
     toml = example / "dokk.toml"
-    toml.write_text(toml.read_text().replace("https://example.com/", "https://example.com/repo/"))
+    toml.write_text(
+        toml.read_text(encoding="utf-8").replace(
+            "https://example.com/", "https://example.com/repo/"
+        ),
+        encoding="utf-8",
+    )
     out = build(example, search=False).out_dir
-    md = (out / "guides/writing.md").read_text()
+    md = (out / "guides/writing.md").read_text(encoding="utf-8")
     assert md.startswith("# Writing pages\n\nSee [installation](../getting-started/install.md)")
-    html = (out / "guides/writing/index.html").read_text()
+    html = (out / "guides/writing/index.html").read_text(encoding="utf-8")
     header = html[
         html.index('<header class="dk-page-header">') : html.index(
             "</header>", html.index("dk-page-header")
@@ -235,7 +255,9 @@ def test_page_actions_and_markdown_copy(example: Path) -> None:
 
 
 def test_no_ai_links_without_site_url(make_site) -> None:
-    html = (build(make_site({"index.md": "# Home\n\nHi"})).out_dir / "index.html").read_text()
+    html = (build(make_site({"index.md": "# Home\n\nHi"})).out_dir / "index.html").read_text(
+        encoding="utf-8"
+    )
     assert "Open in Claude" not in html and "View as Markdown" in html
 
 
@@ -245,8 +267,12 @@ def test_themes_page_matches_vendored_colors() -> None:
 
     from dokk.themes import ACCENTS, BASES, code_styles
 
-    page = (EXAMPLE.parents[1] / "docs" / "guides" / "themes" / "index.md").read_text()
-    data = json.loads((EXAMPLE.parents[1] / "src/dokk/data/shadcn-themes.json").read_text())
+    page = (EXAMPLE.parents[1] / "docs" / "guides" / "themes" / "index.md").read_text(
+        encoding="utf-8"
+    )
+    data = json.loads(
+        (EXAMPLE.parents[1] / "src/dokk/data/shadcn-themes.json").read_text(encoding="utf-8")
+    )
     for name in BASES:
         assert f":swatch[{data[name]['dark']['background']}]" in page, name
     for name in ACCENTS:
@@ -259,16 +285,20 @@ def test_themes_page_matches_vendored_colors() -> None:
 def test_footer_credit_and_text(make_site) -> None:
     credit = '<p>Built with <a href="https://terminalkitten.github.io/dokk/">dokk</a></p>'
     out = build(make_site({"index.md": "Home"})).out_dir
-    assert credit in (out / "index.html").read_text()  # on by default
-    assert credit in (out / "404.html").read_text()
+    assert credit in (out / "index.html").read_text(encoding="utf-8")  # on by default
+    assert credit in (out / "404.html").read_text(encoding="utf-8")
 
     toml = 'title = "T"\n[footer]\ntext = "© 2026 <Acme>"\ncredit = false\n'
-    html = (build(make_site({"index.md": "Home"}, toml)).out_dir / "index.html").read_text()
+    html = (build(make_site({"index.md": "Home"}, toml)).out_dir / "index.html").read_text(
+        encoding="utf-8"
+    )
     assert "<p>© 2026 &lt;Acme&gt;</p>" in html
     assert "Built with" not in html
 
     toml = 'title = "T"\n[footer]\ncredit = false\n'
-    html = (build(make_site({"index.md": "Home"}, toml)).out_dir / "index.html").read_text()
+    html = (build(make_site({"index.md": "Home"}, toml)).out_dir / "index.html").read_text(
+        encoding="utf-8"
+    )
     assert "dk-site-footer" not in html  # nothing to show, no empty footer
 
 
@@ -285,14 +315,13 @@ def test_custom_component_from_site_templates(make_site) -> None:
     )
     components = root / "templates" / "components"
     components.mkdir(parents=True)
-    (components / "greet.html.jinja").write_text(
-        '<p id="{{ id }}">{{ directive.title }}, {{ directive.attrs.get("who", "") }}</p>{{ body }}'
-    )
-    html = (build(root).out_dir / "index.html").read_text()
+    template = '<p id="{{ id }}">{{ directive.title }}, {{ directive.attrs.get("who", "") }}</p>'
+    (components / "greet.html.jinja").write_text(template + "{{ body }}", encoding="utf-8")
+    html = (build(root).out_dir / "index.html").read_text(encoding="utf-8")
     assert '<p id="dk-greet-1">Hello, &lt;you&gt;</p>' in html  # attributes are escaped
     assert '<p id="dk-greet-2">Twice, </p><p>With <strong>body</strong>.</p>' in html
     assert 'id="dk-tabs-1"' in html  # built-in ids are unchanged
 
-    (root / "docs" / "index.md").write_text("::nope\n")
+    (root / "docs" / "index.md").write_text("::nope\n", encoding="utf-8")
     with pytest.raises(DokkError, match="unknown directive ':::nope'"):
         build(root)

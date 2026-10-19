@@ -43,7 +43,7 @@ def test_last_modified_from_git_then_mtime(tmp_path: Path) -> None:
     docs = tmp_path / "docs"
     (docs / "sub").mkdir(parents=True)
     for rel in ("a.md", "sub/café.md", "new.md"):
-        (docs / rel).write_text(rel)
+        (docs / rel).write_text(rel, encoding="utf-8")
     os.utime(docs / "new.md", (0, 86400 * 365))
     _git(tmp_path, "init", "-q")
     _git(tmp_path, "-c", "user.name=t", "-c", "user.email=t@t", "add", "docs/a.md", "docs/sub")
@@ -68,9 +68,9 @@ def test_seo_output(make_site) -> None:
         '[links]\nedit_url = "https://gh.io/e/docs/{path}"\n',
     )
     (root / "public").mkdir()
-    (root / "public" / "favicon.svg").write_text("<svg/>")
+    (root / "public" / "favicon.svg").write_text("<svg/>", encoding="utf-8")
     out = build(root).out_dir
-    home = (out / "index.html").read_text()
+    home = (out / "index.html").read_text(encoding="utf-8")
     assert '<meta property="og:title" content="Home">' in home
     assert '<meta property="og:description" content="The home page">' in home
     assert '<meta property="og:url" content="https://x.io/repo/">' in home
@@ -80,30 +80,36 @@ def test_seo_output(make_site) -> None:
     assert 'href="https://gh.io/e/docs/index.md">Edit this page</a>' in home
     assert re.search(r'Last updated <time datetime="\d{4}-\d\d-\d\d">', home)
 
-    cafe = (out / "café/index.html").read_text()
+    cafe = (out / "café/index.html").read_text(encoding="utf-8")
     assert 'href="https://gh.io/e/docs/caf%C3%A9.md"' in cafe
     assert '<link rel="canonical" href="https://x.io/repo/caf%C3%A9/">' in cafe
-    assert '<meta name="robots" content="noindex">' in (out / "secret/index.html").read_text()
+    assert '<meta name="robots" content="noindex">' in (out / "secret/index.html").read_text(
+        encoding="utf-8"
+    )
 
-    xml = (out / "sitemap.xml").read_text()
+    xml = (out / "sitemap.xml").read_text(encoding="utf-8")
     assert re.findall(r"<loc>([^<]+)</loc>", xml) == [
         "https://x.io/repo/",
         "https://x.io/repo/caf%C3%A9/",
     ]
-    assert (out / "robots.txt").read_text().endswith("Sitemap: https://x.io/repo/sitemap.xml\n")
+    assert (
+        (out / "robots.txt")
+        .read_text(encoding="utf-8")
+        .endswith("Sitemap: https://x.io/repo/sitemap.xml\n")
+    )
 
 
 def test_no_site_url_means_no_sitemap(make_site) -> None:
     out = build(make_site({"index.md": "x"})).out_dir
     assert not (out / "sitemap.xml").exists()
-    assert (out / "robots.txt").read_text() == "User-agent: *\nAllow: /\n"
+    assert (out / "robots.txt").read_text(encoding="utf-8") == "User-agent: *\nAllow: /\n"
 
 
 def test_public_robots_wins(make_site) -> None:
     root = make_site({"index.md": "x"}, 'title = "T"\nsite_url = "https://x.io/"\n')
     (root / "public").mkdir()
-    (root / "public" / "robots.txt").write_text("custom")
-    assert (build(root).out_dir / "robots.txt").read_text() == "custom"
+    (root / "public" / "robots.txt").write_text("custom", encoding="utf-8")
+    assert (build(root).out_dir / "robots.txt").read_text(encoding="utf-8") == "custom"
 
 
 @pytest.mark.parametrize(
@@ -123,7 +129,7 @@ def test_heading_issues(article: str, expected: list[str]) -> None:
 def test_search_disabled_by_config(make_site) -> None:
     result = build(make_site({"index.md": "x"}))
     assert not result.search and not result.search_missing
-    html = (result.out_dir / "index.html").read_text()
+    html = (result.out_dir / "index.html").read_text(encoding="utf-8")
     assert "dk-search" not in html and not (result.out_dir / "pagefind").exists()
 
 
@@ -132,12 +138,17 @@ def test_search_index_and_ui(tmp_path: Path) -> None:
     root = tmp_path / "basic"
     shutil.copytree(EXAMPLE, root, ignore=shutil.ignore_patterns("dist", ".dokk"))
     toml = root / "dokk.toml"
-    toml.write_text(toml.read_text().replace("https://example.com/", "https://example.com/repo/"))
+    toml.write_text(
+        toml.read_text(encoding="utf-8").replace(
+            "https://example.com/", "https://example.com/repo/"
+        ),
+        encoding="utf-8",
+    )
     result = build(root)
     assert result.search
     out = result.out_dir
     assert (out / "pagefind" / "pagefind-ui.js").is_file()
-    html = (out / "index.html").read_text()
+    html = (out / "index.html").read_text(encoding="utf-8")
     assert 'data-bundle="/repo/pagefind/" data-base="/repo/"' in html
     assert "data-dk-search" in html
     hits = [
@@ -154,7 +165,7 @@ def test_search_index_and_ui(tmp_path: Path) -> None:
 def test_style_and_color_theme(make_site) -> None:
     toml = 'title = "T"\n[theme]\nstyle = "rhea"\nbase = "zinc"\ncolor = "pink"\n'
     out = build(make_site({"index.md": "x"}, toml)).out_dir
-    css = (out / "_dokk" / "theme.css").read_text()
+    css = (out / "_dokk" / "theme.css").read_text(encoding="utf-8")
     light, dark = css.split(".dark {")
     assert "--background: oklch(1 0 0);" in light  # from the zinc base
     assert "--primary: oklch(0.525 0.223 3.958);" in light  # pink accent, light
@@ -163,7 +174,7 @@ def test_style_and_color_theme(make_site) -> None:
     assert "--radius" not in css  # shape belongs to the style pack
     vendor = sorted(p.name for p in (out / "_dokk" / "vendor" / "basecoat").glob("*.css"))
     assert vendor == ["basecoat-rhea.cdn.min.css"]  # only the chosen style pack ships
-    html = (out / "index.html").read_text()
+    html = (out / "index.html").read_text(encoding="utf-8")
     order = [html.index(n) for n in ("basecoat-rhea.cdn.min.css", "theme.css", "dokk.css")]
     assert order == sorted(order)  # theme after the style pack, as Basecoat documents
 
@@ -171,16 +182,16 @@ def test_style_and_color_theme(make_site) -> None:
 def test_logo_from_public(make_site) -> None:
     root = make_site({"index.md": "x"}, 'title = "<T>"\nsite_url = "https://x.io/repo/"\n')
     out = build(root).out_dir
-    assert "dk-logo" not in (out / "index.html").read_text()  # no logo, title only
+    assert "dk-logo" not in (out / "index.html").read_text(encoding="utf-8")  # no logo, title only
 
     (root / "public").mkdir()
-    (root / "public" / "logo.svg").write_text("<svg/>")
-    html = (build(root).out_dir / "index.html").read_text()
+    (root / "public" / "logo.svg").write_text("<svg/>", encoding="utf-8")
+    html = (build(root).out_dir / "index.html").read_text(encoding="utf-8")
     logo = '<img class="dk-logo" src="/repo/logo.svg" alt="">'
     assert html.count(logo) == 2  # top bar and sidebar header
     assert html.count("<span>&lt;T&gt;</span>") == 2
 
-    (root / "public" / "logo-dark.svg").write_text("<svg/>")
-    html = (build(root).out_dir / "index.html").read_text()
+    (root / "public" / "logo-dark.svg").write_text("<svg/>", encoding="utf-8")
+    html = (build(root).out_dir / "index.html").read_text(encoding="utf-8")
     assert html.count('<img class="dk-logo dk-logo-light" src="/repo/logo.svg" alt="">') == 2
     assert html.count('<img class="dk-logo dk-logo-dark" src="/repo/logo-dark.svg" alt="">') == 2

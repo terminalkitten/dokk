@@ -20,7 +20,7 @@ def test_help_exits_zero(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_python_m_dokk_runs() -> None:
     result = subprocess.run(
-        [sys.executable, "-m", "dokk", "--help"], capture_output=True, text=True
+        [sys.executable, "-m", "dokk", "--help"], capture_output=True, encoding="utf-8"
     )
     assert result.returncode == 0
 
@@ -42,4 +42,4 @@ def test_vendored_file_exists(rel: str) -> None:
 
 
 def test_vendored_version_recorded() -> None:
-    assert "basecoat-css@1.0.2" in (ROOT / "VENDORED.md").read_text()
+    assert "basecoat-css@1.0.2" in (ROOT / "VENDORED.md").read_text(encoding="utf-8")

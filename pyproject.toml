@@ -85,3 +85,6 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# With PYTHONWARNDEFAULTENCODING=1 (make test, CI), a file or process opened without an
+# explicit encoding fails the tests on every platform, not only on Windows.
+filterwarnings = ["error::EncodingWarning"]

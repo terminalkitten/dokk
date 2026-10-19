@@ -34,7 +34,7 @@ FILES = {
 
 def test_configured_sidebar_in_html(make_site) -> None:
     out = build(make_site(FILES, SIDEBAR_TOML)).out_dir
-    html = (out / "guides/a/index.html").read_text()
+    html = (out / "guides/a/index.html").read_text(encoding="utf-8")
     nav = html.split("</aside>")[0]
     assert '<h3 id="group-label-dk-sidebar-content-1">Start</h3>' in nav
     assert "<span>Introduction</span>" in nav
@@ -54,7 +54,7 @@ def test_check_warns_about_pages_missing_from_sidebar(make_site) -> None:
 
 def test_llms_txt(make_site) -> None:
     out = build(make_site(FILES, SIDEBAR_TOML)).out_dir
-    assert (out / "llms.txt").read_text() == (
+    assert (out / "llms.txt").read_text(encoding="utf-8") == (
         "# T\n\n> Docs for T\n\n"
         "## Start\n\n"
         "- [Home](https://x.io/t/): Start here\n"
@@ -63,7 +63,7 @@ def test_llms_txt(make_site) -> None:
         "- [Guides](https://x.io/t/guides/)\n"
         "- [Guide A](https://x.io/t/guides/a/): Body of A with :::note markers left as is.\n"
     )
-    full = (out / "llms-full.txt").read_text()
+    full = (out / "llms-full.txt").read_text(encoding="utf-8")
     assert full.startswith("# T\n")
     assert "# Guide A\n\nURL: https://x.io/t/guides/a/\n\nBody of A" in full
     assert full.index("# Home") < full.index("# Guide A") < full.index("# Orphan")
