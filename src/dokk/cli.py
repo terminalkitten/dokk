@@ -6,7 +6,7 @@ from pathlib import Path
 from dokk import DokkError, __version__
 from dokk.build import build
 from dokk.check import check
-from dokk.config import CONFIG_FILE
+from dokk.config import CONFIG_FILE, load_config
 from dokk.render import base_env
 from dokk.writer import SiteWriter
 
@@ -67,6 +67,18 @@ def cmd_serve(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_format(args: argparse.Namespace) -> int:
+    from dokk.formatter import format_docs
+
+    changed = format_docs(load_config(Path(args.root)).content_dir, check=args.check)
+    for rel in changed:
+        print(f"{'not formatted' if args.check else 'formatted'}: {rel.as_posix()}")
+    if args.check and changed:
+        print("run: dokk format", file=sys.stderr)
+        return 1
+    return 0
+
+
 def cmd_check(args: argparse.Namespace) -> int:
     issues = check(Path(args.root))
     for issue in issues:
@@ -107,6 +119,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--search", action="store_true", help="build the search index on every rebuild"
     )
     serve_cmd.set_defaults(func=cmd_serve)
+
+    format_cmd = sub.add_parser("format", help="format the Markdown pages (mdformat)")
+    format_cmd.add_argument("--root", default=".", help="site root (default: .)")
+    format_cmd.add_argument(
+        "--check", action="store_true", help="change nothing; fail if a page is not formatted"
+    )
+    format_cmd.set_defaults(func=cmd_format)
 
     check_cmd = sub.add_parser("check", help="find broken links, anchors and assets")
     check_cmd.add_argument("--root", default=".", help="site root (default: .)")

@@ -1,6 +1,6 @@
 ---
 title: Command line
-description: dokk init, build, serve and check, with every option.
+description: dokk init, build, serve, check and format, with every option.
 sidebar:
   order: 1
 ---
@@ -9,6 +9,7 @@ sidebar:
 dokk init     # scaffold a new site
 dokk serve    # write with live reload
 dokk check    # find broken links before you publish
+dokk format   # tidy the Markdown of every page
 dokk build    # build the production site
 ```
 
@@ -116,3 +117,22 @@ dokk build --drafts
 Builds are deterministic: the same input gives byte-identical output. When `site_url` has no path,
 you can look at a build locally with `python -m http.server 8000 -d .dokk/build`. With a path,
 such as GitHub Pages' `/my-docs/`, links only work once deployed; use `dokk serve` locally.
+
+## dokk format
+
+Formats every page in the content folder with [mdformat](https://github.com/hukkin/mdformat), so
+lists, tables and spacing look the same everywhere. It knows dokk's Markdown: front matter,
+components, tables, footnotes and definition lists are kept intact, and the lines in `:::env` and
+`:::bench` stay exactly as written.
+
+```sh title="Terminal"
+pip install "dokk[format]"
+dokk format
+```
+
+`--check`
+: Change nothing; list the pages that are not formatted and exit with an error. Use it in CI or a
+  pre-commit hook.
+
+`--root PATH`
+: The site folder. Default: the current folder.

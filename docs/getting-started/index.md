@@ -24,7 +24,8 @@ uv pip install "dokk[serve,search]"
 :::
 ::::
 
-The `serve` extra adds the dev server, `search` adds the Pagefind index. Both are optional.
+The `serve` extra adds the dev server, `search` adds the Pagefind index. Both are optional, as is
+`format`, for [`dokk format`](../reference/cli.md#dokk-format).
 
 ## Create a site
 

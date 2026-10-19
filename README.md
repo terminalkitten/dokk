@@ -65,7 +65,8 @@ files and folders and they show up in the sidebar.
 - Full-text search with [Pagefind](https://pagefind.app), fully static.
 - Eight [Basecoat](https://basecoatui.com) styles and the shadcn/ui colors, vendored: no CDN, no
   third-party requests.
-- `dokk serve` with live reload, and `dokk check` for broken links and anchors.
+- `dokk serve` with live reload, `dokk check` for broken links and anchors, and `dokk format`
+  to keep the Markdown tidy.
 - A sitemap, a Markdown copy of every page and optional `llms.txt`, for search engines and AI tools.
 
 The [documentation](https://terminalkitten.github.io/dokk/) is built with dokk from the `docs/` folder in this repository.
