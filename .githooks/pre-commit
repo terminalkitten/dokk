@@ -1,6 +1,6 @@
 #!/bin/sh
-# Stops a commit when docs/ is not formatted; `make format-md` fixes it. Install: make hooks
-uv run --no-sync mdformat --check docs || {
-  echo "docs/ is not formatted: run make format-md, then git add" >&2
+# stops a commit when docs/ is not formatted; `dokk format` fixes it. Install: make hooks
+uv run --no-sync dokk format --check || {
+  echo "docs/ is not formatted: run dokk format (or make format), then git add" >&2
   exit 1
 }

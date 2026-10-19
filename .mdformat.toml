@@ -1,6 +1,0 @@
-# mdformat for docs/ (make format), with the plugins in the dev extra. mdformat-directives
-# keeps dokk's components intact; env and bench bodies are data, kept as written.
-number = true  # keep lists numbered 1. 2. 3.
-
-[plugin.directives]
-raw = ["env", "bench"]
