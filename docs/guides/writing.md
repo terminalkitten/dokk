@@ -80,7 +80,8 @@ Links written as raw HTML (`<a href>`, `<img src>`) are not rewritten. Use Markd
 ## Markdown features
 
 Tables, ~~strikethrough~~, footnotes[^1], task lists, definition lists, heading anchors and
-attributes like `{#id .class}` all work. Code blocks are highlighted at build time:
+attributes like `{#id .class}` all work. A heading can set its own anchor, as MkDocs writes it:
+`## Install { #setup }` links as `#setup`. Code blocks are highlighted at build time:
 
 ```python
 def hello(name: str) -> str:

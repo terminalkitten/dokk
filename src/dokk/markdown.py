@@ -35,6 +35,7 @@ from dokk.directives import (
     fold,
 )
 from dokk.filetree import file_tree
+from dokk.headings import heading_attrs_plugin, strip_attrs
 
 DESCRIPTION_LENGTH = 160
 LINKBUTTON_VARIANTS = ("primary", "secondary", "minimal")
@@ -114,6 +115,7 @@ def make_md() -> MarkdownIt:
         .use(deflist_plugin)
         .use(attrs_plugin)
         .use(directive_plugin)
+        .use(heading_attrs_plugin)
     )
     md.add_render_rule("fence", _fence)
     md.add_render_rule("table_open", _table_open)
@@ -139,7 +141,7 @@ _TITLE_MD = MarkdownIt("commonmark", {"html": False})  # titles: inline Markdown
 
 def render_title(source: str) -> tuple[Markup, str]:
     """A title in Markdown: (HTML for the h1, plain text for everything else)."""
-    inline = _TITLE_MD.parseInline(source)[0]
+    inline = _TITLE_MD.parseInline(strip_attrs(source))[0]
     html = _TITLE_MD.renderer.render(inline.children or [], _TITLE_MD.options, {})
     return Markup(html.strip()), _plain_text(inline)
 
