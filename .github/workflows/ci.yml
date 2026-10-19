@@ -29,7 +29,7 @@ jobs:
           activate-environment: true  # .venv on PATH for the steps below
       - run: uv sync --locked --extra dev --extra serve --extra search
       - if: matrix.os == 'ubuntu-latest'  # Windows checks out CRLF, which a format check flags
-        run: ruff check . && ruff format --check . && ty check
+        run: ruff check . && ruff format --check . && ty check && mdformat --check docs
       - run: pytest
 
   e2e:

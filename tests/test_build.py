@@ -295,6 +295,7 @@ def test_themes_page_matches_vendored_colors() -> None:
     page = (EXAMPLE.parents[1] / "docs" / "guides" / "themes" / "index.md").read_text(
         encoding="utf-8"
     )
+    page = re.sub(r" *\| *", "|", page)  # mdformat pads table cells
     data = json.loads(
         (EXAMPLE.parents[1] / "src/dokk/data/shadcn-themes.json").read_text(encoding="utf-8")
     )
@@ -303,7 +304,7 @@ def test_themes_page_matches_vendored_colors() -> None:
     for name in ACCENTS:
         light, dark = data[name]["light"]["primary"], data[name]["dark"]["primary"]
         code = "`{}` / `{}`".format(*code_styles(name))
-        assert f"| `{name}` | :swatch[{light}] | :swatch[{dark}] |" in page, name
+        assert f"|`{name}`|:swatch[{light}]|:swatch[{dark}]|" in page, name
         assert code in page, name
 
 
