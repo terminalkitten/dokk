@@ -7,8 +7,7 @@ sidebar:
 ---
 
 Pick a style, base color and accent color, and this page restyles itself. Use the light/dark
-toggle in the header to see both modes. The `[theme]` table under the picker is ready to paste into
-`dokk.toml`; Reset returns to these docs' own theme.
+toggle in the header to see both modes, then copy the `[theme]` table into your `dokk.toml`.
 
 ::themepicker
 
