@@ -2,7 +2,14 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
-from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
+from jinja2 import (
+    BytecodeCache,
+    Environment,
+    FileSystemBytecodeCache,
+    FileSystemLoader,
+    StrictUndefined,
+    select_autoescape,
+)
 from markupsafe import Markup
 
 from dokk.assets import ASSETS_DIR
@@ -12,11 +19,14 @@ from dokk.routes import url_for
 BUILTIN_TEMPLATES = Path(__file__).parent / "templates"
 
 
-def base_env(user_templates: Path | None = None) -> Environment:
+def base_env(
+    user_templates: Path | None = None, bytecode_cache: BytecodeCache | None = None
+) -> Environment:
     search_path = [p for p in (user_templates, BUILTIN_TEMPLATES) if p and p.is_dir()]
     return Environment(
         loader=FileSystemLoader(search_path),  # user overrides win
-        # Escape HTML and XML output; text formats (.txt, .md, .toml, .yml) stay as written.
+        bytecode_cache=bytecode_cache,
+        # Escape HTML and XML output
         autoescape=select_autoescape(["html.jinja", "xml.jinja"], default=False),
         undefined=StrictUndefined,
         trim_blocks=True,
@@ -27,14 +37,27 @@ def base_env(user_templates: Path | None = None) -> Environment:
 
 # Picked up from public/ when present, first match wins.
 FAVICONS = ("favicon.svg", "favicon.ico", "favicon.png")
+# Logo
 LOGOS = ("logo.svg", "logo.png")
+# Logo Dark-mode
+DARK_LOGOS = ("logo-dark.svg", "logo-dark.png")
 # Where the footer's "Built with dokk" credit links to.
 HOMEPAGE = "https://terminalkitten.github.io/dokk/"
-DARK_LOGOS = ("logo-dark.svg", "logo-dark.png")
+# Compiled templates, kept between builds.
+TEMPLATE_CACHE = Path(".dokk") / "templates"
+
+
+def _bytecode_cache(root: Path) -> BytecodeCache | None:
+    directory = root / TEMPLATE_CACHE
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        return None
+    return FileSystemBytecodeCache(str(directory))
 
 
 def make_env(cfg: Config, dev: bool = False, search: bool = False) -> Environment:
-    env = base_env(cfg.root / "templates")
+    env = base_env(cfg.root / "templates", _bytecode_cache(cfg.root))
 
     def url(route: str) -> str:
         return url_for(cfg.base_path, route)

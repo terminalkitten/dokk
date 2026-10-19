@@ -61,7 +61,8 @@ def test_rebuild_keeps_serving_the_old_site(server: tuple[str, DevState], monkey
     monkeypatch.setattr(build_module, "copy_static", copy_static)
     state.rebuild()
     assert state.error is None and _get(base + "/")[0] == 200
-    assert sorted(p.name for p in state.out.parent.iterdir()) == ["dev"]
+    left = {p.name for p in state.out.parent.iterdir()}
+    assert "dev" in left and not left & {"dev.next", "dev.old"}  # .dokk/templates: the cache
 
 
 def test_version_increments_on_rebuild(server: tuple[str, DevState]) -> None:

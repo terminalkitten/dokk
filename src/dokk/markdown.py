@@ -1,3 +1,4 @@
+import functools
 import itertools
 import posixpath
 import re
@@ -21,6 +22,7 @@ from mdit_py_plugins.footnote import footnote_plugin
 from mdit_py_plugins.tasklists import tasklists_plugin
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
+from pygments.lexer import Lexer
 from pygments.lexers import get_lexer_by_name
 from pygments.lexers.special import TextLexer
 from pygments.util import ClassNotFound
@@ -73,13 +75,19 @@ def _line_numbers(spec: str) -> list[int]:
     return lines
 
 
+@functools.cache
+def get_lexer(lang: str) -> Lexer:
+    """Pygments' lookup by name is slow (~1 ms); lexers are reusable, so one per language."""
+    try:
+        return get_lexer_by_name(lang) if lang else TextLexer()
+    except ClassNotFound:
+        return TextLexer()
+
+
 def highlight_code(code: str, lang: str, attrs: str) -> str:
     """A code block, highlighted at build time. `attrs` is the rest of the fence's info
     string: title="file.py" adds a caption, {2,4-6} highlights lines."""
-    try:
-        lexer = get_lexer_by_name(lang) if lang else TextLexer()
-    except ClassNotFound:
-        lexer = TextLexer()
+    lexer = get_lexer(lang)
     lines = _LINES.search(attrs)
     formatter = HtmlFormatter(nowrap=True, hl_lines=_line_numbers(lines.group(1)) if lines else [])
     code_html = Markup(highlight(code, lexer, formatter))  # Pygments escapes the code
