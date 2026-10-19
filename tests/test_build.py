@@ -230,6 +230,15 @@ def test_cli_init_then_build(tmp_path: Path) -> None:
     assert main(["init", "--root", str(tmp_path)]) == 1  # refuses to overwrite
 
 
+def test_cli_init_in_an_existing_project_adds_to_its_gitignore(tmp_path: Path) -> None:
+    (tmp_path / ".gitignore").write_text("__pycache__/", encoding="utf-8")
+    assert main(["init", "--root", str(tmp_path)]) == 0
+    assert (tmp_path / ".gitignore").read_text(encoding="utf-8") == "__pycache__/\n.dokk/\n"
+    assert (tmp_path / "dokk.toml").is_file()
+    (tmp_path / "dokk.toml").unlink()  # again: .dokk/ is not added twice
+    assert main(["init", "--root", str(tmp_path)]) == 1  # docs/index.md exists
+
+
 def test_parallel_markdown_matches_serial(example: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import dokk.build as build_module
 

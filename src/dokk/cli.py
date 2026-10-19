@@ -10,25 +10,40 @@ from dokk.config import CONFIG_FILE
 from dokk.render import base_env
 from dokk.writer import SiteWriter
 
+GITIGNORE = ".gitignore"
 # Destination -> template in templates/init/.
 INIT_FILES = {
     CONFIG_FILE: "init/dokk.toml.jinja",
     "docs/index.md": "init/index.md.jinja",
-    ".gitignore": "init/gitignore.jinja",
+    GITIGNORE: "init/gitignore.jinja",
     ".github/workflows/docs.yml": "init/docs.yml.jinja",
 }
 
 
 def cmd_init(args: argparse.Namespace) -> int:
     root = Path(args.root)
-    existing = [name for name in INIT_FILES if (root / name).exists()]
+    # An existing project has a .gitignore already: dokk's lines are added to it instead.
+    existing = [n for n in INIT_FILES if n != GITIGNORE and (root / n).exists()]
     if existing:
         raise DokkError(f"refusing to overwrite: {', '.join(existing)}")
-    writer = SiteWriter(base_env(), root)
+    env = base_env()
+    writer = SiteWriter(env, root)
     for name, template in INIT_FILES.items():
-        writer.render(name, template)
+        if name == GITIGNORE and (root / name).exists():
+            _add_lines(root / name, env.get_template(template).render())
+        else:
+            writer.render(name, template)
     print(f"Created a dokk site in {root.resolve()}. Run: dokk serve --root {root}")
     return 0
+
+
+def _add_lines(path: Path, text: str) -> None:
+    """Append the lines of `text` that `path` does not have yet."""
+    current = path.read_text(encoding="utf-8")
+    missing = [line for line in text.splitlines() if line not in current.splitlines()]
+    if missing:
+        sep = "" if not current or current.endswith("\n") else "\n"
+        path.write_text(current + sep + "\n".join(missing) + "\n", encoding="utf-8")
 
 
 def cmd_build(args: argparse.Namespace) -> int:

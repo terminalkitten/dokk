@@ -33,7 +33,8 @@ Scaffolds a new site in `--root`.
 : Where to create the site. Default: the current folder.
 
 :::note
-`init` never overwrites. If any of these files exist, it stops and lists them.
+`init` never overwrites. If any of these files exist, it stops and lists them. The exception is
+`.gitignore`: in an existing project, `init` adds `.dokk/` to it.
 :::
 
 ## dokk serve
