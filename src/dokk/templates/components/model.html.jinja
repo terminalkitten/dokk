@@ -1,0 +1,49 @@
+{# :::model[Claude Opus 5.5]{provider="Anthropic" model="claude-opus-5-5" input="5" output="25" context="1M" ...}
+   Every attribute is optional; prices are USD per million tokens. See the Model card docs page. #}
+{% from "partials/icons.html.jinja" import icon %}
+{% set a = directive.attrs %}
+{% macro price(value) %}{{ value if value[:1] in "$€£" or not value[:1].isdigit() else "$" ~ value }}{% endmacro %}
+{% set stats = [
+  ('log-in', 'Input', price(a.input) ~ ' / 1M' if a.get('input') else ''),
+  ('log-out', 'Output', price(a.output) ~ ' / 1M' if a.get('output') else ''),
+  ('database', 'Cached input', price(a.cached) ~ ' / 1M' if a.get('cached') else ''),
+  ('layers', 'Context', a.get('context')),
+  ('text-cursor-input', 'Max output', a.get('max_output')),
+  ('calendar', 'Knowledge cutoff', a.get('cutoff')),
+  ('sparkles', 'Released', a.get('released')),
+  ('scale', 'License', a.get('license')),
+] | selectattr(2) | list %}
+{% set feature_icons = {
+  'text': 'file-text', 'vision': 'eye', 'image': 'image', 'audio': 'audio-lines', 'video': 'video',
+  'tools': 'wrench', 'reasoning': 'brain', 'code': 'code', 'json': 'braces', 'search': 'globe',
+  'streaming': 'zap', 'files': 'file-text', 'caching': 'database',
+} %}
+<article class="card dk-model" id="{{ id }}">
+  <header>
+    <span class="dk-model-avatar">{% if a.get('src') %}<img src="{{ a.src }}" alt="" loading="lazy">{% else %}{{ icon('bot') }}{% endif %}</span>
+    <div>
+      <strong class="card-title">{{ directive.title }}</strong>
+      {% if a.get('provider') or a.get('model') %}
+      <p class="card-description">{{ a.get('provider', '') }}{% if a.get('provider') and a.get('model') %} · {% endif %}{% if a.get('model') %}<code>{{ a.model }}</code>{% endif %}</p>
+      {% endif %}
+    </div>
+  </header>
+  <section>
+    {{ body }}
+    {% if stats %}
+    <dl class="dk-model-stats">
+      {% for name, label, value in stats %}
+      <div><dt>{{ icon(name) }}{{ label }}</dt><dd>{{ value }}</dd></div>
+      {% endfor %}
+    </dl>
+    {% endif %}
+  </section>
+  {% if a.get('features') or a.get('href') %}
+  <footer>
+    {% for f in a.get('features', '').split() %}
+    <span class="badge" data-variant="secondary">{% if f in feature_icons %}{{ icon(feature_icons[f]) }}{% endif %}{{ f }}</span>
+    {% endfor %}
+    {% if a.get('href') %}<a class="btn dk-model-link" data-variant="ghost" data-size="sm" href="{{ a.href }}">Docs{{ icon('arrow-up-right') }}</a>{% endif %}
+  </footer>
+  {% endif %}
+</article>

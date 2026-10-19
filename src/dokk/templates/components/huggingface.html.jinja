@@ -1,0 +1,30 @@
+{# ::huggingface[owner/name]{type="model" task="text-generation" params="8B" downloads="5.1M" likes="4.2k" ...}
+   type is model (default), dataset or space. Numbers are written as text: builds never fetch. #}
+{% from "partials/icons.html.jinja" import icon %}
+{% set a = directive.attrs %}
+{% set kind = a.get('type', 'model') %}
+{% set prefix = {'model': '', 'dataset': 'datasets/', 'space': 'spaces/'}[kind] %}
+{% set owner, _, name = directive.title.rpartition('/') %}
+{% set stats = [
+  ('tag', a.get('task')),
+  ('cpu', a.get('params')),
+  ('scale', a.get('license')),
+  ('download', a.get('downloads')),
+  ('heart', a.get('likes')),
+  ('calendar', a.get('updated')),
+] | selectattr(1) | list %}
+<article class="card dk-hf" id="{{ id }}">
+  <header>
+    <span class="dk-hf-logo" aria-hidden="true">🤗</span>
+    <div>
+      <strong class="card-title"><a class="dk-hf-link" href="https://huggingface.co/{{ prefix }}{{ directive.title }}">{% if owner %}<span class="dk-hf-owner">{{ owner }}/</span>{% endif %}{{ name }}</a></strong>
+      <p class="card-description">Hugging Face {{ kind }}</p>
+    </div>
+  </header>
+  {% if body %}<section>{{ body }}</section>{% endif %}
+  {% if stats %}
+  <footer>
+    {% for name, value in stats %}<span class="dk-hf-stat">{{ icon(name) }}{{ value }}</span>{% endfor %}
+  </footer>
+  {% endif %}
+</article>

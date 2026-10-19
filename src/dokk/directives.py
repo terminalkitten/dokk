@@ -24,6 +24,7 @@ PARENTS = {child: parent for parent, child in CHILDREN.items()}
 KNOWN = {
     *CALLOUTS,
     *("tabs", "tab", "cards", "card", "steps", "filetree", "linkbutton", "details", "image"),
+    *("model", "huggingface", "prompt"),
 }
 # Template used by every callout type; not a directive name of its own.
 CALLOUT_TEMPLATE = "callout"

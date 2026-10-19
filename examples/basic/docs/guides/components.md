@@ -134,3 +134,10 @@ Spin the sprocket with :kbd[Shift+S]. Widgets come in :swatch[#db2777] pink,
 def spin(speed: int) -> str:
     return "whirr" * speed
 ```
+
+:::prompt[Plan a widget]{role="user"}
+Plan a widget with:
+
+1. two sprockets
+2. one anvil
+:::

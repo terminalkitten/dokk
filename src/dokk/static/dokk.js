@@ -1,4 +1,24 @@
 (() => {
+  // :::prompt: Copy, and Open in Claude/ChatGPT with the prompt as the question.
+  for (const card of document.querySelectorAll("[data-dk-prompt]")) {
+    const prompt = card.dataset.dkPrompt;
+    for (const a of card.querySelectorAll("[data-dk-prompt-open]")) {
+      a.href = a.dataset.dkPromptOpen + encodeURIComponent(prompt);
+    }
+    const copy = card.querySelector("[data-dk-prompt-copy]");
+    const label = copy.querySelector("span");
+    copy.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(prompt);
+        label.textContent = "Copied";
+      } catch {
+        label.textContent = "Failed";
+      }
+      setTimeout(() => (label.textContent = "Copy"), 1500);
+    });
+    card.querySelector("footer").hidden = false;
+  }
+
   // Copy button on code blocks.
   for (const pre of document.querySelectorAll(".dk-prose pre")) {
     const wrap = document.createElement("div");

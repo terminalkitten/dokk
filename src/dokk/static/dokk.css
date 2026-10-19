@@ -286,6 +286,48 @@ html.dark .dk-callout[data-callout="caution"] {
 .dk-card-link::after { content: ""; position: absolute; inset: 0; } /* whole card is clickable */
 .dk-prose .dk-card section > :last-child { margin-bottom: 0; }
 
+/* AI components: :::model, ::huggingface and :::prompt, all Basecoat cards */
+.dk-model, .dk-hf, .dk-prompt { margin: 0 0 1.25rem; gap: 1rem; }
+.dk-model > header, .dk-hf > header, .dk-prompt > header { display: flex; align-items: center; gap: 0.75rem; }
+.dk-model .card-title, .dk-hf .card-title, .dk-prompt .card-title { display: block; font-size: 1rem; line-height: 1.4; }
+.dk-prose .dk-model .card-description, .dk-prose .dk-hf .card-description { margin: 0; font-size: 0.8125rem; }
+.dk-prose .dk-model section > :last-child, .dk-prose .dk-hf section > :last-child,
+.dk-prose :is(.dk-prompt section, .dk-prompt-text) > :last-child { margin-bottom: 0; }
+.dk-model svg, .dk-hf svg, .dk-prompt svg { width: 1em; height: 1em; flex-shrink: 0; }
+.dk-model-avatar, .dk-prompt-icon {
+  display: grid; place-items: center; flex-shrink: 0; width: 2.5rem; height: 2.5rem;
+  border-radius: var(--radius); background: var(--muted); color: var(--primary); font-size: 1.25rem;
+}
+.dk-model-avatar img { width: 1.5rem; height: 1.5rem; object-fit: contain; }
+.dk-prompt-icon { width: 2rem; height: 2rem; font-size: 1rem; }
+.dk-prose .dk-model-stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); gap: 0.5rem; margin: 1rem 0 0;
+}
+.dk-prose .dk-model-stats > div { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem 0.75rem; }
+.dk-prose .dk-model-stats dt {
+  display: flex; align-items: center; gap: 0.375rem; margin: 0;
+  color: var(--muted-foreground); font-size: 0.75rem; font-weight: 500;
+}
+.dk-prose .dk-model-stats dd { margin: 0.125rem 0 0; padding: 0; border: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.dk-model > footer, .dk-prompt > footer, .dk-hf > footer { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.dk-model > footer .badge { gap: 0.25rem; }
+.dk-prose .dk-model-link { margin-left: auto; text-decoration: none; }
+.dk-hf-logo { font-size: 2rem; line-height: 1; }
+.dk-prose a.dk-hf-link { color: inherit; text-decoration: none; }
+.dk-hf-link::after { content: ""; position: absolute; inset: 0; } /* whole card is clickable */
+.dk-hf { position: relative; }
+.dk-hf:hover { background: var(--accent); }
+.dk-hf-owner { color: var(--muted-foreground); font-weight: 400; }
+.dk-hf-stat { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--muted-foreground); font-size: 0.8125rem; }
+.dk-hf > footer { gap: 0.5rem 1rem; }
+.dk-prompt > header .badge { gap: 0.25rem; }
+.dk-prompt > header .card-title { margin-right: auto; }
+.dk-prompt-text {
+  border-left: 3px solid var(--primary); padding: 0.25rem 0 0.25rem 1rem;
+}
+.dk-prompt > footer a { text-decoration: none; }
+.dk-prompt > footer[hidden] { display: none; }
+
 /* Steps: numbered procedure from an ordered list */
 .dk-prose .dk-steps > ol { list-style: none; padding-left: 0; counter-reset: dk-step; }
 .dk-prose .dk-steps > ol > li {

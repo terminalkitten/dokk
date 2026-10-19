@@ -7,6 +7,7 @@ from collections.abc import Iterator
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import quote
 
 import pytest
 
@@ -155,6 +156,21 @@ def test_image_opens_in_lightbox(page, site: str) -> None:  # type: ignore[no-un
     page.keyboard.press("Escape")
     dialog.wait_for(state="hidden")
     assert page.problems == []
+
+
+def test_prompt_copy_and_open_links(browser, site: str) -> None:  # type: ignore[no-untyped-def]
+    context = browser.new_context(permissions=["clipboard-read", "clipboard-write"])
+    page = context.new_page()
+    page.goto(site + "/guides/components/")
+    card = page.locator(".dk-prompt")
+    expected = "Plan a widget with:\n\n1. two sprockets\n2. one anvil"  # the Markdown as written
+    card.get_by_role("button", name="Copy").click()
+    card.get_by_role("button", name="Copied").wait_for()
+    assert page.evaluate("navigator.clipboard.readText()") == expected
+    href = card.get_by_role("link", name="Open in Claude").get_attribute("href")
+    encoded = quote(expected, safe="!~*'()")  # as encodeURIComponent
+    assert href == "https://claude.ai/new?q=" + encoded
+    context.close()
 
 
 def test_sidebar_keeps_scroll_and_toc_scrolls(browser, site: str) -> None:  # type: ignore[no-untyped-def]

@@ -300,3 +300,55 @@ def test_image_errors(renderer: Renderer) -> None:
         _render(renderer, '::image{src="img/a.png"}\n')
     result = renderer.render('::image[Gone]{src="img/gone.png"}\n', Path("page.md"))
     assert result.broken == ["img/gone.png"]
+
+
+def test_model(renderer: Renderer) -> None:
+    html = _render(
+        renderer,
+        ':::model[Acme <Large>]{provider="Acme" model="acme-l" input="3" output="€15" '
+        'context="200K" features="vision tools custom" href="guide.md"}\n'
+        "The **best** one.\n:::\n\n"
+        "::model[Bare]\n",
+    )
+    assert '<strong class="card-title">Acme &lt;Large&gt;</strong>' in html
+    assert "Acme · <code>acme-l</code>" in html
+    assert "<dd>$3 / 1M</dd>" in html
+    assert "<dd>€15 / 1M</dd>" in html  # a currency is kept
+    assert "<dd>200K</dd>" in html
+    assert "Cached input" not in html  # only what is given
+    assert "<p>The <strong>best</strong> one.</p>" in html
+    assert html.count("<svg") == html.count("</svg>")
+    assert re.search(r"<svg[^>]*>.*?</svg>vision</span>", html)  # a known feature has an icon
+    assert re.search(r'secondary">\s*custom</span>', html)  # an unknown one has none
+    assert 'href="/repo/guide/"' in html
+    assert 'id="dk-model-2"' in html  # the one-line card
+    with pytest.raises(DirectiveError, match=r"line 1: use ::model\[Name\]"):
+        _render(renderer, '::model{input="1"}\n')
+
+
+def test_huggingface(renderer: Renderer) -> None:
+    html = _render(renderer, '::huggingface[meta-llama/Llama-3.1-8B]{params="8B"}\n')
+    assert 'href="https://huggingface.co/meta-llama/Llama-3.1-8B"' in html
+    assert '<span class="dk-hf-owner">meta-llama/</span>Llama-3.1-8B' in html
+    assert "Hugging Face model" in html
+    assert "</svg>8B</span>" in html
+    html = _render(renderer, ':::huggingface[org/data]{type="dataset"}\nAbout it.\n:::\n')
+    assert 'href="https://huggingface.co/datasets/org/data"' in html
+    assert "<section><p>About it.</p>" in html
+    with pytest.raises(DirectiveError, match="type must be one of model, dataset, space"):
+        _render(renderer, '::huggingface[a/b]{type="repo"}\n')
+
+
+def test_prompt(renderer: Renderer) -> None:
+    html = _render(
+        renderer,
+        '- before\n\n:::prompt[Review]{role="system"}\nYou are "careful".\n\n1. Bugs first\n:::\n',
+    )
+    # The Markdown as written, for Copy and the Open links.
+    assert 'data-dk-prompt="You are &#34;careful&#34;.\n\n1. Bugs first"' in html
+    assert '<div class="dk-prompt-text"><p>You are' in html
+    assert "<footer hidden>" in html
+    assert html.count("data-dk-prompt-open=") == 2
+    html = _render(renderer, ':::prompt{open="false"}\nHi\n:::\n')
+    assert "data-dk-prompt-open" not in html
+    assert '<strong class="card-title">Prompt</strong>' in html

@@ -1,6 +1,7 @@
 import itertools
 import posixpath
 import re
+import textwrap
 from collections import defaultdict
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
@@ -39,6 +40,7 @@ from dokk.headings import heading_attrs_plugin, strip_attrs
 
 DESCRIPTION_LENGTH = 160
 LINKBUTTON_VARIANTS = ("primary", "secondary", "minimal")
+HUGGINGFACE_TYPES = ("model", "dataset", "space")
 
 
 @dataclass(frozen=True)
@@ -200,6 +202,7 @@ class Renderer:
         counters: dict[str, Iterator[int]] = defaultdict(lambda: itertools.count(1))
 
         renderer = cast(RendererHTML, self.md.renderer)  # MarkdownIt's default renderer
+        lines = body.splitlines()
 
         def render_inner(inner: list[Token]) -> str:
             return renderer.render(inner, self.md.options, env)
@@ -218,6 +221,13 @@ class Renderer:
                     raise DirectiveError(f"line {d.line}: {e}") from None
             if d.name == "image" and (not d.title or not d.attrs.get("src")):
                 raise DirectiveError(f'line {d.line}: use ::image[Alt text]{{src="..."}}')
+            if d.name in ("model", "huggingface") and not d.title:
+                raise DirectiveError(f"line {d.line}: use ::{d.name}[Name]")
+            if d.name == "huggingface" and d.attrs.get("type", "model") not in HUGGINGFACE_TYPES:
+                types = ", ".join(HUGGINGFACE_TYPES)
+                raise DirectiveError(f"line {d.line}: huggingface type must be one of {types}")
+            if d.name == "prompt":  # copied as written, Markdown and all
+                extra["source"] = _source(lines, inner)
             if d.name == "linkbutton":
                 if not d.title or not d.attrs.get("href"):
                     raise DirectiveError(f'line {d.line}: use ::linkbutton[Text]{{href="..."}}')
@@ -290,6 +300,15 @@ class Renderer:
         if not (self.content_dir / target).is_file():
             return None
         return f"{self.base_path}/{quote(target)}{fragment}"
+
+
+def _source(lines: list[str], inner: list[Token]) -> str:
+    """The Markdown inside a directive, as written."""
+    maps = [t.map for t in inner if t.map]
+    if not maps:
+        return ""
+    start, end = min(m[0] for m in maps), max(m[1] for m in maps)
+    return textwrap.dedent("\n".join(lines[start:end])).strip()
 
 
 def component_names(env: Environment) -> set[str]:

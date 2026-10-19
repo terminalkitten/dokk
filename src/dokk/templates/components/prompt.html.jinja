@@ -1,0 +1,21 @@
+{# :::prompt[Title]{model="..." role="system"}: a prompt with Copy and Open in Claude/ChatGPT buttons,
+   which use the Markdown as written (data-dk-prompt).
+   The buttons need JavaScript and stay hidden without it; open="false" leaves out the Open ones. #}
+{% from "partials/icons.html.jinja" import icon %}
+{% set a = directive.attrs %}
+<article class="card dk-prompt" id="{{ id }}" data-dk-prompt="{{ source }}">
+  <header>
+    <span class="dk-prompt-icon">{{ icon('message-square-text') }}</span>
+    <strong class="card-title">{{ directive.title or "Prompt" }}</strong>
+    {% if a.get('role') %}<span class="badge" data-variant="outline">{{ a.role }}</span>{% endif %}
+    {% if a.get('model') %}<span class="badge" data-variant="secondary">{{ icon('bot') }}{{ a.model }}</span>{% endif %}
+  </header>
+  <section><div class="dk-prompt-text">{{ body }}</div></section>
+  <footer hidden>
+    <button type="button" class="btn" data-variant="outline" data-size="sm" data-dk-prompt-copy>{{ icon('copy') }}<span>Copy</span></button>
+    {% if a.get('open', 'true') != 'false' %}
+    <a class="btn" data-variant="ghost" data-size="sm" target="_blank" rel="noopener" data-dk-prompt-open="https://claude.ai/new?q=">Open in Claude{{ icon('arrow-up-right') }}</a>
+    <a class="btn" data-variant="ghost" data-size="sm" target="_blank" rel="noopener" data-dk-prompt-open="https://chatgpt.com/?q=">Open in ChatGPT{{ icon('arrow-up-right') }}</a>
+    {% endif %}
+  </footer>
+</article>

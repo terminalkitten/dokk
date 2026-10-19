@@ -47,6 +47,15 @@ Inline badges, keyboard keys and color swatches.
 :::card[Image]{href="image.md"}
 An image that opens full size when clicked.
 :::
+:::card[Model card]{href="model.md"}
+An AI model with prices, context and features.
+:::
+:::card[Hugging Face card]{href="huggingface.md"}
+A model, dataset or Space on the Hub.
+:::
+:::card[Prompt]{href="prompt.md"}
+A prompt to copy or open in Claude or ChatGPT.
+:::
 :::card[Custom components]{href="custom.md"}
 Add a template to register your own.
 :::
