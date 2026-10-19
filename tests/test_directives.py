@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from dokk.directives import Directive, DirectiveError, parse_info
+from dokk.directives import Directive, DirectiveError, parse_attrs, parse_info
 from dokk.markdown import Renderer
 from dokk.render import base_env
 
@@ -362,3 +362,11 @@ def test_model_and_huggingface_logos(renderer: Renderer) -> None:
     assert html.count('class="dk-vendor-logo"') == 2  # only the logos the page uses
     with pytest.raises(DirectiveError, match='unknown icon "acme"; choose from anthropic, '):
         _render(renderer, '::model[X]{icon="acme"}\n')
+
+
+def test_attribute_values_without_quotes() -> None:
+    assert parse_attrs('dev=true tools="uv pip" max=100') == {
+        "dev": "true",
+        "tools": "uv pip",
+        "max": "100",
+    }

@@ -157,3 +157,8 @@ def test_images_load_lazily(content: Path) -> None:
     ).html
     assert '<img src="https://x.io/a.png" alt="a" loading="lazy" decoding="async" />' in html
     assert 'alt="b" loading="eager" decoding="async"' in html
+
+
+def test_query_on_a_page_link_is_kept(content: Path) -> None:
+    result = _renderer(content).render("[a](intro.md?tab=uv#top)", Path("guides/index.md"))
+    assert _hrefs(result.html) == ["/guides/intro/?tab=uv#top"] and not result.broken

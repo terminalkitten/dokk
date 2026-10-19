@@ -38,6 +38,8 @@ def test_bench_scores() -> None:
     assert bench_scores("A: 150\n", "100")[0]["width"] == 100.0  # capped
     with pytest.raises(ValueError, match="Label: 88.7"):
         bench_scores("just text\n", "")
+    with pytest.raises(ValueError, match="max must be above 0"):
+        bench_scores("A: 1\n", "0")
 
 
 def test_mark_variables() -> None:

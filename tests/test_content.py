@@ -42,6 +42,7 @@ def test_titleize() -> None:
         ("---\n- a\n---\n", "must be a mapping"),
         ("---\nsidebar: x\n---\n", "'sidebar' must be a mapping"),
         ("---\nsidebar:\n  order: first\n---\n", "'sidebar.order' must be a number"),
+        ("---\ndescription: [a, b]\n---\n", "'description' must be text"),
     ],
 )
 def test_front_matter_errors(tmp_path: Path, text: str, message: str) -> None:
@@ -68,3 +69,7 @@ def test_line_offset(tmp_path: Path) -> None:
     assert _page(tmp_path, "a.md", "---\ntitle: A\n---\nBody\n").line_offset == 3
     assert _page(tmp_path, "b.md", "# Title\n\nBody\n").line_offset == 1
     assert _page(tmp_path, "c.md", "Body\n").line_offset == 0
+
+
+def test_empty_description_is_empty(tmp_path: Path) -> None:
+    assert _page(tmp_path, "a.md", "---\ntitle: A\ndescription:\n---\nHi\n").description == ""

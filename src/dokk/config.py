@@ -147,6 +147,8 @@ def load_config(root: Path, dev: bool = False) -> Config:
         "code_dark": theme_in.get("code_dark", code_dark),
     }
     for key in ("code_light", "code_dark"):
+        if not isinstance(theme[key], str):
+            raise ConfigError(f"{CONFIG_FILE}: 'theme.{key}' must be a string")
         try:
             get_style_by_name(theme[key])
         except ClassNotFound:

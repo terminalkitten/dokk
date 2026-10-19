@@ -47,6 +47,7 @@ def test_dev_forces_empty_base_path(make_site) -> None:
         ('title = "T"\ntheme = "x"\n', "[theme] must be a table"),
         ("title = \n", "dokk.toml"),
         ('title = "T"\n[theme]\ncode_dark = "nope"\n', "unknown Pygments style 'nope'"),
+        ('title = "T"\n[theme]\ncode_light = 5\n', "'theme.code_light' must be a string"),
         ('title = "T"\n[theme]\nfont = "x"\n', "unknown [theme] key(s): font"),
         (
             'title = "T"\n[theme]\nstyle = "comic"\n',

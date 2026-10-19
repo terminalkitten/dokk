@@ -1,10 +1,3 @@
-"""Directives compiled to static HTML: `:::name[Title]{key="value"}` containers and
-`::name[Title]{key="value"}` one-line (leaf) directives, from the generic directives syntax.
-
-All directives are parsed as one container type; `fold` then replaces each
-container (innermost first) with a single html_block holding the rendered component.
-"""
-
 import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -23,6 +16,7 @@ CALLOUTS = ("note", "tip", "caution", "danger")
 CHILDREN = {"tabs": "tab", "trace": "step", "models": "model"}
 # Children that only exist inside their parent (a ::model also stands on its own).
 PARENTS = {"tab": "tabs", "step": "trace"}
+# Known directive names
 KNOWN = {
     *CALLOUTS,
     *("tabs", "tab", "cards", "card", "steps", "filetree", "linkbutton", "details", "image"),
@@ -38,12 +32,16 @@ BADGE_VARIANTS = {
     "danger": "destructive",
 }
 
+# Info line
 _INFO = re.compile(r"^\s*([A-Za-z][\w-]*)(?:\[(.*?)\])?(?:\{(.*)\})?\s*$")
+# Leaf directive
 _LEAF = re.compile(r"^::(?!:)(.+)$")  # exactly two colons
+# Inline directives
 _INLINE = re.compile(r":(badge|kbd|swatch)\[([^\]\n]*)\](?:\{([^}\n]*)\})?")
-# A CSS color: hex, a name or a function like oklch(0.6 0.2 30); nothing that ends the property.
+# CSS color: hex, a name or a function like oklch(0.6 0.2 30)
 _COLOR = re.compile(r"[#\w(),.%/\s-]+")
-_ATTR = re.compile(r'([A-Za-z_][\w-]*)\s*=\s*"([^"]*)"')
+# key="value", or key=value without spaces
+_ATTR = re.compile(r'([A-Za-z_][\w-]*)\s*=\s*(?:"([^"]*)"|([^\s"}]+))')
 _OPEN, _CLOSE = "container_directive_open", "container_directive_close"
 
 
@@ -64,7 +62,11 @@ def parse_info(info: str) -> Directive | None:
     if not match:
         return None
     name, title, attrs = match.groups()
-    return Directive(name, (title or "").strip(), dict(_ATTR.findall(attrs or "")))
+    return Directive(name, (title or "").strip(), parse_attrs(attrs or ""))
+
+
+def parse_attrs(text: str) -> dict[str, str]:
+    return {key: quoted or bare for key, quoted, bare in _ATTR.findall(text)}
 
 
 def _leaf_rule(state: StateBlock, start: int, end: int, silent: bool) -> bool:
@@ -103,7 +105,7 @@ def _inline_rule(state: StateInline, silent: bool) -> bool:
     match = _INLINE.match(state.src, pos)
     if not match:
         return False
-    name, text, attrs = match.group(1), match.group(2), dict(_ATTR.findall(match.group(3) or ""))
+    name, text, attrs = match.group(1), match.group(2), parse_attrs(match.group(3) or "")
     if name == "badge":
         html = badge(text, attrs.get("variant", "default"))  # validate even when silent
     elif name == "kbd":

@@ -66,6 +66,9 @@ def split_front_matter(text: str, src: Path) -> tuple[dict[str, Any], str]:
     sidebar = meta.get("sidebar")
     if sidebar is not None and not isinstance(sidebar, dict):
         raise ContentError(f"{src}: 'sidebar' must be a mapping")
+    for key in ("title", "description"):
+        if meta.get(key) is not None and not isinstance(meta[key], str | int | float):
+            raise ContentError(f"{src}: '{key}' must be text")
     order = (sidebar or {}).get("order")
     if order is not None and (isinstance(order, bool) or not isinstance(order, int | float)):
         raise ContentError(f"{src}: 'sidebar.order' must be a number")
@@ -93,7 +96,7 @@ def load_page(src: Path, content_dir: Path) -> Page:
         meta=meta,
         body=body,
         title=str(title),
-        description=str(meta.get("description", "")),
+        description=str(meta.get("description") or ""),
         draft=meta.get("draft") is True,
         has_title=has_title,
         line_offset=text[: len(text) - len(body)].count("\n"),  # body is a suffix of text

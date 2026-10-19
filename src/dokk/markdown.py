@@ -312,7 +312,8 @@ class Renderer:
         if not href or href.startswith("#") or _is_external(href):
             return href
         path, _, fragment = href.partition("#")
-        fragment = f"#{fragment}" if fragment else ""
+        path, _, query = path.partition("?")
+        suffix = (f"?{query}" if query else "") + (f"#{fragment}" if fragment else "")
         if path.startswith("/"):
             base = self.base_path
             if base and (path == base or path.startswith(base + "/")):
@@ -323,10 +324,10 @@ class Renderer:
             return None  # outside content_dir
         if is_link and target.endswith(".md"):
             url = self.page_urls.get(target)
-            return url + fragment if url else None
+            return url + suffix if url else None
         if not (self.content_dir / target).is_file():
             return None
-        return f"{self.base_path}/{quote(target)}{fragment}"
+        return f"{self.base_path}/{quote(target)}{suffix}"
 
 
 def _source(lines: list[str], inner: list[Token]) -> str:

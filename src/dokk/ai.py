@@ -120,6 +120,8 @@ def bench_scores(source: str, maximum: str) -> list[dict[str, Any]]:
         label, number, unit = match.groups()
         rows.append((label.strip(), float(number), number + unit))
     top = float(maximum) if maximum else max((v for _, v, _ in rows), default=0.0) or 1.0
+    if top <= 0:
+        raise ValueError(f"max must be above 0, not {maximum!r}")
     scores = []
     for label, value, text in rows:
         width = round(min(100.0, max(0.0, value / top * 100)), 1)
