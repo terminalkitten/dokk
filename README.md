@@ -11,8 +11,7 @@
 
 <p align="center">
   <strong>A tiny static docs generator in Python.</strong><br>
-  For library and tool authors who want good-looking docs without a theme to assemble:<br>
-  <code>pip install</code>, write Markdown, publish to GitHub Pages. Search, dark mode and components included.
+  Write Markdown, push, and get a docs site on GitHub Pages, with search, dark mode and components included.
 </p>
 
 <p align="center">
